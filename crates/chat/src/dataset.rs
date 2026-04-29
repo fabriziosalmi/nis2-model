@@ -6,6 +6,7 @@ use crate::cache::CacheEntry;
 use nis2_rules::engine;
 use nis2_rules::schema::CompanyProfile;
 
+#[allow(dead_code)]
 struct Lang {
     code: &'static str,
     applies_yes: &'static str,
@@ -234,6 +235,103 @@ pub fn build_dataset() -> Vec<CacheEntry> {
             question: lang.diff_q.to_string(),
             answer: DIFF_A.to_string(),
             category: "classification".into(),
+            embedding: vec![],
+        });
+    }
+
+    // --- Practical operational Q&A (language-independent, the panic questions) ---
+    let practical: &[(&str, &str, &str)] = &[
+        // Passwords & access
+        ("Do we need to rotate passwords and secrets under NIS2?",
+         "Yes. Art. 21(2)(i) requires access control and asset management policies. Credential rotation, elimination of shared/root passwords, and secret lifecycle management fall under this obligation.",
+         "access_control"),
+        ("Can we still use shared root passwords?",
+         "No. Art. 21(2)(i) requires proper access control. Shared root accounts violate the principle of individual accountability. Each administrator must have a unique credential.",
+         "access_control"),
+        ("Should we use SSH keys instead of passwords?",
+         "Art. 21(2)(j) mandates strong authentication. SSH key-based authentication is a recognized implementation of this requirement. Password-only access to critical systems is insufficient.",
+         "access_control"),
+        ("Do we need a password policy?",
+         "Yes. Art. 21(2)(i) covers access control policies. A password policy with minimum complexity, rotation intervals, and prohibition of reuse is a baseline measure.",
+         "access_control"),
+        ("Is multi-factor authentication mandatory?",
+         "Art. 21(2)(j) requires use of multi-factor or continuous authentication solutions where appropriate. For access to critical systems and administrative interfaces, MFA is expected.",
+         "access_control"),
+        // Encryption
+        ("Do we need encryption at rest?",
+         "Art. 21(2)(h) requires cryptography and encryption policies. Encryption of data at rest protects against unauthorized access to stored data, especially on removable media and backups.",
+         "encryption"),
+        ("Do we need encryption in transit?",
+         "Art. 21(2)(h) covers cryptography policies. TLS/mTLS for data in transit is a standard implementation. Art. 21(2)(j) also requires secured communications.",
+         "encryption"),
+        ("Do we need a vault for secrets management?",
+         "Art. 21(2)(h) and (i) together require proper cryptographic key management and access control. A secrets vault (e.g. HashiCorp Vault, AWS Secrets Manager) is a common implementation pattern.",
+         "encryption"),
+        ("What encryption standards does NIS2 require?",
+         "Art. 21(2)(h) mandates cryptography policies but does not prescribe specific algorithms. ENISA guidelines recommend AES-256 for data at rest and TLS 1.2+ for data in transit.",
+         "encryption"),
+        // Incident response
+        ("What do we do if we get hacked?",
+         "Art. 23: (1) Notify your CSIRT without undue delay. (4)(a) Send early warning within 24h. (4)(b) Full notification within 72h. (4)(d) Final report within 30 days. Art. 21(2)(b) requires an incident handling procedure to be in place before any incident occurs.",
+         "incident_response"),
+        ("Do we need an incident response plan?",
+         "Yes. Art. 21(2)(b) requires incident handling procedures. This includes detection, analysis, containment, eradication, recovery, and post-incident review.",
+         "incident_response"),
+        ("Who do we notify after a breach?",
+         "Art. 23(1): Notify your national CSIRT or competent authority. The early warning (24h) must indicate whether the incident is suspected to be caused by unlawful or malicious acts and whether it could have cross-border impact.",
+         "incident_response"),
+        // Business continuity
+        ("Do we need backups?",
+         "Yes. Art. 21(2)(c) explicitly requires business continuity measures including backup management and disaster recovery. Regular tested backups are a minimum requirement.",
+         "business_continuity"),
+        ("Do we need a disaster recovery plan?",
+         "Art. 21(2)(c) requires business continuity and crisis management, including disaster recovery capabilities. The plan must be documented, tested, and regularly updated.",
+         "business_continuity"),
+        ("How often should we test our backups?",
+         "Art. 21(2)(c) requires business continuity measures and Art. 21(2)(f) requires assessing effectiveness of security measures. Regular backup restoration tests are an expected practice.",
+         "business_continuity"),
+        // Supply chain
+        ("Do we need to audit our vendors?",
+         "Art. 21(2)(d) requires supply chain security including security aspects of relationships with direct suppliers and service providers. Vendor security assessments are expected.",
+         "supply_chain"),
+        ("Are our cloud providers covered by NIS2?",
+         "Cloud providers (IaaS, PaaS, SaaS) fall under digital infrastructure (Annex I). Additionally, Art. 21(2)(d) requires you to manage supply chain risk from your cloud providers.",
+         "supply_chain"),
+        // Vulnerability management
+        ("Do we need to patch our systems?",
+         "Art. 21(2)(e) requires security in system acquisition, development, and maintenance including vulnerability management and disclosure. Timely patching is a core requirement.",
+         "vulnerability_mgmt"),
+        ("Do we need vulnerability scanning?",
+         "Art. 21(2)(e) covers vulnerability management. Regular scanning, penetration testing, and coordinated vulnerability disclosure processes are expected measures.",
+         "vulnerability_mgmt"),
+        // Governance
+        ("Is the board personally liable under NIS2?",
+         "Art. 20(1) states management bodies approve and oversee cybersecurity measures and can be held responsible for violations. This creates personal accountability at board level.",
+         "governance"),
+        ("Does the CEO need cybersecurity training?",
+         "Art. 20(2) explicitly requires management body members to undergo cybersecurity training. This includes C-level executives and board members.",
+         "governance"),
+        // Risk assessment
+        ("Do we need a risk assessment?",
+         "Art. 21(2)(a) requires risk analysis and information system security policies. A formal risk assessment is the foundational measure from which all other Art. 21 obligations derive.",
+         "risk_assessment"),
+        ("How often should we do risk assessments?",
+         "Art. 21(2)(a) requires ongoing risk analysis. Art. 21(2)(f) requires policies to assess effectiveness. Annual risk assessments with event-driven reviews are standard practice.",
+         "risk_assessment"),
+        // Network security
+        ("Do we need network segmentation?",
+         "Art. 21(2)(a) covers information system security policies. Network segmentation is a recognized risk mitigation measure to limit lateral movement in case of breach.",
+         "network_security"),
+        ("Do we need a firewall?",
+         "Art. 21(2)(a) requires information system security. Firewalls, IDS/IPS, and network monitoring are baseline security measures expected under this obligation.",
+         "network_security"),
+    ];
+
+    for (q, a, cat) in practical {
+        entries.push(CacheEntry {
+            question: q.to_string(),
+            answer: a.to_string(),
+            category: cat.to_string(),
             embedding: vec![],
         });
     }

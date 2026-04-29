@@ -4628,6 +4628,7 @@ dependencies = [
  "anyhow",
  "nis2-rules",
  "nis2-slm",
+ "nis2-vectordb",
  "serde",
  "serde_json",
 ]

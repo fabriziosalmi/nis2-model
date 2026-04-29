@@ -12,3 +12,4 @@ serde_json.workspace = true
 anyhow.workspace = true
 nis2-rules.workspace = true
 nis2-slm.workspace = true
+nis2-vectordb.workspace = true
