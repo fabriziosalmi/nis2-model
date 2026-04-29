@@ -1,6 +1,6 @@
 # Overview
 
-The NIS2 Compliance Engine is a deterministic, locally-executable compliance engine for EU cybersecurity regulation.
+`nis2-model` is a Rust workspace that models the compliance logic of EU cybersecurity regulation (NIS2 Directive, DORA Regulation).
 
 ## What it does
 

@@ -1,15 +1,15 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: 'NIS2 Compliance Engine',
-  description: 'Deterministic, locally-executable compliance engine for EU NIS2/DORA regulation',
+  title: 'nis2-model',
+  description: 'Reference implementation for NIS2/DORA compliance logic in Rust',
   lang: 'en-US',
 
   head: [
     ['meta', { name: 'theme-color', content: '#1a56db' }],
     ['meta', { name: 'og:type', content: 'website' }],
-    ['meta', { name: 'og:title', content: 'NIS2 Compliance Engine' }],
-    ['meta', { name: 'og:description', content: 'Deterministic compliance engine for NIS2 and DORA' }],
+    ['meta', { name: 'og:title', content: 'nis2-model' }],
+    ['meta', { name: 'og:description', content: 'Reference implementation for NIS2/DORA compliance logic in Rust' }],
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
   ],
 

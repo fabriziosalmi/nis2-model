@@ -2,9 +2,9 @@
 layout: home
 
 hero:
-  name: NIS2 Compliance Engine
-  text: Deterministic compliance, local execution
-  tagline: No cloud dependencies. No hallucination. Deterministic output.
+  name: nis2-model
+  text: Reference implementation for NIS2/DORA compliance logic
+  tagline: Rust workspace. 6 crates. 61 tests. Fully local.
   actions:
     - theme: brand
       text: Getting Started
