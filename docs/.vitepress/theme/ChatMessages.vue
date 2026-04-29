@@ -9,9 +9,11 @@ defineEmits(['followUp'])
 
   <div v-for="(m, i) in messages" :key="i" :class="['msg', m.role]">
     <div class="bubble">
-      <!-- Category pill -->
+      <!-- Category + Severity -->
       <div v-if="m.role === 'assistant' && m.category && m.category !== 'miss'" class="meta">
+        <span :class="['sev-dot', m.severity || 'info']"></span>
         <span class="m-cat">{{ m.category }}</span>
+        <span v-if="m.deadline" class="m-deadline">{{ m.deadline }}</span>
       </div>
 
       <!-- User message -->
@@ -29,12 +31,13 @@ defineEmits(['followUp'])
           </button>
       </div>
 
-      <!-- Contextual references -->
-      <div v-if="m.role === 'assistant' && !m.typing && (m.refs?.length || m.catLink)" class="refs">
+      <!-- Contextual references + Standards -->
+      <div v-if="m.role === 'assistant' && !m.typing && (m.refs?.length || m.catLink || m.standards?.length)" class="refs">
         <a v-for="r in (m.refs || [])" :key="r.num" :href="r.url" target="_blank" class="ref-link">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           Art. {{ r.num }}
         </a>
+        <span v-for="s in (m.standards || [])" :key="s" class="std-chip">{{ s }}</span>
         <a v-if="m.catLink" :href="m.catLink.url" target="_blank" class="ref-link ref-cat">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
           {{ m.catLink.label }}
@@ -79,15 +82,19 @@ defineEmits(['followUp'])
   border-bottom-left-radius:4px;
 }
 
-/* Meta category */
-.meta{padding:8px 14px 0}
+/* Meta category + severity */
+.meta{padding:8px 14px 0;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sev-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sev-dot.critical{background:#ef4444;box-shadow:0 0 4px rgba(239,68,68,.4)}
+.sev-dot.high{background:#f59e0b;box-shadow:0 0 4px rgba(245,158,11,.3)}
+.sev-dot.medium{background:#6366f1}
+.sev-dot.info{background:var(--vp-c-brand-1)}
 .m-cat{
   font-size:10px;padding:2px 8px;border-radius:4px;
   font-weight:600;text-transform:uppercase;letter-spacing:.06em;
   background:rgba(59,130,246,.08);color:var(--vp-c-brand-1);
-  display:inline-block;
 }
-.dark .m-cat{background:rgba(59,130,246,.12)}
+.m-deadline{font-size:9.5px;color:var(--vp-c-text-3);font-weight:500;letter-spacing:.02em}
 
 /* User text */
 .msg-txt{font-size:14px;line-height:1.5;white-space:pre-wrap;word-break:break-word;letter-spacing:-.01em}
@@ -194,6 +201,11 @@ defineEmits(['followUp'])
 .ref-link svg{flex-shrink:0;opacity:.4}
 .ref-link:hover svg{opacity:.7}
 .ref-cat{border-left:2px solid var(--vp-c-brand-1)}
+.std-chip{
+  font-size:9.5px;padding:2px 7px;border-radius:3px;
+  background:rgba(99,102,241,.06);color:var(--vp-c-text-3);
+  font-weight:500;letter-spacing:.01em;white-space:nowrap;
+}
 
 /* Dots */
 .dots{display:flex;gap:5px;padding:12px 16px}
