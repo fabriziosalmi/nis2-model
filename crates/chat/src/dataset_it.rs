@@ -247,5 +247,206 @@ pub fn italian_entries() -> Vec<(&'static str, &'static str, &'static str)> {
         ("Cosa succede se ignoriamo NIS2?",
          "Art. 32-34: Le autorita competenti possono imporre sanzioni (fino a 10M EUR / 2% fatturato), sospendere certificazioni, vietare temporaneamente funzioni dirigenziali e imporre misure correttive con scadenze.",
          "sanctions"),
+
+        // === COLLOQUIAL IT — how real people ask ===
+        // Scope
+        ("La mia azienda rientra nella NIS2?",
+         "Dipende dal settore (Allegato I o II della Direttiva 2022/2555) e dalla dimensione (50+ dipendenti o 10M+ EUR fatturato). Verifica il tuo codice ATECO rispetto ai settori elencati. Art. 2 definisce i criteri.",
+         "applicability"),
+        ("Siamo un ospedale, NIS2 ci riguarda?",
+         "Si. La sanita e' elencata nell'Allegato I. Ospedali e fornitori sanitari che superano la soglia dimensionale (50+ dipendenti o 10M+ EUR) sono classificati come entita essenziali.",
+         "applicability"),
+        ("Siamo una PMI, dobbiamo preoccuparci?",
+         "Solo se operate in un settore Allegato I o II E superate la soglia (50+ dipendenti O 10M+ EUR ricavi). La maggior parte delle PMI sotto entrambe le soglie e' fuori ambito, salvo infrastrutture critiche.",
+         "applicability"),
+        ("Siamo una startup, NIS2 si applica?",
+         "Solo se opera in un settore Allegato I o II E supera la soglia (50+ dipendenti O 10M+ EUR fatturato). La maggior parte delle startup in fase iniziale e' sotto entrambe le soglie ed e' fuori ambito.",
+         "applicability"),
+        ("Siamo una PA, NIS2 si applica?",
+         "Si. Le pubbliche amministrazioni sono elencate nell'Allegato I e classificate come entita essenziali indipendentemente dalla dimensione (Art. 2(2)). Gli enti centrali sono in ambito; il trattamento degli enti locali varia per stato membro.",
+         "applicability"),
+        ("Siamo un'universita, rientiramo?",
+         "Le organizzazioni di ricerca sono nell'Allegato II. Le universita che superano la soglia dimensionale sono entita importanti. Quelle sotto soglia sono fuori ambito.",
+         "applicability"),
+
+        // Sanctions
+        ("Possono sospenderci le operazioni?",
+         "Art. 32(5) consente alle autorita competenti di sospendere temporaneamente certificazioni o autorizzazioni delle entita essenziali per non conformita. Va oltre le sanzioni pecuniarie.",
+         "sanctions"),
+        ("I dirigenti possono essere sospesi?",
+         "Art. 32(5)(b) consente alle autorita competenti di richiedere il divieto temporaneo di funzioni dirigenziali per le persone fisiche responsabili della non conformita nelle entita essenziali.",
+         "sanctions"),
+        ("Rischio la galera per NIS2?",
+         "NIS2 non prevede direttamente la detenzione, ma Art. 20(1) stabilisce responsabilita personale. La responsabilita penale dipende dal recepimento nazionale. Art. 32(5)(b) consente il divieto di funzioni dirigenziali e sanzioni fino a 10M EUR.",
+         "sanctions"),
+
+        // Legal
+        ("Quando entra in vigore NIS2?",
+         "La Direttiva (UE) 2022/2555 e' entrata in vigore il 16 gennaio 2023. Gli stati membri avevano tempo fino al 17 ottobre 2024 per il recepimento in legge nazionale. Gli obblighi si applicano dalla data di recepimento.",
+         "legal"),
+        ("NIS2 e' gia legge in Italia?",
+         "Il D.Lgs. 138/2024 ha recepito la NIS2 in Italia. L'ACN (Agenzia per la Cybersicurezza Nazionale) e' l'autorita competente. Le scadenze di registrazione e conformita sono definite nel decreto.",
+         "legal"),
+        ("Chi e' l'autorita competente in Italia?",
+         "L'ACN (Agenzia per la Cybersicurezza Nazionale) e' l'autorita competente per NIS2 in Italia. Il CSIRT Italia, operante presso l'ACN, riceve le notifiche di incidente per Art. 23.",
+         "legal"),
+        ("Cos'e' il CSIRT?",
+         "Computer Security Incident Response Team designato per Art. 10 di NIS2. In Italia e' il CSIRT Italia presso l'ACN. Riceve le notifiche di incidenti da entita essenziali e importanti.",
+         "legal"),
+        ("Che rapporto c'e' tra NIS2 e GDPR?",
+         "NIS2 copre sicurezza di reti e sistemi. GDPR copre protezione dati personali. Si sovrappongono su notifica breach e misure di sicurezza. Art. 35 NIS2 richiede cooperazione con autorita protezione dati quando gli incidenti coinvolgono dati personali.",
+         "legal"),
+        ("NIS2 sostituisce il GDPR?",
+         "No. NIS2 e GDPR sono complementari. GDPR si applica al trattamento dati personali (72h notifica al Garante). NIS2 si applica alla sicurezza di rete delle entita (24h preallarme al CSIRT). Entrambi possono applicarsi simultaneamente.",
+         "legal"),
+        ("Operiamo in piu paesi UE, come funziona?",
+         "Art. 26 stabilisce le regole di giurisdizione. L'autorita competente primaria e' nello stato membro dove l'entita ha il suo stabilimento principale. Art. 37 consente assistenza reciproca tra autorita.",
+         "legal"),
+
+        // Governance
+        ("Serve un CISO?",
+         "NIS2 non impone il titolo CISO, ma Art. 20(1) richiede supervisione delle misure di cybersecurity da parte degli organi direttivi. Una funzione di sicurezza designata che riporta al CDA e' implicita.",
+         "governance"),
+        ("Chi e' responsabile della conformita NIS2?",
+         "Art. 20(1): l'organo direttivo (CDA, management esecutivo) approva le misure di cybersecurity, sovraintende l'attuazione e puo essere ritenuto personalmente responsabile delle violazioni.",
+         "governance"),
+        ("Serve un DPO per NIS2?",
+         "NIS2 non richiede un DPO (quello e' GDPR). Richiede pero che gli organi direttivi supervisionino la cybersecurity (Art. 20). Un CISO o funzione equivalente e' la figura di riferimento per NIS2.",
+         "governance"),
+        ("Il CDA deve fare formazione?",
+         "Art. 20(2): si, formazione obbligatoria in cybersecurity per gli organi direttivi. Annuale minimo. Copre: obblighi NIS2, responsabilita personale, panorama minacce, postura rischio aziendale.",
+         "governance"),
+        ("Possono auditarci?",
+         "Art. 32 (essenziali) e Art. 33 (importanti): le autorita competenti possono condurre audit, ispezioni e visite in loco. Le entita essenziali possono essere soggette ad audit regolari; le importanti ex-post.",
+         "governance"),
+        ("Servono audit interni?",
+         "Art. 21(2)(f) richiede la valutazione dell'efficacia delle misure di cybersecurity. Audit interni, revisioni di sicurezza e valutazioni di maturita sono metodi standard per questo obbligo.",
+         "governance"),
+
+        // Documentation
+        ("Quale documentazione richiede NIS2?",
+         "Art. 21 richiede policy documentate per: (a) analisi rischi, (c) continuita operativa, (d) supply chain, (h) crittografia, (i) controllo accessi. Art. 20 richiede approvazione documentata del CDA. Art. 23 richiede registri notifiche incidenti.",
+         "documentation"),
+        ("Serve una policy di cybersecurity?",
+         "Si. Art. 21(2)(a) richiede esplicitamente 'politiche di analisi dei rischi e sicurezza dei sistemi informatici'. E' il documento fondamentale da cui derivano tutte le altre misure Art. 21.",
+         "documentation"),
+
+        // Operations
+        ("Serve il change management?",
+         "Art. 21(2)(e) copre sicurezza nella manutenzione dei sistemi. Change management formale con revisione di sicurezza, test e procedure di rollback e' una pratica attesa per mantenere l'integrita dei sistemi.",
+         "operations"),
+        ("Cos'e' la cyber hygiene secondo NIS2?",
+         "Art. 21(2)(g): include policy di configurazione dispositivi, aggiornamenti software, creazione account sicuri, gestione password. Richiede anche formazione periodica in cybersecurity per tutti i dipendenti.",
+         "operations"),
+        ("Cosa dice NIS2 sulla continuita operativa?",
+         "Art. 21(2)(c) richiede: gestione continuita operativa, procedure di backup, disaster recovery e gestione delle crisi. I piani devono essere documentati, testati e manutenuti.",
+         "business_continuity"),
+
+        // Zero trust / architecture
+        ("NIS2 richiede zero trust?",
+         "NIS2 non impone zero trust per nome. Tuttavia Art. 21(2)(i) controllo accessi, Art. 21(2)(j) autenticazione continua e Art. 21(2)(a) policy basate sul rischio sono allineati con i principi zero trust.",
+         "architecture"),
+
+        // Physical
+        ("NIS2 copre la sicurezza fisica?",
+         "Art. 21(2)(a) richiede policy di sicurezza dei sistemi informatici che includono sicurezza fisica e ambientale di reti e sistemi. I controlli di accesso fisico sono in ambito.",
+         "physical"),
+
+        // Remote work
+        ("Cosa dice NIS2 sul lavoro remoto?",
+         "Art. 21(2)(j) richiede comunicazioni protette e Art. 21(2)(i) richiede controllo accessi. L'accesso remoto deve usare VPN o ZTNA con MFA. Le policy BYOD rientrano in Art. 21(2)(a).",
+         "remote_work"),
+        ("Serve una VPN?",
+         "Art. 21(2)(j) richiede comunicazioni protette. VPN o tunnel cifrati equivalenti sono standard per l'accesso remoto a risorse interne. Le policy di split tunneling vanno valutate per rischio.",
+         "remote_work"),
+        ("Serve una policy BYOD?",
+         "Art. 21(2)(a) analisi rischi e Art. 21(2)(i) gestione asset richiedono policy per dispositivi personali che accedono a sistemi aziendali. MDM (Mobile Device Management) e' un controllo comune.",
+         "remote_work"),
+
+        // Cloud
+        ("NIS2 si applica al cloud?",
+         "Si. I fornitori di servizi cloud sono elencati nell'Allegato I (infrastruttura digitale) e classificati come entita essenziali. Sono soggetti a tutti gli obblighi Art. 20, 21 e 23.",
+         "applicability"),
+        ("Serve il cloud security posture management?",
+         "Art. 21(2)(a) analisi rischi e Art. 21(2)(e) sicurezza sistemi si applicano agli ambienti cloud. Strumenti CSPM che rilevano misconfigurazioni sono una pratica riconosciuta per workload cloud.",
+         "operations"),
+        ("NIS2 si applica al DNS?",
+         "Si. I fornitori di servizi DNS sono esplicitamente elencati nell'Allegato I sotto infrastruttura digitale. Sono classificati come entita essenziali soggette a tutti gli obblighi NIS2.",
+         "applicability"),
+
+        // Insurance / Risk
+        ("Serve un'assicurazione cyber?",
+         "NIS2 non impone assicurazione cyber. Tuttavia Art. 21(2)(a) analisi rischi deve valutare il rischio residuo. L'assicurazione e' un meccanismo di trasferimento del rischio che complementa ma non sostituisce le misure tecniche.",
+         "risk_assessment"),
+
+        // Email
+        ("NIS2 copre il phishing?",
+         "Art. 21(2)(g) richiede igiene informatica di base e formazione. Misure anti-phishing (SPF, DKIM, DMARC, formazione awareness, filtraggio email) rientrano nell'igiene e prevenzione incidenti.",
+         "email_security"),
+        ("Serve la sicurezza email?",
+         "Art. 21(2)(g) igiene informatica e Art. 21(2)(j) comunicazioni protette si applicano. Misure di sicurezza email incluse cifratura (S/MIME o TLS), anti-spam e anti-phishing sono attese.",
+         "email_security"),
+
+        // Supply chain keywords
+        ("Serve auditare i fornitori?",
+         "Art. 21(2)(d) richiede sicurezza della supply chain. Include: valutazioni di sicurezza dei fornitori, clausole contrattuali, SLA, monitoraggio rischi e coordinamento incidenti con fornitori diretti.",
+         "supply_chain"),
+        ("I nostri fornitori cloud sono conformi?",
+         "Art. 21(2)(d): la sicurezza della supply chain e' un obbligo. Per fornitori cloud verificare: certificazioni (ISO 27001, SOC 2), clausole contrattuali di sicurezza, localizzazione dati, diritto di audit.",
+         "supply_chain"),
+
+        // Access control keywords
+        ("Serve il controllo accessi?",
+         "Art. 21(2)(i) richiede esplicitamente policy di controllo accessi e gestione asset. Include: principio del minimo privilegio, separazione compiti, revisione periodica accessi, MFA per accessi critici.",
+         "access_control"),
+        ("Serve gestire gli accessi privilegiati?",
+         "Art. 21(2)(i) richiede controllo accessi e gestione asset. Soluzioni PAM che impongono privilegio minimo, registrazione sessioni e accesso just-in-time sono implementazioni riconosciute.",
+         "access_control"),
+        ("Cos'e' il principio del minimo privilegio?",
+         "Art. 21(2)(i) copre strategie di controllo accessi. Minimo privilegio significa che utenti e sistemi ricevono solo l'accesso minimo necessario. Si applica a tutti gli account, specialmente quelli amministrativi.",
+         "access_control"),
+
+        // Encryption keywords
+        ("Serve la crittografia?",
+         "Art. 21(2)(h) richiede esplicitamente policy sull'uso della crittografia e della cifratura. Include cifratura dati a riposo (AES-256), in transito (TLS 1.2+) e gestione chiavi crittografiche.",
+         "encryption"),
+        ("Che standard di cifratura servono?",
+         "Art. 21(2)(h): ENISA raccomanda AES-256 per dati a riposo, TLS 1.2+ (preferire 1.3) per dati in transito. Algoritmi asimmetrici: RSA-4096 o ECDSA P-256+. Evitare: DES, 3DES, RC4, MD5, SHA-1.",
+         "encryption"),
+
+        // Vulnerability management keywords
+        ("Serve fare patching?",
+         "Art. 21(2)(e) richiede gestione vulnerabilita. Il patching tempestivo delle vulnerabilita note e' un requisito fondamentale. Prioritizzare per severita CVSS. SLA: critico 48h, alto 7gg, medio 30gg.",
+         "vulnerability_mgmt"),
+        ("Serve la scansione vulnerabilita?",
+         "Art. 21(2)(e): scansione vulnerabilita regolare. Settimanale per sistemi internet-facing, mensile per interni. Test di penetrazione annuale. Tracciare metriche di tempo medio di remediation.",
+         "vulnerability_mgmt"),
+        ("Serve una policy di vulnerability disclosure?",
+         "Art. 21(2)(e) copre la divulgazione coordinata delle vulnerabilita. Le entita dovrebbero avere un processo per ricevere, valutare e rimediare le vulnerabilita segnalate nei propri prodotti e servizi.",
+         "vulnerability_mgmt"),
+
+        // Incident keywords
+        ("Entro quanto tempo devo notificare un incidente?",
+         "Art. 23: preallarme al CSIRT entro 24h dal momento in cui si viene a conoscenza di un incidente significativo. Notifica completa entro 72h. Relazione finale entro 30 giorni.",
+         "incident_response"),
+        ("A chi notifico un incidente?",
+         "Art. 23: al CSIRT nazionale. In Italia: CSIRT Italia presso l'ACN. Preallarme entro 24h, notifica completa entro 72h. Se coinvolge dati personali, anche al Garante Privacy (GDPR, 72h).",
+         "incident_response"),
+        ("Serve un piano di risposta incidenti?",
+         "Art. 21(2)(b) richiede gestione incidenti: rilevamento, analisi, contenimento, eliminazione, ripristino, revisione post-incidente. Le procedure devono essere documentate e testate regolarmente.",
+         "incident_response"),
+
+        // Business continuity keywords
+        ("Servono i backup?",
+         "Art. 21(2)(c) richiede esplicitamente la gestione dei backup e il disaster recovery. Backup regolari e testati con copie offsite/offline sono il minimo. Regola 3-2-1.",
+         "business_continuity"),
+        ("Serve un piano di disaster recovery?",
+         "Art. 21(2)(c) richiede continuita operativa incluso disaster recovery. RTO/RPO devono essere definiti, piani documentati e recovery testato regolarmente. Almeno annuale per test completo.",
+         "business_continuity"),
+
+        // Network keywords
+        ("Serve un firewall?",
+         "Art. 21(2)(a) sicurezza dei sistemi informatici. Firewall, IDS/IPS, WAF e monitoraggio di rete sono misure di base. La segmentazione limita il movimento laterale in caso di compromissione.",
+         "network_security"),
     ]
 }
