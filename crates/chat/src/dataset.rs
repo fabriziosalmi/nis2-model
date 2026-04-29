@@ -336,6 +336,180 @@ pub fn build_dataset() -> Vec<CacheEntry> {
         });
     }
 
+    // --- Extended operational Q&A (batch 2) ---
+    let extended: &[(&str, &str, &str)] = &[
+        // SIEM / SOC / Logging
+        ("Do we need a SIEM under NIS2?",
+         "Art. 21(2)(b) requires incident handling which implies detection capabilities. A SIEM or equivalent log correlation system is a standard means to detect and investigate incidents.",
+         "detection"),
+        ("Do we need centralized logging?",
+         "Art. 21(2)(b) incident handling and Art. 21(2)(f) effectiveness assessment both require audit trails. Centralized logging is the baseline for detection, forensics, and compliance evidence.",
+         "detection"),
+        ("Do we need a SOC?",
+         "NIS2 does not mandate a SOC by name, but Art. 21(2)(b) requires incident detection and handling capabilities. A SOC (internal or outsourced) is a common way to meet this obligation.",
+         "detection"),
+        ("Do we need endpoint detection and response?",
+         "Art. 21(2)(b) requires incident handling including detection. EDR is a recognized measure for endpoint visibility. Art. 21(2)(e) also covers vulnerability management on endpoints.",
+         "detection"),
+        // Asset management
+        ("Do we need an asset inventory?",
+         "Art. 21(2)(i) requires asset management. You cannot protect what you do not know exists. A complete inventory of hardware, software, data, and network assets is foundational.",
+         "asset_management"),
+        ("Do we need to classify our data?",
+         "Art. 21(2)(a) risk analysis requires understanding what data you hold and its criticality. Data classification enables proportionate security measures per Art. 21.",
+         "asset_management"),
+        // Secure development
+        ("Does NIS2 require secure software development?",
+         "Art. 21(2)(e) explicitly requires security in system acquisition, development, and maintenance. This covers secure SDLC, code review, and vulnerability management in custom software.",
+         "development"),
+        ("Do we need code reviews?",
+         "Art. 21(2)(e) covers security in development and maintenance. Code review, static analysis, and security testing are recognized practices under this obligation.",
+         "development"),
+        ("Do we need penetration testing?",
+         "Art. 21(2)(e) requires vulnerability management and Art. 21(2)(f) requires assessing effectiveness of security measures. Penetration testing is a standard method for both.",
+         "development"),
+        // Privileged access
+        ("Do we need privileged access management?",
+         "Art. 21(2)(i) requires access control and asset management. PAM solutions that enforce least privilege, session recording, and just-in-time access are recognized implementations.",
+         "access_control"),
+        ("What is the principle of least privilege under NIS2?",
+         "Art. 21(2)(i) covers access control strategies. Least privilege means users and systems receive only the minimum access necessary. This applies to all accounts, especially administrative ones.",
+         "access_control"),
+        // Email / phishing
+        ("Does NIS2 address phishing protection?",
+         "Art. 21(2)(g) requires basic cyber hygiene and training. Anti-phishing measures (SPF, DKIM, DMARC, user awareness training, email filtering) fall under hygiene and incident prevention.",
+         "email_security"),
+        ("Do we need email security under NIS2?",
+         "Art. 21(2)(g) cyber hygiene and Art. 21(2)(j) secured communications both apply. Email security measures including encryption (S/MIME or TLS), anti-spam, and anti-phishing are expected.",
+         "email_security"),
+        // Zero trust
+        ("Does NIS2 require zero trust?",
+         "NIS2 does not mandate zero trust by name. However, Art. 21(2)(i) access control, Art. 21(2)(j) continuous authentication, and Art. 21(2)(a) risk-based policies align with zero trust principles.",
+         "architecture"),
+        // Physical security
+        ("Does NIS2 cover physical security?",
+         "Art. 21(2)(a) requires information system security policies which include physical and environmental security of network and information systems. Physical access controls are in scope.",
+         "physical"),
+        // Remote work
+        ("What does NIS2 say about remote work?",
+         "Art. 21(2)(j) requires secured communications and Art. 21(2)(i) requires access control. Remote access must use VPN or zero-trust network access with MFA. BYOD policies fall under Art. 21(2)(a).",
+         "remote_work"),
+        ("Do we need a VPN?",
+         "Art. 21(2)(j) requires secured communications. VPN or equivalent encrypted tunnels are standard for remote access to internal resources. Split tunneling policies should be risk-assessed per Art. 21(2)(a).",
+         "remote_work"),
+        ("Do we need a BYOD policy?",
+         "Art. 21(2)(a) risk analysis and Art. 21(2)(i) asset management together require policies for personal devices accessing corporate systems. Mobile device management (MDM) is a common control.",
+         "remote_work"),
+        // GDPR relationship
+        ("What is the relationship between NIS2 and GDPR?",
+         "NIS2 covers network and information system security. GDPR covers personal data protection. They overlap on breach notification and security measures. NIS2 Art. 35 requires cooperation with data protection authorities when incidents involve personal data.",
+         "legal"),
+        ("Does NIS2 replace GDPR?",
+         "No. NIS2 and GDPR are complementary. GDPR applies to personal data processing (72h breach notification to DPA). NIS2 applies to network security of essential/important entities (24h early warning to CSIRT). Both may apply simultaneously.",
+         "legal"),
+        // CISO / organizational
+        ("Do we need a CISO under NIS2?",
+         "NIS2 does not mandate a CISO title, but Art. 20(1) requires management body oversight of cybersecurity measures. A designated security officer or equivalent function is implied for effective governance.",
+         "governance"),
+        ("Who is responsible for NIS2 compliance?",
+         "Art. 20(1): the management body (board of directors, executive management) approves cybersecurity measures, oversees implementation, and can be held personally responsible for violations.",
+         "governance"),
+        // Deadlines and transposition
+        ("When does NIS2 come into effect?",
+         "Directive (EU) 2022/2555 entered into force on 16 January 2023. Member states had until 17 October 2024 to transpose it into national law. Compliance obligations apply from the transposition date.",
+         "legal"),
+        ("Has NIS2 been transposed into national law?",
+         "Transposition deadlines vary by member state. Art. 41 required transposition by 17 October 2024. Check your national competent authority for the specific implementing legislation.",
+         "legal"),
+        // National authorities
+        ("Who is the NIS2 competent authority?",
+         "Each EU member state designates competent authorities per Art. 8. Italy: ACN (Agenzia per la Cybersicurezza Nazionale). Germany: BSI. France: ANSSI. Each state also designates a CSIRT per Art. 10.",
+         "legal"),
+        ("What is a CSIRT?",
+         "A Computer Security Incident Response Team designated per Art. 10 of NIS2. Each member state must have at least one CSIRT responsible for receiving incident notifications from essential and important entities.",
+         "legal"),
+        // Cross-border
+        ("What if we operate in multiple EU countries?",
+         "Art. 26 establishes jurisdiction rules. The primary competent authority is in the member state where the entity has its main establishment. Art. 37 enables mutual assistance between authorities.",
+         "legal"),
+        // Documentation
+        ("What documentation does NIS2 require?",
+         "Art. 21 requires documented policies for: (a) risk analysis, (c) business continuity, (d) supply chain, (h) cryptography, (i) access control. Art. 20 requires documented management approval. Art. 23 requires incident notification records.",
+         "documentation"),
+        ("Do we need a cybersecurity policy?",
+         "Yes. Art. 21(2)(a) explicitly requires 'policies on risk analysis and information system security.' This is the foundational document from which all other Art. 21 measures derive.",
+         "documentation"),
+        // Change management
+        ("Does NIS2 require change management?",
+         "Art. 21(2)(e) covers security in system maintenance. Formal change management with security review, testing, and rollback procedures is an expected practice for maintaining system integrity.",
+         "operations"),
+        // DNS
+        ("Does NIS2 apply to DNS providers?",
+         "Yes. DNS service providers are explicitly listed in Annex I under digital infrastructure. They are classified as essential entities subject to all NIS2 obligations.",
+         "applicability"),
+        // Cloud security
+        ("Does NIS2 apply to cloud services?",
+         "Yes. Cloud computing service providers are listed in Annex I (digital infrastructure) and are classified as essential entities. They face the full set of Art. 20, 21, and 23 obligations.",
+         "applicability"),
+        ("Do we need cloud security posture management?",
+         "Art. 21(2)(a) risk analysis and Art. 21(2)(e) system security apply to cloud environments. CSPM tools that detect misconfigurations are a recognized practice for cloud workloads.",
+         "operations"),
+        // API security
+        ("Does NIS2 cover API security?",
+         "Art. 21(2)(e) covers security in system development and maintenance. APIs are part of the system surface. Authentication, rate limiting, input validation, and encryption apply.",
+         "development"),
+        // Insurance
+        ("Do we need cyber insurance for NIS2?",
+         "NIS2 does not mandate cyber insurance. However, Art. 21(2)(a) risk analysis should evaluate residual risk. Insurance is a risk transfer mechanism that complements but does not replace technical measures.",
+         "risk_assessment"),
+        // Audit
+        ("Can we be audited under NIS2?",
+         "Art. 32 (essential) and Art. 33 (important) grant competent authorities powers to conduct audits, inspections, and on-site visits. Essential entities may face regular audits; important entities are audited ex-post.",
+         "governance"),
+        ("Do we need internal audits?",
+         "Art. 21(2)(f) requires assessing the effectiveness of cybersecurity measures. Internal audits, security reviews, and maturity assessments are standard methods for this obligation.",
+         "governance"),
+        // Specific Art. 21 measures people ask about
+        ("What is cyber hygiene under NIS2?",
+         "Art. 21(2)(g) lists basic cyber hygiene: device configuration policies, software updates, secure account creation, password management. It also requires periodic cybersecurity training for all employees.",
+         "operations"),
+        ("What does NIS2 say about business continuity?",
+         "Art. 21(2)(c) requires: business continuity management, backup procedures, disaster recovery, and crisis management. Plans must be documented, tested, and maintained.",
+         "business_continuity"),
+        ("Do we need a vulnerability disclosure policy?",
+         "Art. 21(2)(e) covers coordinated vulnerability disclosure. Entities should have a process for receiving, triaging, and remediating reported vulnerabilities in their products and services.",
+         "vulnerability_mgmt"),
+        // Scope edge cases
+        ("Are hospitals subject to NIS2?",
+         "Yes. Health is listed in Annex I. Hospitals and healthcare providers meeting the size threshold (50+ employees or 10M+ EUR) are classified as essential entities.",
+         "applicability"),
+        ("Are universities subject to NIS2?",
+         "Research organizations are listed in Annex II. Universities meeting the size threshold are classified as important entities. Those not meeting the threshold are out of scope.",
+         "applicability"),
+        ("Is a startup subject to NIS2?",
+         "Only if it operates in an Annex I or II sector AND meets the size threshold (50+ employees or 10M+ EUR revenue). Most early-stage startups are below both thresholds and are out of scope.",
+         "applicability"),
+        ("Are government agencies subject to NIS2?",
+         "Public administration entities are listed in Annex I and classified as essential regardless of size (Art. 2(2)). Central government bodies are in scope; local government treatment varies by member state.",
+         "applicability"),
+        // Penalties beyond fines
+        ("Can NIS2 suspend our operations?",
+         "Art. 32(5) allows competent authorities to temporarily suspend certifications or authorizations of essential entities for non-compliance. This goes beyond financial penalties.",
+         "sanctions"),
+        ("Can executives be banned under NIS2?",
+         "Art. 32(5)(b) allows competent authorities to request a temporary prohibition of management functions for natural persons responsible for non-compliance in essential entities.",
+         "sanctions"),
+    ];
+
+    for (q, a, cat) in extended {
+        entries.push(CacheEntry {
+            question: q.to_string(),
+            answer: a.to_string(),
+            category: cat.to_string(),
+            embedding: vec![],
+        });
+    }
+
     entries
 }
 
