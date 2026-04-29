@@ -16,6 +16,8 @@ const askedQuestions = ref(new Set())
 const totalMs = ref(0)
 const ready = ref(false)
 const loadProgress = ref(0)
+const showLeft = ref(true)
+const showRight = ref(true)
 
 const lang = ref('en')
 onMounted(() => {
@@ -45,26 +47,22 @@ const areaStatus = computed(() =>
   }))
 )
 
-// SVG ring calculations
-const ringR = 32
+const ringR = 28
 const ringC = 2 * Math.PI * ringR
 const ringOffset = computed(() => ringC - (coverage.value.pct / 100) * ringC)
 
-// NIS2 public resources — contextual based on explored areas
-const NIS2_RESOURCES = {
-  it: [
-    { label: 'Strumento di autovalutazione', url: 'https://github.com/fabriziosalmi/nis2-public', desc: 'Verifica se la tua organizzazione rientra in NIS2' },
-    { label: 'Documentazione NIS2', url: 'https://github.com/fabriziosalmi/nis2-public#readme', desc: 'Guida completa al framework NIS2' },
-  ],
-  en: [
-    { label: 'Self-assessment tool', url: 'https://github.com/fabriziosalmi/nis2-public', desc: 'Check if your organization falls under NIS2' },
-    { label: 'NIS2 Documentation', url: 'https://github.com/fabriziosalmi/nis2-public#readme', desc: 'Complete guide to the NIS2 framework' },
-  ],
-}
-const resources = computed(() => NIS2_RESOURCES[lang.value] || NIS2_RESOURCES.en)
-
 function filterAsked(items) {
   return items.filter(q => !askedQuestions.value.has(q.toLowerCase()))
+}
+
+function dedup(arr) {
+  const seen = new Set()
+  return arr.filter(q => {
+    const k = q.toLowerCase()
+    if (seen.has(k)) return false
+    seen.add(k)
+    return true
+  })
 }
 
 function exploreSuggestions(uiLang, limit = 4) {
@@ -101,13 +99,13 @@ function search(query) {
     }
     return {
       hit: true, answer: entry.a, html: formatAnswer(entry.a),
-      category: getCategoryName(entry.c, uiLang), followUps, elapsed,
+      category: getCategoryName(entry.c, uiLang), followUps: dedup(followUps), elapsed,
     }
   }
   const missStrings = getStrings(uiLang)
   let followUps = filterAsked(missStrings.missSuggestions)
   if (followUps.length < 2) followUps = [...followUps, ...exploreSuggestions(uiLang, 4 - followUps.length)]
-  return { hit: false, elapsed, followUps }
+  return { hit: false, elapsed, followUps: dedup(followUps) }
 }
 
 async function sendMessage(text) {
@@ -168,7 +166,7 @@ onMounted(async () => {
 <!-- Loader -->
 <div v-if="!ready" class="loader">
   <div class="loader-inner">
-    <svg class="loader-shield" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <svg class="loader-shield" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     <div class="loader-text">{{ t.loading }}</div>
     <div class="loader-bar"><div class="loader-fill" :style="{width: loadProgress+'%'}"></div></div>
   </div>
@@ -176,41 +174,44 @@ onMounted(async () => {
 
 <!-- App -->
 <div v-else class="app">
-  <!-- Header -->
   <header class="hd">
     <div class="hd-left">
-      <svg class="hd-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <!-- Toggle left sidebar -->
+      <button class="hd-toggle" @click="showLeft = !showLeft" :title="t.coverageLabel">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+      </button>
+      <svg class="hd-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       <div>
         <div class="hd-title">{{ t.title }}</div>
         <div class="hd-sub">{{ stats.entries }} entries · {{ t.sub }}</div>
       </div>
     </div>
     <div class="hd-right">
-      <button class="lang-btn" @click="lang = lang === 'it' ? 'en' : 'it'">
-        {{ lang === 'it' ? 'IT' : 'EN' }}
+      <div class="hd-cov">{{ coverage.explored }}/{{ coverage.total }}</div>
+      <button class="lang-btn" @click="lang = lang === 'it' ? 'en' : 'it'">{{ lang.toUpperCase() }}</button>
+      <!-- Toggle right sidebar -->
+      <button class="hd-toggle" @click="showRight = !showRight" :title="t.session">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
       </button>
     </div>
   </header>
 
   <div class="body">
-    <!-- Left: Coverage -->
-    <aside class="side side-l">
-      <!-- Ring -->
-      <div class="ring-wrap">
-        <svg class="ring" viewBox="0 0 80 80">
-          <circle cx="40" cy="40" :r="ringR" fill="none" stroke="var(--vp-c-divider)" stroke-width="3"/>
-          <circle cx="40" cy="40" :r="ringR" fill="none" stroke="var(--vp-c-brand-1)" stroke-width="3"
+    <!-- Left sidebar -->
+    <aside v-if="showLeft" class="side side-l">
+      <div class="ring-row">
+        <svg class="ring" viewBox="0 0 64 64" width="56" height="56">
+          <circle cx="32" cy="32" :r="ringR" fill="none" stroke="var(--vp-c-divider)" stroke-width="3"/>
+          <circle cx="32" cy="32" :r="ringR" fill="none" stroke="var(--vp-c-brand-1)" stroke-width="3"
             stroke-linecap="round" :stroke-dasharray="ringC" :stroke-dashoffset="ringOffset"
-            transform="rotate(-90 40 40)" class="ring-progress"/>
+            transform="rotate(-90 32 32)" class="ring-arc"/>
         </svg>
-        <div class="ring-label">
-          <span class="ring-pct">{{ coverage.pct }}</span>
-          <span class="ring-unit">%</span>
+        <div class="ring-info">
+          <div class="ring-pct">{{ coverage.pct }}%</div>
+          <div class="ring-cap">{{ coverage.explored }}/{{ coverage.total }} {{ t.coverageLabel.toLowerCase() }}</div>
         </div>
       </div>
-      <div class="ring-caption">{{ coverage.explored }}/{{ coverage.total }} {{ t.coverageLabel.toLowerCase() }}</div>
 
-      <!-- Area list -->
       <div class="areas">
         <div v-for="a in areaStatus" :key="a.id" :class="['area', { on: a.visited }]">
           <span class="area-dot"></span>
@@ -218,27 +219,29 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- Resources -->
-      <div class="res-section">
-        <div class="side-label">{{ t.linkProject }}</div>
-        <a v-for="r in resources" :key="r.url" :href="r.url" target="_blank" class="res-card">
-          <div class="res-name">{{ r.label }}</div>
-          <div class="res-desc">{{ r.desc }}</div>
+      <div class="side-footer">
+        <a href="https://github.com/fabriziosalmi/nis2-public" target="_blank" class="side-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          {{ t.linkProject }}
+        </a>
+        <a href="https://github.com/fabriziosalmi/nis2-model" target="_blank" class="side-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          {{ t.linkEngine }}
         </a>
       </div>
     </aside>
 
-    <!-- Center: Chat -->
+    <!-- Center -->
     <div class="center">
       <ChatMessages ref="chatEl" :messages="messages" :isLoading="isLoading" @followUp="sendMessage">
         <template #welcome>
           <div v-if="messages.length === 0" class="welcome">
-            <svg class="w-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <svg class="w-icon" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             <h2 class="w-title">{{ t.welcome }}</h2>
             <p class="w-sub">{{ stats.entries }} {{ t.welcomeSub }}</p>
             <div class="w-grid">
               <button v-for="s in t.suggestions" :key="s" @click="sendMessage(s)" class="w-card">
-                <span class="w-card-text">{{ s }}</span>
+                <span>{{ s }}</span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </button>
             </div>
@@ -248,44 +251,28 @@ onMounted(async () => {
       <ChatInput v-model:input="input" :disabled="isLoading || !stats.entries" :placeholder="t.placeholder" @send="sendMessage()" />
     </div>
 
-    <!-- Right: Session -->
-    <aside class="side side-r">
+    <!-- Right sidebar -->
+    <aside v-if="showRight" class="side side-r">
       <div class="side-label">{{ t.session }}</div>
       <div class="metrics">
         <div class="metric">
-          <div class="metric-val">{{ stats.queries }}</div>
-          <div class="metric-label">{{ t.queries }}</div>
+          <div class="m-val">{{ stats.queries }}</div>
+          <div class="m-label">{{ t.queries }}</div>
         </div>
         <div class="metric">
-          <div class="metric-val">{{ stats.hits }}</div>
-          <div class="metric-label">{{ t.hits }}</div>
-        </div>
-        <div class="metric">
-          <div class="metric-val">{{ stats.queries ? stats.avgMs.toFixed(0) : '–' }}</div>
-          <div class="metric-label">ms avg</div>
+          <div class="m-val">{{ stats.hits }}</div>
+          <div class="m-label">{{ t.hits }}</div>
         </div>
       </div>
 
       <template v-if="messages.filter(m=>m.role==='user').length">
-        <div class="side-label" style="margin-top:20px">{{ t.recent }}</div>
+        <div class="side-label" style="margin-top:16px">{{ t.recent }}</div>
         <div class="trail">
-          <button v-for="(m, i) in messages.filter(m => m.role === 'user').slice(-8)" :key="i" class="trail-btn" @click="sendMessage(m.text)">
+          <button v-for="(m, i) in messages.filter(m => m.role === 'user').slice(-10)" :key="i" class="trail-btn" @click="sendMessage(m.text)">
             {{ m.text }}
           </button>
         </div>
       </template>
-
-      <!-- nis2-public CTA -->
-      <div class="cta">
-        <a href="https://github.com/fabriziosalmi/nis2-public" target="_blank" class="cta-link">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-          fabriziosalmi/nis2-public
-        </a>
-        <a href="https://github.com/fabriziosalmi/nis2-model" target="_blank" class="cta-link">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-          fabriziosalmi/nis2-model
-        </a>
-      </div>
     </aside>
   </div>
 </div>
@@ -295,123 +282,103 @@ onMounted(async () => {
 *{box-sizing:border-box}
 .app,.loader{
   font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Helvetica Neue',sans-serif;
-  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
-  color:var(--vp-c-text-1);
+  -webkit-font-smoothing:antialiased;color:var(--vp-c-text-1);
 }
 
-/* === LOADER === */
+/* Loader */
 .loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--vp-c-bg);z-index:999}
 .loader-inner{text-align:center;animation:fadeUp .5s ease}
-.loader-shield{color:var(--vp-c-text-3);margin-bottom:16px;animation:pulse 2s infinite}
-.loader-text{font-size:13px;color:var(--vp-c-text-3);margin-bottom:16px;letter-spacing:-.01em}
-.loader-bar{width:160px;height:2px;background:var(--vp-c-divider);border-radius:1px;overflow:hidden;margin:0 auto}
+.loader-shield{color:var(--vp-c-text-3);margin-bottom:14px;animation:pulse 2s infinite}
+.loader-text{font-size:13px;color:var(--vp-c-text-3);margin-bottom:14px}
+.loader-bar{width:140px;height:2px;background:var(--vp-c-divider);border-radius:1px;overflow:hidden;margin:0 auto}
 .loader-fill{height:100%;background:var(--vp-c-brand-1);border-radius:1px;transition:width .3s}
 
-/* === HEADER === */
-.hd{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid var(--vp-c-divider);flex-shrink:0}
-.hd-left{display:flex;align-items:center;gap:10px}
-.hd-icon{color:var(--vp-c-brand-1)}
+/* Header */
+.hd{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;border-bottom:1px solid var(--vp-c-divider);flex-shrink:0}
+.hd-left,.hd-right{display:flex;align-items:center;gap:8px}
+.hd-icon{color:var(--vp-c-brand-1);flex-shrink:0}
 .hd-title{font-size:13px;font-weight:600;letter-spacing:-.02em}
-.hd-sub{font-size:10.5px;color:var(--vp-c-text-3);letter-spacing:-.01em}
-.hd-right{display:flex;align-items:center;gap:8px}
+.hd-sub{font-size:10px;color:var(--vp-c-text-3)}
+.hd-cov{font-size:11px;color:var(--vp-c-text-3);font-variant-numeric:tabular-nums;font-weight:500}
+.hd-toggle{
+  padding:4px;border:none;background:none;color:var(--vp-c-text-3);
+  cursor:pointer;border-radius:4px;display:flex;align-items:center;transition:all .12s;
+}
+.hd-toggle:hover{color:var(--vp-c-text-1);background:var(--vp-c-bg-soft)}
 .lang-btn{
-  font-size:11px;font-weight:600;padding:3px 10px;
-  border:1px solid var(--vp-c-divider);border-radius:6px;
-  background:var(--vp-c-bg-soft);color:var(--vp-c-text-2);
-  cursor:pointer;transition:all .15s;letter-spacing:.02em;
+  font-size:10px;font-weight:700;padding:2px 8px;
+  border:1px solid var(--vp-c-divider);border-radius:4px;
+  background:none;color:var(--vp-c-text-2);cursor:pointer;
+  letter-spacing:.04em;transition:all .12s;
 }
 .lang-btn:hover{border-color:var(--vp-c-brand-1);color:var(--vp-c-brand-1)}
 
-/* === LAYOUT === */
+/* Layout */
 .app{display:flex;flex-direction:column;height:100vh;max-height:100vh;overflow:hidden;background:var(--vp-c-bg)}
 .body{display:flex;flex:1;overflow:hidden}
 .center{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 
-/* === SIDEBARS === */
-.side{width:200px;flex-shrink:0;padding:16px;overflow-y:auto;display:flex;flex-direction:column;background:var(--vp-c-bg-soft)}
+/* Sidebars — collapsible, wider */
+.side{width:240px;flex-shrink:0;padding:16px;overflow-y:auto;display:flex;flex-direction:column;background:var(--vp-c-bg-soft);animation:fadeIn .2s ease}
 .side-l{border-right:1px solid var(--vp-c-divider)}
 .side-r{border-left:1px solid var(--vp-c-divider)}
 .side-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--vp-c-text-3);margin-bottom:10px}
 
-/* Coverage ring */
-.ring-wrap{position:relative;width:80px;height:80px;margin:0 auto 4px}
-.ring{width:100%;height:100%}
-.ring-progress{transition:stroke-dashoffset .6s ease}
-.ring-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:1px}
-.ring-pct{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:var(--vp-c-text-1)}
-.ring-unit{font-size:11px;font-weight:500;color:var(--vp-c-text-3);margin-top:4px}
-.ring-caption{text-align:center;font-size:10.5px;color:var(--vp-c-text-3);margin-bottom:14px;letter-spacing:-.01em}
+/* Coverage ring — horizontal layout */
+.ring-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.ring-arc{transition:stroke-dashoffset .6s ease}
+.ring-info{display:flex;flex-direction:column}
+.ring-pct{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.ring-cap{font-size:10.5px;color:var(--vp-c-text-3)}
 
-/* Area list */
-.areas{display:flex;flex-direction:column;gap:1px;margin-bottom:16px}
-.area{display:flex;align-items:center;gap:7px;padding:3px 4px;font-size:11.5px;color:var(--vp-c-text-3);transition:color .2s;letter-spacing:-.01em}
+/* Areas */
+.areas{display:flex;flex-direction:column;gap:1px;flex:1}
+.area{display:flex;align-items:center;gap:8px;padding:4px 6px;font-size:12px;color:var(--vp-c-text-3);transition:color .2s}
 .area.on{color:var(--vp-c-text-1);font-weight:500}
 .area-dot{width:5px;height:5px;border-radius:50%;background:var(--vp-c-divider);flex-shrink:0;transition:all .3s}
 .area.on .area-dot{background:var(--vp-c-brand-1);box-shadow:0 0 4px rgba(59,130,246,.3)}
 
-/* Resources */
-.res-section{margin-top:auto;padding-top:12px;border-top:1px solid var(--vp-c-divider)}
-.res-card{
-  display:block;text-decoration:none;padding:8px;border-radius:6px;
-  margin-top:6px;transition:background .15s;
-}
-.res-card:hover{background:var(--vp-c-bg)}
-.res-name{font-size:11.5px;font-weight:600;color:var(--vp-c-text-1);letter-spacing:-.01em}
-.res-desc{font-size:10.5px;color:var(--vp-c-text-3);margin-top:2px;line-height:1.4}
+/* Footer links */
+.side-footer{padding-top:12px;border-top:1px solid var(--vp-c-divider);display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.side-link{font-size:11px;color:var(--vp-c-text-3);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .12s}
+.side-link:hover{color:var(--vp-c-brand-1)}
 
-/* Session metrics */
-.metrics{display:flex;gap:4px}
-.metric{
-  flex:1;text-align:center;padding:8px 4px;
-  border-radius:6px;background:var(--vp-c-bg);
-}
-.metric-val{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:var(--vp-c-text-1)}
-.metric-label{font-size:9.5px;color:var(--vp-c-text-3);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+/* Session */
+.metrics{display:flex;gap:6px}
+.metric{flex:1;text-align:center;padding:8px 4px;border-radius:6px;background:var(--vp-c-bg)}
+.m-val{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.m-label{font-size:9px;color:var(--vp-c-text-3);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
 
-/* Trail */
 .trail{display:flex;flex-direction:column;gap:1px}
 .trail-btn{
-  text-align:left;font-size:11px;color:var(--vp-c-text-3);
-  padding:4px 6px;border:none;background:none;border-radius:4px;
-  cursor:pointer;transition:all .12s;letter-spacing:-.01em;
+  text-align:left;font-size:11.5px;color:var(--vp-c-text-3);
+  padding:5px 8px;border:none;background:none;border-radius:4px;
+  cursor:pointer;transition:all .12s;line-height:1.4;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-  line-height:1.4;
 }
 .trail-btn:hover{background:var(--vp-c-bg);color:var(--vp-c-text-1)}
 
-/* CTA */
-.cta{margin-top:auto;padding-top:12px;border-top:1px solid var(--vp-c-divider);display:flex;flex-direction:column;gap:6px}
-.cta-link{
-  font-size:11px;color:var(--vp-c-text-3);text-decoration:none;
-  display:flex;align-items:center;gap:6px;transition:color .12s;
-}
-.cta-link:hover{color:var(--vp-c-brand-1)}
-
-/* === WELCOME === */
+/* Welcome */
 .welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;padding:40px 24px;animation:fadeUp .5s ease}
-.w-icon{color:var(--vp-c-text-3);opacity:.15;margin-bottom:8px}
-.w-title{font-size:18px;font-weight:600;margin:0;letter-spacing:-.03em;color:var(--vp-c-text-1)}
-.w-sub{color:var(--vp-c-text-3);font-size:12.5px;margin:4px 0 0;letter-spacing:-.01em}
+.w-icon{color:var(--vp-c-text-3);opacity:.12;margin-bottom:8px}
+.w-title{font-size:18px;font-weight:600;margin:0;letter-spacing:-.03em}
+.w-sub{color:var(--vp-c-text-3);font-size:12.5px;margin:4px 0 0}
 .w-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-width:480px;margin-top:20px;width:100%}
 .w-card{
   display:flex;align-items:center;justify-content:space-between;
-  text-align:left;padding:10px 12px;
+  text-align:left;padding:10px 12px;gap:8px;
   border:1px solid var(--vp-c-divider);border-radius:8px;
   background:var(--vp-c-bg);color:var(--vp-c-text-2);
-  font-size:12.5px;cursor:pointer;transition:all .15s;
-  letter-spacing:-.01em;line-height:1.4;gap:8px;
+  font-size:12.5px;cursor:pointer;transition:all .12s;line-height:1.4;
 }
 .w-card:hover{border-color:var(--vp-c-brand-1);color:var(--vp-c-text-1)}
-.w-card svg{flex-shrink:0;opacity:.2;transition:opacity .15s}
-.w-card:hover svg{opacity:.5}
-.w-card-text{flex:1}
+.w-card svg{flex-shrink:0;opacity:.15;transition:opacity .12s}
+.w-card:hover svg{opacity:.4}
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse{0%,100%{opacity:.4}50%{opacity:.8}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:.7}}
 
-@media(max-width:960px){.side{display:none}}
-@media(max-width:640px){
-  .w-grid{grid-template-columns:1fr}
-  .hd-sub{display:none}
-}
+@media(max-width:960px){.side{display:none}.hd-toggle{display:none}}
+@media(max-width:640px){.w-grid{grid-template-columns:1fr}.hd-sub{display:none}}
 </style>

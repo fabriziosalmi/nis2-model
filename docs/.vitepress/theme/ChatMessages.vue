@@ -23,13 +23,10 @@ defineEmits(['followUp'])
 
       <!-- Follow-ups -->
       <div v-if="m.followUps?.length && !m.typing" class="fups">
-        <div class="fups-label">{{ m.role === 'assistant' && m.category !== 'miss' ? '↳' : '' }}</div>
-        <div class="fups-list">
           <button v-for="f in m.followUps" :key="f" @click="$emit('followUp', f)" class="fup-btn">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             <span>{{ f }}</span>
           </button>
-        </div>
       </div>
     </div>
   </div>
@@ -154,13 +151,8 @@ defineEmits(['followUp'])
 .fups{
   padding:6px 10px 10px;
   border-top:1px solid var(--vp-c-divider);
-  display:flex;gap:4px;
+  display:flex;flex-direction:column;gap:1px;
 }
-.fups-label{
-  font-size:14px;color:var(--vp-c-text-3);
-  padding-top:4px;width:16px;flex-shrink:0;
-}
-.fups-list{display:flex;flex-direction:column;gap:1px;flex:1}
 .fup-btn{
   text-align:left;padding:5px 8px;border:none;border-radius:6px;
   background:transparent;color:var(--vp-c-text-2);
