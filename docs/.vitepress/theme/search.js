@@ -14,9 +14,15 @@ export function isItalian(text) {
     'dobbiamo','quanto','azienda','cifrat','incidente','fornitor',
     'sicurezza','backup','audit','formazione','obblig','sanzioni',
     'continuita','crittografia','rischi','gestione','entita','allegato',
+    'della','delle','nella','nelle','degli','sono','essere','questo',
+    'questa','ogni','deve','devo','fare','perch','anche','ancora',
+    'quando','dove','settori','direttiva','notifica','prevede',
+    'implementare','necessario','dipende','operativa','conformit',
+    'misure','procedur','preoccup','hackerato','compromess',
+    'violazione','segnalazione','adeguarsi','rispetto',
   ]
   const low = text.toLowerCase()
-  return markers.filter(w => low.includes(w)).length >= 2 || /[àèéìòù]/.test(low)
+  return markers.some(w => low.includes(w)) || /[àèéìòù]/.test(low)
 }
 
 export function bm25Search(dataset, query, topN = 5) {
