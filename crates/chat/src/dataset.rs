@@ -751,6 +751,17 @@ pub fn build_dataset() -> Vec<CacheEntry> {
         });
     }
 
+    // --- Italian expansion (2x coverage) ---
+    for (q, a, cat) in crate::dataset_it2::italian_expansion() {
+        entries.push(CacheEntry {
+            question: q.to_string(),
+            answer: a.to_string(),
+            category: cat.to_string(),
+            follow_ups: vec![],
+            embedding: vec![],
+        });
+    }
+
     // --- Scenario entries (panic questions EN+IT) ---
     for (q, a, cat) in crate::dataset_scenarios::scenario_entries() {
         entries.push(CacheEntry {
