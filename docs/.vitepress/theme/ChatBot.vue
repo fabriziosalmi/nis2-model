@@ -11,6 +11,7 @@ const input = ref('')
 const isLoading = ref(false)
 const chatEl = ref(null)
 const stats = ref({ entries: 0, queries: 0, hits: 0, avgMs: 0 })
+const askedQuestions = ref(new Set())
 const totalMs = ref(0)
 const ready = ref(false)
 const loadProgress = ref(0)
@@ -102,6 +103,10 @@ const suggestions = computed(() => lang.value === 'it' ? [
   { text: 'What are the NIS2 sanctions?' },
 ])
 
+function filterAsked(items) {
+  return items.filter(q => !askedQuestions.value.has(q.toLowerCase()))
+}
+
 function search(query) {
   const t0 = performance.now()
   const results = bm25Search(dataset.value, query, 3)
@@ -113,21 +118,23 @@ function search(query) {
     const cat = entry.c.replace(/_impl$/, '')
     visitedCategories.value = new Set([...visitedCategories.value, cat])
     stats.value.hits++
+    const rawFollowUps = findFollowUps(dataset.value, entry.c, qLang)
     return {
       hit: true, answer: entry.a, html: formatAnswer(entry.a),
-      category: entry.c, followUps: findFollowUps(dataset.value, entry.c, qLang), elapsed,
+      category: entry.c, followUps: filterAsked(rawFollowUps), elapsed,
     }
   }
   const miss = qLang === 'it'
     ? ['La mia azienda rientra nella NIS2?','Da dove iniziare con NIS2?','Quali sono gli obblighi NIS2?','Quanto costa adeguarsi?']
     : ['Does NIS2 apply to my company?','Where to start with NIS2?','What are the NIS2 obligations?','What are the sanctions?']
-  return { hit: false, elapsed, followUps: miss }
+  return { hit: false, elapsed, followUps: filterAsked(miss) }
 }
 
 async function sendMessage(text) {
   const query = (text || input.value).trim()
   if (!query || isLoading.value) return
   input.value = ''
+  askedQuestions.value = new Set([...askedQuestions.value, query.toLowerCase()])
   messages.value.push({ role: 'user', text: query })
   isLoading.value = true
   stats.value.queries++
