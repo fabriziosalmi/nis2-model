@@ -68,26 +68,27 @@ function search(query) {
   const t0 = performance.now()
   const results = bm25Search(dataset.value, query, 3)
   const elapsed = performance.now() - t0
-  const qLang = isItalian(query) ? 'it' : lang.value
+  // UI language is the source of truth for follow-ups and labels
+  const uiLang = lang.value
 
   if (results.length > 0 && results[0].score > 0.5) {
     const entry = dataset.value[results[0].idx]
     const cat = entry.c.replace(/_impl$/, '')
     visitedCategories.value = new Set([...visitedCategories.value, cat])
     stats.value.hits++
-    const rawFollowUps = findFollowUps(dataset.value, entry.c, qLang)
+    const rawFollowUps = findFollowUps(dataset.value, entry.c, uiLang)
     let followUps = filterAsked(rawFollowUps)
     if (followUps.length < 2) {
-      followUps = [...followUps, ...exploreSuggestions(qLang, 4 - followUps.length)]
+      followUps = [...followUps, ...exploreSuggestions(uiLang, 4 - followUps.length)]
     }
     return {
       hit: true, answer: entry.a, html: formatAnswer(entry.a),
-      category: getCategoryName(entry.c, qLang), followUps, elapsed,
+      category: getCategoryName(entry.c, uiLang), followUps, elapsed,
     }
   }
-  const missStrings = getStrings(qLang)
+  const missStrings = getStrings(uiLang)
   let followUps = filterAsked(missStrings.missSuggestions)
-  if (followUps.length < 2) followUps = [...followUps, ...exploreSuggestions(qLang, 4 - followUps.length)]
+  if (followUps.length < 2) followUps = [...followUps, ...exploreSuggestions(uiLang, 4 - followUps.length)]
   return { hit: false, elapsed, followUps }
 }
 
@@ -105,8 +106,7 @@ async function sendMessage(text) {
   const result = search(query)
   totalMs.value += result.elapsed
   stats.value.avgMs = totalMs.value / stats.value.queries
-  const qLang = isItalian(query) ? 'it' : lang.value
-  const missText = getStrings(qLang).miss
+  const missText = t.value.miss
 
   if (result.hit) {
     const msg = { role:'assistant', text:result.answer, html:result.html, category:result.category, followUps:result.followUps, typing:true, displayHtml:'' }
