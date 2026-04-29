@@ -3,7 +3,7 @@ import { ref, onMounted, nextTick, computed } from 'vue'
 import ChatMessages from './ChatMessages.vue'
 import ChatInput from './ChatInput.vue'
 import { bm25Search, isItalian, findFollowUps } from './search.js'
-import { formatAnswer } from './formatter.js'
+import { formatAnswer, extractArticles, getCategoryLink } from './formatter.js'
 import { getStrings, getCategoryName } from './i18n.js'
 
 const dataset = ref([])
@@ -100,6 +100,8 @@ function search(query) {
     return {
       hit: true, answer: entry.a, html: formatAnswer(entry.a),
       category: getCategoryName(entry.c, uiLang), followUps: dedup(followUps), elapsed,
+      refs: extractArticles(entry.a),
+      catLink: getCategoryLink(entry.c, uiLang),
     }
   }
   const missStrings = getStrings(uiLang)
@@ -125,7 +127,7 @@ async function sendMessage(text) {
   const missText = t.value.miss
 
   if (result.hit) {
-    const msg = { role:'assistant', text:result.answer, html:result.html, category:result.category, followUps:result.followUps, typing:true, displayHtml:'' }
+    const msg = { role:'assistant', text:result.answer, html:result.html, category:result.category, followUps:result.followUps, refs:result.refs, catLink:result.catLink, typing:true, displayHtml:'' }
     messages.value.push(msg)
     const words = result.answer.split(' ')
     for (let i = 0; i < words.length; i++) {
@@ -319,7 +321,7 @@ onMounted(async () => {
 .center{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 
 /* Sidebars — collapsible, wider */
-.side{width:240px;flex-shrink:0;padding:16px;overflow-y:auto;display:flex;flex-direction:column;background:var(--vp-c-bg-soft);animation:fadeIn .2s ease}
+.side{width:240px;flex-shrink:0;padding:16px;overflow:hidden;display:flex;flex-direction:column;background:var(--vp-c-bg-soft)}
 .side-l{border-right:1px solid var(--vp-c-divider)}
 .side-r{border-left:1px solid var(--vp-c-divider)}
 .side-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--vp-c-text-3);margin-bottom:10px}
@@ -332,7 +334,7 @@ onMounted(async () => {
 .ring-cap{font-size:10.5px;color:var(--vp-c-text-3)}
 
 /* Areas */
-.areas{display:flex;flex-direction:column;gap:1px;flex:1}
+.areas{display:flex;flex-direction:column;gap:1px;flex:1;overflow-y:auto;min-height:0}
 .area{display:flex;align-items:center;gap:8px;padding:4px 6px;font-size:12px;color:var(--vp-c-text-3);transition:color .2s}
 .area.on{color:var(--vp-c-text-1);font-weight:500}
 .area-dot{width:5px;height:5px;border-radius:50%;background:var(--vp-c-divider);flex-shrink:0;transition:all .3s}

@@ -28,6 +28,18 @@ defineEmits(['followUp'])
             <span>{{ f }}</span>
           </button>
       </div>
+
+      <!-- Contextual references -->
+      <div v-if="m.role === 'assistant' && !m.typing && (m.refs?.length || m.catLink)" class="refs">
+        <a v-for="r in (m.refs || [])" :key="r.num" :href="r.url" target="_blank" class="ref-link">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Art. {{ r.num }}
+        </a>
+        <a v-if="m.catLink" :href="m.catLink.url" target="_blank" class="ref-link ref-cat">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          {{ m.catLink.label }}
+        </a>
+      </div>
     </div>
   </div>
 
@@ -163,6 +175,25 @@ defineEmits(['followUp'])
 .fup-btn svg{opacity:.3;flex-shrink:0;transition:opacity .15s}
 .fup-btn:hover svg{opacity:.7}
 .fup-btn span{line-height:1.4}
+
+/* Contextual references */
+.refs{
+  padding:6px 10px 8px;
+  border-top:1px solid var(--vp-c-divider);
+  display:flex;flex-wrap:wrap;gap:4px;
+}
+.ref-link{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 8px;border-radius:4px;
+  font-size:10.5px;font-weight:500;
+  color:var(--vp-c-text-3);text-decoration:none;
+  background:rgba(59,130,246,.04);
+  transition:all .12s;letter-spacing:-.01em;
+}
+.ref-link:hover{color:var(--vp-c-brand-1);background:rgba(59,130,246,.08)}
+.ref-link svg{flex-shrink:0;opacity:.4}
+.ref-link:hover svg{opacity:.7}
+.ref-cat{border-left:2px solid var(--vp-c-brand-1)}
 
 /* Dots */
 .dots{display:flex;gap:5px;padding:12px 16px}
