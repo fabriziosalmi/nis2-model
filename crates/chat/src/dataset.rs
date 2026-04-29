@@ -194,6 +194,7 @@ pub fn build_dataset() -> Vec<CacheEntry> {
                 question: tmpl(lang.sector_q, si.code, si.annex, &cat),
                 answer: tmpl(lang.applies_yes, si.code, si.annex, &cat),
                 category: "applicability".into(),
+                follow_ups: vec![],
                 embedding: vec![],
             });
         }
@@ -203,6 +204,7 @@ pub fn build_dataset() -> Vec<CacheEntry> {
                 question: tmpl(lang.sector_q, sector, "", "OutOfScope"),
                 answer: tmpl(lang.applies_no, sector, "", "OutOfScope"),
                 category: "applicability".into(),
+                follow_ups: vec![],
                 embedding: vec![],
             });
         }
@@ -227,6 +229,7 @@ pub fn build_dataset() -> Vec<CacheEntry> {
                 question: q.to_string(),
                 answer: a.to_string(),
                 category: "general".into(),
+                follow_ups: vec![],
                 embedding: vec![],
             });
         }
@@ -235,6 +238,7 @@ pub fn build_dataset() -> Vec<CacheEntry> {
             question: lang.diff_q.to_string(),
             answer: DIFF_A.to_string(),
             category: "classification".into(),
+            follow_ups: vec![],
             embedding: vec![],
         });
     }
@@ -332,6 +336,7 @@ pub fn build_dataset() -> Vec<CacheEntry> {
             question: q.to_string(),
             answer: a.to_string(),
             category: cat.to_string(),
+            follow_ups: vec![],
             embedding: vec![],
         });
     }
@@ -506,6 +511,7 @@ pub fn build_dataset() -> Vec<CacheEntry> {
             question: q.to_string(),
             answer: a.to_string(),
             category: cat.to_string(),
+            follow_ups: vec![],
             embedding: vec![],
         });
     }
@@ -571,11 +577,102 @@ pub fn build_dataset() -> Vec<CacheEntry> {
             question: q.to_string(),
             answer: a.to_string(),
             category: cat.to_string(),
+            follow_ups: vec![],
             embedding: vec![],
         });
     }
+    // --- Assign follow-ups by category (deterministic conversation tree) ---
+    for entry in &mut entries {
+        entry.follow_ups = follow_ups_for(&entry.category);
+    }
 
     entries
+}
+
+/// Deterministic follow-up paths per category.
+fn follow_ups_for(category: &str) -> Vec<String> {
+    match category {
+        "applicability" => vec![
+            "What are the NIS2 obligations?".into(),
+            "What are the NIS2 sanctions?".into(),
+            "What is the NIS2 size threshold?".into(),
+        ],
+        "access_control" => vec![
+            "Do we need a vault for secrets management?".into(),
+            "Is multi-factor authentication mandatory?".into(),
+            "Do we need privileged access management?".into(),
+            "Do we need a password policy?".into(),
+        ],
+        "encryption" => vec![
+            "Do we need encryption at rest?".into(),
+            "Do we need encryption in transit?".into(),
+            "What encryption standards does NIS2 require?".into(),
+            "Do we need a vault for secrets management?".into(),
+        ],
+        "incident_response" => vec![
+            "What are the NIS2 incident reporting deadlines?".into(),
+            "Do we need an incident response plan?".into(),
+            "Who do we notify after a breach?".into(),
+            "Do we need a SIEM under NIS2?".into(),
+        ],
+        "business_continuity" => vec![
+            "Do we need a disaster recovery plan?".into(),
+            "How often should we test our backups?".into(),
+            "Do we need a risk assessment?".into(),
+        ],
+        "supply_chain" => vec![
+            "Do we need to audit our vendors?".into(),
+            "Are our cloud providers covered by NIS2?".into(),
+            "Does NIS2 require change management?".into(),
+        ],
+        "vulnerability_mgmt" => vec![
+            "Do we need patching?".into(),
+            "Do we need vulnerability scanning?".into(),
+            "Do we need penetration testing?".into(),
+            "Does NIS2 require secure software development?".into(),
+        ],
+        "governance" => vec![
+            "Is the board personally liable under NIS2?".into(),
+            "Does the CEO need cybersecurity training?".into(),
+            "Do we need a CISO under NIS2?".into(),
+            "Can we be audited under NIS2?".into(),
+        ],
+        "risk_assessment" => vec![
+            "How often should we do risk assessments?".into(),
+            "What cybersecurity measures does NIS2 require?".into(),
+            "Do we need cyber insurance for NIS2?".into(),
+        ],
+        "network_security" => vec![
+            "Do we need network segmentation?".into(),
+            "Do we need a firewall?".into(),
+            "Does NIS2 require zero trust?".into(),
+        ],
+        "detection" => vec![
+            "Do we need centralized logging?".into(),
+            "Do we need endpoint detection and response?".into(),
+            "Do we need an incident response plan?".into(),
+        ],
+        "sanctions" => vec![
+            "Can NIS2 suspend our operations?".into(),
+            "Can executives be banned under NIS2?".into(),
+            "Is the board personally liable under NIS2?".into(),
+        ],
+        "legal" => vec![
+            "When does NIS2 come into effect?".into(),
+            "What is the relationship between NIS2 and GDPR?".into(),
+            "Who is the NIS2 competent authority?".into(),
+        ],
+        "documentation" => vec![
+            "Do we need a cybersecurity policy?".into(),
+            "What documentation does NIS2 require?".into(),
+            "What are the NIS2 governance requirements?".into(),
+        ],
+        "general" | "classification" | _ => vec![
+            "What are the NIS2 obligations?".into(),
+            "What are the NIS2 sanctions?".into(),
+            "What are the NIS2 incident reporting deadlines?".into(),
+        ],
+    }
 }
 
 #[cfg(test)]

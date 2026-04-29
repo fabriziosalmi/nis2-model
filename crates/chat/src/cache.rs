@@ -15,6 +15,8 @@ pub struct CacheEntry {
     pub answer: String,
     /// Category tag for filtering (e.g. "applicability", "sanctions").
     pub category: String,
+    /// Suggested follow-up questions for deterministic conversation branching.
+    pub follow_ups: Vec<String>,
     /// Pre-computed embedding vector (384-dim for BGE-Small).
     #[serde(skip)]
     pub embedding: Vec<f32>,
@@ -134,6 +136,7 @@ mod tests {
             question: "test question".into(),
             answer: "test answer".into(),
             category: "test".into(),
+            follow_ups: vec![],
             embedding: emb.clone(),
         });
         let hit = cache.search(&emb).unwrap();
@@ -148,6 +151,7 @@ mod tests {
             question: "test".into(),
             answer: "answer".into(),
             category: "test".into(),
+            follow_ups: vec![],
             embedding: dummy_embedding(1.0),
         });
         // Very different embedding
@@ -181,6 +185,7 @@ mod tests {
             question: "q".into(),
             answer: "a".into(),
             category: "test".into(),
+            follow_ups: vec![],
             embedding: dummy_embedding(1.0),
         });
         // Slightly different embedding -- won't hit 0.99
@@ -203,6 +208,7 @@ mod tests {
             question: "q".into(),
             answer: "a".into(),
             category: "t".into(),
+            follow_ups: vec![],
             embedding: vec![1.0],
         });
         assert_eq!(cache.len(), 1);

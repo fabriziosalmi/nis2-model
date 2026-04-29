@@ -31,11 +31,13 @@ fn main() -> anyhow::Result<()> {
     println!("Similarity threshold: {:.2}", threshold);
     println!("Languages: EN, IT, DE, FR, ES");
     println!();
-    println!("Type a question (or 'quit' to exit):");
+    println!("Commands: quit | stats | 1-4 (follow suggested path)");
     println!("{}", "-".repeat(60));
 
     let stdin = io::stdin();
     let mut stdout = io::stdout();
+
+    let mut last_follow_ups: Vec<String> = vec![];
 
     for line in stdin.lock().lines() {
         let line = line?;
@@ -51,11 +53,24 @@ fn main() -> anyhow::Result<()> {
             println!("  Cache size: {} entries", engine.cache_size());
             println!("  Threshold:  {:.2}", threshold);
             println!();
+            print!("> ");
+            stdout.flush()?;
             continue;
         }
 
+        // Check if user typed a number to follow a suggested path
+        let effective_query = if let Ok(n) = query.parse::<usize>() {
+            if n >= 1 && n <= last_follow_ups.len() {
+                last_follow_ups[n - 1].clone()
+            } else {
+                query.to_string()
+            }
+        } else {
+            query.to_string()
+        };
+
         let t = Instant::now();
-        let emb = embedder.embed_one(query)?;
+        let emb = embedder.embed_one(&effective_query)?;
         let resp = engine.ask(&emb);
         let elapsed_us = t.elapsed().as_micros();
 
@@ -63,10 +78,21 @@ fn main() -> anyhow::Result<()> {
             println!();
             println!("  [HIT] score={:.4}  category={}  time={}us", resp.score, resp.category, elapsed_us);
             println!("  {}", resp.answer);
+
+            // Show follow-up suggestions
+            if !resp.follow_ups.is_empty() {
+                println!();
+                println!("  Suggested paths:");
+                for (i, fu) in resp.follow_ups.iter().enumerate() {
+                    println!("    [{}] {}", i + 1, fu);
+                }
+                last_follow_ups = resp.follow_ups;
+            } else {
+                last_follow_ups.clear();
+            }
         } else {
             println!();
             println!("  [MISS] No match above {:.2}  time={}us", threshold, elapsed_us);
-            // Show top 3 nearest for debugging
             let top3 = engine.debug_top_n(&emb, 3);
             if !top3.is_empty() {
                 println!("  Nearest matches:");
@@ -74,6 +100,7 @@ fn main() -> anyhow::Result<()> {
                     println!("    {:.4}  {}", score, question);
                 }
             }
+            last_follow_ups.clear();
         }
         println!();
         print!("> ");

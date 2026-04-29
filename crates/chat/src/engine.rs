@@ -14,6 +14,8 @@ pub struct ChatResponse {
     pub score: f32,
     /// Category of the matched entry.
     pub category: String,
+    /// Suggested follow-up questions.
+    pub follow_ups: Vec<String>,
 }
 
 /// Chat engine with semantic cache.
@@ -64,6 +66,7 @@ impl ChatEngine {
                 from_cache: true,
                 score: hit.score,
                 category: hit.entry.category,
+                follow_ups: hit.entry.follow_ups,
             },
             None => ChatResponse {
                 answer: "This question is not in the knowledge base. \
@@ -73,6 +76,7 @@ impl ChatEngine {
                 from_cache: false,
                 score: 0.0,
                 category: "miss".into(),
+                follow_ups: vec![],
             },
         }
     }
@@ -83,6 +87,7 @@ impl ChatEngine {
             question,
             answer,
             category,
+            follow_ups: vec![],
             embedding,
         });
     }
