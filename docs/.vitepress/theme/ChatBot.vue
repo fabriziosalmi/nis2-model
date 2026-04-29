@@ -107,6 +107,24 @@ function filterAsked(items) {
   return items.filter(q => !askedQuestions.value.has(q.toLowerCase()))
 }
 
+// Find questions from unexplored categories to prevent dead ends
+function exploreSuggestions(qLang, limit = 4) {
+  const explored = visitedCategories.value
+  const unexplored = AREAS.filter(a => !explored.has(a.id)).map(a => a.id)
+  if (!unexplored.length) return []
+
+  const candidates = []
+  for (const cat of unexplored) {
+    const entries = dataset.value.filter(d => {
+      const dc = d.c.replace(/_impl$/, '')
+      return dc === cat && (qLang === 'it' ? isItalian(d.q) : !isItalian(d.q))
+    })
+    if (entries.length) candidates.push(entries[0].q)
+    if (candidates.length >= limit) break
+  }
+  return filterAsked(candidates)
+}
+
 function search(query) {
   const t0 = performance.now()
   const results = bm25Search(dataset.value, query, 3)
@@ -119,15 +137,23 @@ function search(query) {
     visitedCategories.value = new Set([...visitedCategories.value, cat])
     stats.value.hits++
     const rawFollowUps = findFollowUps(dataset.value, entry.c, qLang)
+    let followUps = filterAsked(rawFollowUps)
+    // Backfill with unexplored categories if running low
+    if (followUps.length < 2) {
+      const explore = exploreSuggestions(qLang, 4 - followUps.length)
+      followUps = [...followUps, ...explore]
+    }
     return {
       hit: true, answer: entry.a, html: formatAnswer(entry.a),
-      category: entry.c, followUps: filterAsked(rawFollowUps), elapsed,
+      category: entry.c, followUps, elapsed,
     }
   }
   const miss = qLang === 'it'
     ? ['La mia azienda rientra nella NIS2?','Da dove iniziare con NIS2?','Quali sono gli obblighi NIS2?','Quanto costa adeguarsi?']
     : ['Does NIS2 apply to my company?','Where to start with NIS2?','What are the NIS2 obligations?','What are the sanctions?']
-  return { hit: false, elapsed, followUps: filterAsked(miss) }
+  let followUps = filterAsked(miss)
+  if (followUps.length < 2) followUps = [...followUps, ...exploreSuggestions(qLang, 4 - followUps.length)]
+  return { hit: false, elapsed, followUps }
 }
 
 async function sendMessage(text) {
