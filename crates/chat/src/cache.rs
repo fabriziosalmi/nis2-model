@@ -74,29 +74,30 @@ impl SemanticCache {
     /// Returns `Some(CacheHit)` if the best match exceeds the threshold,
     /// `None` otherwise (cache miss).
     pub fn search(&self, query_embedding: &[f32]) -> Option<CacheHit> {
+        self.search_top_n(query_embedding, 1)
+            .into_iter()
+            .next()
+            .filter(|h| h.score >= self.threshold)
+    }
+
+    /// Return the top N matches by similarity, regardless of threshold.
+    pub fn search_top_n(&self, query_embedding: &[f32], n: usize) -> Vec<CacheHit> {
         if self.entries.is_empty() {
-            return None;
+            return vec![];
         }
 
-        let mut best_score: f32 = -1.0;
-        let mut best_idx: usize = 0;
+        let mut scored: Vec<(usize, f32)> = self.entries.iter().enumerate()
+            .map(|(i, e)| (i, cosine_similarity(query_embedding, &e.embedding)))
+            .collect();
+        scored.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+        scored.truncate(n);
 
-        for (i, entry) in self.entries.iter().enumerate() {
-            let score = cosine_similarity(query_embedding, &entry.embedding);
-            if score > best_score {
-                best_score = score;
-                best_idx = i;
-            }
-        }
-
-        if best_score >= self.threshold {
-            Some(CacheHit {
-                entry: self.entries[best_idx].clone(),
-                score: best_score,
+        scored.into_iter()
+            .map(|(i, score)| CacheHit {
+                entry: self.entries[i].clone(),
+                score,
             })
-        } else {
-            None
-        }
+            .collect()
     }
 }
 

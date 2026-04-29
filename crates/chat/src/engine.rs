@@ -91,6 +91,14 @@ impl ChatEngine {
     pub fn cache_size(&self) -> usize {
         self.cache.len()
     }
+
+    /// Return the top N matches regardless of threshold (for debugging).
+    pub fn debug_top_n(&self, query_embedding: &[f32], n: usize) -> Vec<(f32, String)> {
+        self.cache.search_top_n(query_embedding, n)
+            .into_iter()
+            .map(|h| (h.score, h.entry.question))
+            .collect()
+    }
 }
 
 #[cfg(test)]

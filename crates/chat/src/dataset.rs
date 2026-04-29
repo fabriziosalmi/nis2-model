@@ -510,6 +510,71 @@ pub fn build_dataset() -> Vec<CacheEntry> {
         });
     }
 
+    // --- Short-form keyword entries (how people actually search) ---
+    let keywords: &[(&str, &str, &str)] = &[
+        // Password / access
+        ("password rotation", "Art. 21(2)(i) requires access control policies. Password/secret rotation, prohibition of shared accounts, and credential lifecycle management are mandatory measures.", "access_control"),
+        ("rotazione password", "Art. 21(2)(i) richiede politiche di controllo accessi. La rotazione delle password, il divieto di account condivisi e la gestione del ciclo di vita delle credenziali sono misure obbligatorie.", "access_control"),
+        ("shared root password", "Art. 21(2)(i): shared root accounts violate individual accountability. Each administrator must have unique credentials. Root/admin access must use MFA per Art. 21(2)(j).", "access_control"),
+        ("password condivise", "Art. 21(2)(i): gli account root condivisi violano il principio di responsabilita individuale. Ogni amministratore deve avere credenziali uniche.", "access_control"),
+        ("ssh keys", "Art. 21(2)(j) mandates strong authentication. SSH key-based auth is a recognized implementation. Password-only access to critical systems is insufficient.", "access_control"),
+        ("chiavi ssh", "Art. 21(2)(j) richiede autenticazione forte. L'autenticazione basata su chiavi SSH e' un'implementazione riconosciuta. L'accesso solo con password e' insufficiente.", "access_control"),
+        ("MFA", "Art. 21(2)(j) requires multi-factor or continuous authentication. MFA is expected for all administrative access and critical systems.", "access_control"),
+        ("autenticazione multifattore", "Art. 21(2)(j) richiede soluzioni di autenticazione a piu fattori. MFA e' richiesto per accessi amministrativi e sistemi critici.", "access_control"),
+        // Encryption
+        ("encryption at rest", "Art. 21(2)(h) requires cryptography policies. Encryption of data at rest (AES-256 recommended by ENISA) protects stored data, backups, and removable media.", "encryption"),
+        ("cifratura dati a riposo", "Art. 21(2)(h) richiede politiche di crittografia. La cifratura dei dati a riposo (AES-256 raccomandato ENISA) protegge dati, backup e supporti rimovibili.", "encryption"),
+        ("encryption in transit", "Art. 21(2)(h) cryptography + Art. 21(2)(j) secured communications. TLS 1.2+ for all data in transit. mTLS for service-to-service communication.", "encryption"),
+        ("cifratura in transito", "Art. 21(2)(h) crittografia + Art. 21(2)(j) comunicazioni protette. TLS 1.2+ per dati in transito. mTLS per comunicazione tra servizi.", "encryption"),
+        ("vault", "Art. 21(2)(h) and (i): proper key management and access control require a secrets management solution. HashiCorp Vault, AWS Secrets Manager, or equivalent.", "encryption"),
+        ("gestione segreti", "Art. 21(2)(h) e (i): la gestione delle chiavi crittografiche e il controllo accessi richiedono una soluzione di gestione dei segreti (Vault, Secrets Manager).", "encryption"),
+        ("TLS", "Art. 21(2)(h) and (j): TLS 1.2+ is the minimum for data in transit. TLS 1.3 is recommended. Certificate management and rotation are part of cryptography policies.", "encryption"),
+        // Incident response
+        ("breach notification", "Art. 23: early warning to CSIRT within 24h, full notification within 72h, final report within 30 days. Applies to significant incidents affecting service provision.", "incident_response"),
+        ("notifica incidente", "Art. 23: preallarme al CSIRT entro 24h, notifica completa entro 72h, relazione finale entro 30 giorni. Si applica a incidenti significativi.", "incident_response"),
+        ("24 ore", "Art. 23(4)(a): early warning to CSIRT within 24 hours of becoming aware of a significant incident. Must indicate if malicious and if cross-border.", "incident_response"),
+        ("72 ore", "Art. 23(4)(b): full incident notification to CSIRT within 72 hours. Must include severity assessment, impact, and indicators of compromise.", "incident_response"),
+        ("incident response", "Art. 21(2)(b) requires incident handling: detection, analysis, containment, eradication, recovery, post-incident review. Procedures must be documented and tested.", "incident_response"),
+        ("risposta incidenti", "Art. 21(2)(b) richiede gestione incidenti: rilevamento, analisi, contenimento, eliminazione, ripristino, revisione post-incidente.", "incident_response"),
+        // Backup / DR
+        ("backup", "Art. 21(2)(c) explicitly requires backup management and disaster recovery. Regular tested backups with offsite/offline copies are a minimum.", "business_continuity"),
+        ("disaster recovery", "Art. 21(2)(c) requires business continuity including disaster recovery. RTO/RPO must be defined, plans documented, and recovery tested regularly.", "business_continuity"),
+        ("continuita operativa", "Art. 21(2)(c) richiede continuita operativa: gestione backup, ripristino in caso di disastro, gestione delle crisi. I piani devono essere documentati e testati.", "business_continuity"),
+        // Supply chain
+        ("supply chain", "Art. 21(2)(d) requires supply chain security: security clauses in contracts, vendor assessments, monitoring of supplier risk, and incident coordination.", "supply_chain"),
+        ("catena di approvvigionamento", "Art. 21(2)(d) richiede sicurezza della catena di fornitura: clausole di sicurezza nei contratti, valutazione fornitori, monitoraggio rischi.", "supply_chain"),
+        ("fornitori", "Art. 21(2)(d): la sicurezza dei rapporti con fornitori diretti e' un obbligo. Include valutazioni di sicurezza, SLA, e coordinamento incidenti.", "supply_chain"),
+        // Vulnerability management
+        ("patching", "Art. 21(2)(e) requires vulnerability management. Timely patching of known vulnerabilities is a core requirement. Prioritize by CVSS severity.", "vulnerability_mgmt"),
+        ("vulnerability scanning", "Art. 21(2)(e) covers vulnerability management. Regular scanning (weekly for internet-facing, monthly for internal) and penetration testing are expected.", "vulnerability_mgmt"),
+        ("penetration test", "Art. 21(2)(e) vulnerability management + Art. 21(2)(f) effectiveness assessment. Annual pentest minimum, more frequent for critical infrastructure.", "vulnerability_mgmt"),
+        // Governance
+        ("board liability", "Art. 20(1): management bodies approve and oversee cybersecurity measures. They can be held personally responsible for violations. Art. 32(5)(b) allows temporary management bans.", "governance"),
+        ("responsabilita CDA", "Art. 20(1): gli organi direttivi approvano le misure di cybersecurity e ne sovraintendono l'attuazione. Possono essere ritenuti responsabili delle violazioni.", "governance"),
+        ("CISO", "NIS2 does not mandate a CISO title, but Art. 20(1) requires management oversight. A designated security function reporting to the board is implied.", "governance"),
+        ("formazione cybersecurity", "Art. 20(2) richiede formazione obbligatoria in cybersecurity per gli organi direttivi. Art. 21(2)(g) richiede formazione per tutti i dipendenti.", "governance"),
+        // Risk
+        ("risk assessment", "Art. 21(2)(a) requires risk analysis. This is the foundation: identify assets, threats, vulnerabilities, impacts. Annual minimum, plus event-driven reviews.", "risk_assessment"),
+        ("analisi rischi", "Art. 21(2)(a) richiede analisi dei rischi: identificare asset, minacce, vulnerabilita, impatti. Almeno annuale, piu revisioni al verificarsi di eventi.", "risk_assessment"),
+        // Network
+        ("firewall", "Art. 21(2)(a) information system security. Firewalls, IDS/IPS, WAF, and network monitoring are baseline measures. Segmentation limits lateral movement.", "network_security"),
+        ("segmentazione rete", "Art. 21(2)(a) sicurezza dei sistemi informatici. La segmentazione di rete limita il movimento laterale in caso di compromissione.", "network_security"),
+        // Sanctions
+        ("sanzioni", SANCTION_A, "sanctions"),
+        ("multa NIS2", SANCTION_A, "sanctions"),
+        ("NIS2 fine", SANCTION_A, "sanctions"),
+        ("10 milioni", "Art. 34(4): 10,000,000 EUR is the floor sanction for essential entities. If 2% of worldwide turnover exceeds 10M, the higher amount applies.", "sanctions"),
+    ];
+
+    for (q, a, cat) in keywords {
+        entries.push(CacheEntry {
+            question: q.to_string(),
+            answer: a.to_string(),
+            category: cat.to_string(),
+            embedding: vec![],
+        });
+    }
+
     entries
 }
 

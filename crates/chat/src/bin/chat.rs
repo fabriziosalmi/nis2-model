@@ -2,7 +2,7 @@
 //!
 //! Usage:
 //!   cargo run --bin chat
-//!   cargo run --bin chat -- --threshold 0.85
+//!   cargo run --bin chat -- --threshold 0.80
 
 use std::io::{self, BufRead, Write};
 use std::time::Instant;
@@ -15,7 +15,7 @@ fn main() -> anyhow::Result<()> {
         .position(|a| a == "--threshold")
         .and_then(|i| std::env::args().nth(i + 1))
         .and_then(|t| t.parse().ok())
-        .unwrap_or(0.88);
+        .unwrap_or(0.78);
 
     println!("nis2-model -- Interactive Q&A");
     println!("Loading embedding model (BGE-Small, 384-dim)...");
@@ -65,8 +65,15 @@ fn main() -> anyhow::Result<()> {
             println!("  {}", resp.answer);
         } else {
             println!();
-            println!("  [MISS] No match above threshold ({:.2})  time={}us", threshold, elapsed_us);
-            println!("  {}", resp.answer);
+            println!("  [MISS] No match above {:.2}  time={}us", threshold, elapsed_us);
+            // Show top 3 nearest for debugging
+            let top3 = engine.debug_top_n(&emb, 3);
+            if !top3.is_empty() {
+                println!("  Nearest matches:");
+                for (score, question) in &top3 {
+                    println!("    {:.4}  {}", score, question);
+                }
+            }
         }
         println!();
         print!("> ");
