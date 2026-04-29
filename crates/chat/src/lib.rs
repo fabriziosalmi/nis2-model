@@ -10,4 +10,5 @@
 pub mod cache;
 pub mod dataset;
 pub mod dataset_it;
+pub mod dataset_scenarios;
 pub mod engine;

@@ -751,6 +751,17 @@ pub fn build_dataset() -> Vec<CacheEntry> {
         });
     }
 
+    // --- Scenario entries (panic questions EN+IT) ---
+    for (q, a, cat) in crate::dataset_scenarios::scenario_entries() {
+        entries.push(CacheEntry {
+            question: q.to_string(),
+            answer: a.to_string(),
+            category: cat.to_string(),
+            follow_ups: vec![],
+            embedding: vec![],
+        });
+    }
+
     // --- Assign follow-ups by category (deterministic conversation tree) ---
     for entry in &mut entries {
         entry.follow_ups = follow_ups_for(&entry.category);
