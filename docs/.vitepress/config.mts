@@ -3,6 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'nis2-model',
   description: 'Reference implementation for NIS2/DORA compliance logic in Rust',
+  base: '/nis2-model/',
   lang: 'en-US',
 
   head: [
