@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, nextTick, computed, watch } from 'vue'
+import { ref, onMounted, nextTick, computed } from 'vue'
 import ChatMessages from './ChatMessages.vue'
 import ChatInput from './ChatInput.vue'
 import { bm25Search, isItalian, findFollowUps } from './search.js'
@@ -24,56 +24,59 @@ onMounted(() => {
 
 const t = computed(() => lang.value === 'it' ? {
   title: 'NIS2 Compliance Engine',
-  sub: 'Motore deterministico · Zero LLM · Open Source',
+  sub: 'Deterministico · Zero LLM',
   placeholder: 'Chiedi qualcosa sulla conformità NIS2...',
   loading: 'Caricamento knowledge base...',
   welcome: 'Chiedi qualsiasi cosa su NIS2',
-  welcomeSub: 'risposte pre-calcolate · Italiano/Inglese · Art. 20, 21, 23, 34',
-  miss: 'Domanda non trovata nella knowledge base. Prova a riformulare.',
+  welcomeSub: 'risposte pre-calcolate · IT/EN · Art. 20, 21, 23, 34',
+  miss: 'Domanda non trovata. Prova a riformulare o usa uno dei suggerimenti.',
   coverage: 'Copertura',
   session: 'Sessione',
   queries: 'Domande',
   hits: 'Risposte',
-  areas: 'Aree',
+  areas: 'Aree esplorate',
   recent: 'Recenti',
-  linkProject: 'Progetto NIS2 principale',
-  linkEngine: 'Motore compliance',
+  linkProject: 'Progetto NIS2',
+  linkEngine: 'Motore',
 } : {
   title: 'NIS2 Compliance Engine',
-  sub: 'Deterministic engine · Zero LLM · Open Source',
+  sub: 'Deterministic · Zero LLM',
   placeholder: 'Ask anything about NIS2 compliance...',
   loading: 'Loading knowledge base...',
   welcome: 'Ask anything about NIS2',
-  welcomeSub: 'pre-computed answers · Italian/English · Art. 20, 21, 23, 34',
-  miss: 'Question not found in the knowledge base. Try rephrasing.',
+  welcomeSub: 'pre-computed answers · IT/EN · Art. 20, 21, 23, 34',
+  miss: 'Question not found. Try rephrasing or use a suggestion below.',
   coverage: 'Coverage',
   session: 'Session',
   queries: 'Queries',
   hits: 'Hits',
-  areas: 'Areas',
+  areas: 'Areas explored',
   recent: 'Recent',
-  linkProject: 'Main NIS2 project',
-  linkEngine: 'Compliance engine',
+  linkProject: 'NIS2 Project',
+  linkEngine: 'Engine',
 })
 
 const visitedCategories = ref(new Set())
 const AREAS = [
-  { id:'governance', icon:'shield-check' },
-  { id:'access_control', icon:'key-round' },
-  { id:'encryption', icon:'lock' },
-  { id:'incident_response', icon:'siren' },
-  { id:'business_continuity', icon:'refresh-cw' },
-  { id:'supply_chain', icon:'link' },
-  { id:'vulnerability_mgmt', icon:'bug' },
-  { id:'risk_assessment', icon:'activity' },
-  { id:'network_security', icon:'wifi' },
-  { id:'detection', icon:'eye' },
-  { id:'email_security', icon:'mail' },
-  { id:'documentation', icon:'file-text' },
-  { id:'remote_work', icon:'laptop' },
-  { id:'physical', icon:'building' },
-  { id:'legal', icon:'scale' },
-  { id:'sanctions', icon:'alert-triangle' },
+  { id:'applicability' },
+  { id:'governance' },
+  { id:'access_control' },
+  { id:'encryption' },
+  { id:'incident_response' },
+  { id:'business_continuity' },
+  { id:'supply_chain' },
+  { id:'vulnerability_mgmt' },
+  { id:'risk_assessment' },
+  { id:'network_security' },
+  { id:'detection' },
+  { id:'email_security' },
+  { id:'documentation' },
+  { id:'remote_work' },
+  { id:'physical' },
+  { id:'legal' },
+  { id:'sanctions' },
+  { id:'asset_management' },
+  { id:'development' },
 ]
 const coverage = computed(() => {
   const explored = AREAS.filter(a => visitedCategories.value.has(a.id)).length
@@ -84,19 +87,19 @@ const areaStatus = computed(() =>
 )
 
 const suggestions = computed(() => lang.value === 'it' ? [
-  { text: 'La mia azienda rientra nella NIS2?', icon: 'building' },
-  { text: 'Da dove iniziare con NIS2?', icon: 'compass' },
-  { text: 'Ci hanno hackerato, cosa facciamo?', icon: 'siren' },
-  { text: 'Quanto costa adeguarsi a NIS2?', icon: 'coins' },
-  { text: 'Serve la crittografia?', icon: 'lock' },
-  { text: 'Quali sono le sanzioni NIS2?', icon: 'alert-triangle' },
+  { text: 'La mia azienda rientra nella NIS2?' },
+  { text: 'Da dove iniziare con NIS2?' },
+  { text: 'Ci hanno hackerato, cosa facciamo?' },
+  { text: 'Quanto costa adeguarsi a NIS2?' },
+  { text: 'Serve la crittografia?' },
+  { text: 'Quali sono le sanzioni NIS2?' },
 ] : [
-  { text: 'Does NIS2 apply to my company?', icon: 'building' },
-  { text: 'Where to start with NIS2?', icon: 'compass' },
-  { text: 'We got hacked, what do we do?', icon: 'siren' },
-  { text: 'What are the NIS2 obligations?', icon: 'clipboard-list' },
-  { text: 'Do we need encryption?', icon: 'lock' },
-  { text: 'What are the NIS2 sanctions?', icon: 'alert-triangle' },
+  { text: 'Does NIS2 apply to my company?' },
+  { text: 'Where to start with NIS2?' },
+  { text: 'We got hacked, what do we do?' },
+  { text: 'What are the NIS2 obligations?' },
+  { text: 'Do we need encryption?' },
+  { text: 'What are the NIS2 sanctions?' },
 ])
 
 function search(query) {
@@ -112,8 +115,7 @@ function search(query) {
     stats.value.hits++
     return {
       hit: true, answer: entry.a, html: formatAnswer(entry.a),
-      category: entry.c, score: results[0].score,
-      followUps: findFollowUps(dataset.value, entry.c, qLang), elapsed,
+      category: entry.c, followUps: findFollowUps(dataset.value, entry.c, qLang), elapsed,
     }
   }
   const miss = qLang === 'it'
@@ -137,7 +139,7 @@ async function sendMessage(text) {
   stats.value.avgMs = totalMs.value / stats.value.queries
 
   if (result.hit) {
-    const msg = { role:'assistant', text:result.answer, html:result.html, category:result.category, score:result.score, elapsed:result.elapsed, followUps:result.followUps, typing:true, displayHtml:'' }
+    const msg = { role:'assistant', text:result.answer, html:result.html, category:result.category, followUps:result.followUps, typing:true, displayHtml:'' }
     messages.value.push(msg)
     const words = result.answer.split(' ')
     for (let i = 0; i < words.length; i++) {
@@ -146,7 +148,7 @@ async function sendMessage(text) {
     }
     msg.typing = false; msg.displayHtml = result.html
   } else {
-    messages.value.push({ role:'assistant', text: t.value.miss, html: t.value.miss, category:'miss', elapsed:result.elapsed, followUps:result.followUps, typing:false, displayHtml:'' })
+    messages.value.push({ role:'assistant', text: t.value.miss, html: t.value.miss, category:'miss', followUps:result.followUps, typing:false, displayHtml:'' })
   }
   isLoading.value = false
   await nextTick(); scrollBottom()
@@ -193,7 +195,7 @@ onMounted(async () => {
   <header class="cb-hd">
     <div class="cb-hd-l">
       <div class="cb-logo">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       </div>
       <div>
         <h1 class="cb-title">{{ t.title }}</h1>
@@ -207,23 +209,17 @@ onMounted(async () => {
       <div class="pill">
         <span class="pill-l">{{ t.coverage }}</span>
         <span class="pill-v">{{ coverage.explored }}/{{ coverage.total }}</span>
-        <div class="cbar"><div class="cfill" :style="{width:(coverage.explored/coverage.total*100)+'%'}"></div></div>
-      </div>
-      <div class="pill" v-if="stats.queries > 0">
-        <span class="pill-v">{{ stats.avgMs.toFixed(1) }}ms</span>
       </div>
     </div>
   </header>
 
   <div class="cb-body">
+    <!-- Left sidebar -->
     <aside class="cb-side cb-side-l">
-      <div class="side-hd">Art. 21 {{ t.coverage }}</div>
+      <div class="side-hd">{{ t.coverage }}</div>
       <div class="area-list">
         <div v-for="a in areaStatus" :key="a.id" :class="['area-item', { visited: a.visited }]">
-          <span :class="['area-check', { on: a.visited }]">
-            <svg v-if="a.visited" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
-          </span>
+          <span :class="['area-dot', { on: a.visited }]"></span>
           <span class="area-name">{{ a.name }}</span>
         </div>
       </div>
@@ -233,18 +229,19 @@ onMounted(async () => {
           {{ t.linkProject }}
         </a>
         <a href="https://github.com/fabriziosalmi/nis2-model" target="_blank" class="side-link">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
           {{ t.linkEngine }}
         </a>
       </div>
     </aside>
 
+    <!-- Center -->
     <div class="cb-center">
       <ChatMessages ref="chatEl" :messages="messages" :isLoading="isLoading" @followUp="sendMessage">
         <template #welcome>
           <div v-if="messages.length === 0" class="welcome">
             <div class="w-shield">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
             <h2>{{ t.welcome }}</h2>
             <p>{{ stats.entries }} {{ t.welcomeSub }}</p>
@@ -259,6 +256,7 @@ onMounted(async () => {
       <ChatInput v-model:input="input" :disabled="isLoading || !stats.entries" :placeholder="t.placeholder" @send="sendMessage()" />
     </div>
 
+    <!-- Right sidebar -->
     <aside class="cb-side cb-side-r">
       <div class="side-hd">{{ t.session }}</div>
       <div class="ss">
@@ -266,13 +264,15 @@ onMounted(async () => {
         <div class="ss-row"><span>{{ t.hits }}</span><span class="ss-val">{{ stats.hits }}</span></div>
         <div class="ss-row"><span>{{ t.areas }}</span><span class="ss-val">{{ coverage.explored }}/{{ coverage.total }}</span></div>
       </div>
-      <div v-if="messages.filter(m=>m.role==='user').length" class="side-hd" style="margin-top:20px">{{ t.recent }}</div>
-      <div class="trail">
-        <div v-for="(m, i) in messages.filter(m => m.role === 'user').slice(-10)" :key="i" class="trail-item" @click="sendMessage(m.text)">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          {{ m.text.length > 36 ? m.text.slice(0,36) + '…' : m.text }}
+      <template v-if="messages.filter(m=>m.role==='user').length">
+        <div class="side-hd" style="margin-top:20px">{{ t.recent }}</div>
+        <div class="trail">
+          <div v-for="(m, i) in messages.filter(m => m.role === 'user').slice(-10)" :key="i" class="trail-item" @click="sendMessage(m.text)">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            <span class="trail-text">{{ m.text }}</span>
+          </div>
         </div>
-      </div>
+      </template>
     </aside>
   </div>
 </div>
@@ -280,84 +280,81 @@ onMounted(async () => {
 
 <style scoped>
 *{box-sizing:border-box}
+.cb,.loader{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 
-/* Apple system font stack */
-.cb,.loader{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-
-/* === LOADER === */
+/* Loader */
 .loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--vp-c-bg);z-index:999}
 .loader-inner{text-align:center;animation:loaderIn .6s ease}
 .loader-icon{margin:0 auto 20px;color:var(--vp-c-brand-1);animation:pulse 2s infinite}
-.loader-icon svg{width:48px;height:48px}
-.loader h2{font-size:22px;font-weight:600;margin:0 0 6px;letter-spacing:-.02em;color:var(--vp-c-text-1)}
+.loader h2{font-size:20px;font-weight:600;margin:0 0 6px;letter-spacing:-.03em;color:var(--vp-c-text-1)}
 .loader p{font-size:13px;color:var(--vp-c-text-3);margin:0 0 20px}
-.loader-bar{width:200px;height:3px;background:var(--vp-c-divider);border-radius:2px;overflow:hidden;margin:0 auto}
-.loader-fill{height:100%;background:var(--vp-c-brand-1);border-radius:2px;transition:width .3s ease}
+.loader-bar{width:180px;height:3px;background:var(--vp-c-divider);border-radius:2px;overflow:hidden;margin:0 auto}
+.loader-fill{height:100%;background:var(--vp-c-brand-1);border-radius:2px;transition:width .3s}
 .loader-pct{font-size:11px;color:var(--vp-c-text-3);margin-top:8px;display:block;font-variant-numeric:tabular-nums}
 
-/* === MAIN === */
+/* Main */
 .cb{display:flex;flex-direction:column;height:100vh;max-height:100vh;overflow:hidden;background:var(--vp-c-bg)}
 
-/* Header */
-.cb-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--vp-c-bg);border-bottom:1px solid var(--vp-c-divider);flex-shrink:0;gap:12px;flex-wrap:wrap}
+/* Header — compact */
+.cb-hd{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid var(--vp-c-divider);flex-shrink:0;gap:12px}
 .cb-hd-l{display:flex;align-items:center;gap:10px}
-.cb-logo{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--vp-c-brand-1);border-radius:10px}
-.cb-title{font-size:15px;font-weight:600;margin:0;letter-spacing:-.02em;color:var(--vp-c-text-1)}
-.cb-sub{font-size:11px;color:var(--vp-c-text-3);margin:1px 0 0;letter-spacing:-.01em}
+.cb-logo{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--vp-c-brand-1);border-radius:8px}
+.cb-title{font-size:14px;font-weight:600;margin:0;letter-spacing:-.02em;color:var(--vp-c-text-1)}
+.cb-sub{font-size:11px;color:var(--vp-c-text-3);margin:0;letter-spacing:-.01em}
 
 .cb-pills{display:flex;gap:6px;align-items:center}
-.pill{display:flex;align-items:center;gap:5px;padding:4px 10px;background:var(--vp-c-bg-soft);border:1px solid var(--vp-c-divider);border-radius:8px;font-size:11px}
-.pill-lang{cursor:pointer;font-weight:600;transition:background .2s}
+.pill{display:flex;align-items:center;gap:5px;padding:3px 8px;background:var(--vp-c-bg-soft);border:1px solid var(--vp-c-divider);border-radius:6px;font-size:11px}
+.pill-lang{cursor:pointer;font-weight:600;transition:background .15s;border:1px solid var(--vp-c-divider);background:var(--vp-c-bg-soft)}
 .pill-lang:hover{background:var(--vp-c-brand-soft)}
 .pill-l{color:var(--vp-c-text-3);font-weight:500}
 .pill-v{color:var(--vp-c-text-1);font-weight:600;font-variant-numeric:tabular-nums}
-.cbar{width:40px;height:3px;background:var(--vp-c-divider);border-radius:2px;overflow:hidden}
-.cfill{height:100%;background:var(--vp-c-brand-1);border-radius:2px;transition:width .4s}
 
 /* Body */
 .cb-body{display:flex;flex:1;overflow:hidden}
 
 /* Sidebars */
-.cb-side{width:200px;flex-shrink:0;padding:16px;overflow-y:auto;display:flex;flex-direction:column}
+.cb-side{width:190px;flex-shrink:0;padding:14px;overflow-y:auto;display:flex;flex-direction:column;background:var(--vp-c-bg-soft)}
 .cb-side-l{border-right:1px solid var(--vp-c-divider)}
 .cb-side-r{border-left:1px solid var(--vp-c-divider)}
-.side-hd{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--vp-c-text-3);margin-bottom:12px}
+.side-hd{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--vp-c-text-3);margin-bottom:10px}
 
-.area-list{display:flex;flex-direction:column;gap:2px}
-.area-item{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;font-size:12px;color:var(--vp-c-text-3);transition:all .2s;letter-spacing:-.01em}
-.area-item.visited{color:var(--vp-c-text-1)}
-.area-check{width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0}
-.area-check.on{color:var(--vp-c-brand-1)}
+/* Coverage list */
+.area-list{display:flex;flex-direction:column;gap:1px}
+.area-item{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:4px;font-size:11.5px;color:var(--vp-c-text-3);transition:color .2s;letter-spacing:-.01em}
+.area-item.visited{color:var(--vp-c-text-1);font-weight:500}
+.area-dot{width:6px;height:6px;border-radius:50%;background:var(--vp-c-divider);flex-shrink:0;transition:background .3s}
+.area-dot.on{background:var(--vp-c-brand-1);box-shadow:0 0 6px rgba(59,130,246,.4)}
 .area-name{text-transform:capitalize}
 
-.side-links{margin-top:auto;padding-top:16px;border-top:1px solid var(--vp-c-divider);display:flex;flex-direction:column;gap:8px}
-.side-link{font-size:12px;color:var(--vp-c-text-3);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s;letter-spacing:-.01em}
+.side-links{margin-top:auto;padding-top:12px;border-top:1px solid var(--vp-c-divider);display:flex;flex-direction:column;gap:6px}
+.side-link{font-size:11px;color:var(--vp-c-text-3);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .15s}
 .side-link:hover{color:var(--vp-c-brand-1)}
 
-/* Session sidebar */
-.ss{display:flex;flex-direction:column;gap:8px}
-.ss-row{display:flex;justify-content:space-between;font-size:12px;color:var(--vp-c-text-3);letter-spacing:-.01em}
+/* Session */
+.ss{display:flex;flex-direction:column;gap:6px}
+.ss-row{display:flex;justify-content:space-between;font-size:11.5px;color:var(--vp-c-text-3);letter-spacing:-.01em}
 .ss-val{font-weight:600;color:var(--vp-c-text-1);font-variant-numeric:tabular-nums}
 
-.trail{display:flex;flex-direction:column;gap:2px}
-.trail-item{font-size:11px;color:var(--vp-c-text-3);padding:5px 8px;border-radius:6px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px;letter-spacing:-.01em}
-.trail-item:hover{background:var(--vp-c-bg-soft);color:var(--vp-c-text-1)}
-.trail-item svg{flex-shrink:0;opacity:.4}
+.trail{display:flex;flex-direction:column;gap:1px}
+.trail-item{font-size:11px;color:var(--vp-c-text-3);padding:4px 6px;border-radius:4px;cursor:pointer;transition:all .15s;display:flex;align-items:flex-start;gap:4px}
+.trail-item:hover{background:var(--vp-c-bg);color:var(--vp-c-text-1)}
+.trail-item svg{flex-shrink:0;opacity:.3;margin-top:2px}
+.trail-text{line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
 /* Center */
 .cb-center{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 
 /* Welcome */
-.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;gap:12px;animation:fadeIn .8s ease}
-.w-shield{color:var(--vp-c-brand-1);opacity:.15;margin-bottom:-4px}
-.welcome h2{font-size:22px;font-weight:600;margin:0;letter-spacing:-.03em;color:var(--vp-c-text-1)}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;gap:10px;animation:fadeIn .6s ease}
+.w-shield{color:var(--vp-c-brand-1);opacity:.12}
+.welcome h2{font-size:20px;font-weight:600;margin:0;letter-spacing:-.03em;color:var(--vp-c-text-1)}
 .welcome p{color:var(--vp-c-text-3);font-size:13px;margin:0;letter-spacing:-.01em}
-.suggestions{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:560px;margin-top:8px}
-.sug-btn{padding:8px 14px;border:1px solid var(--vp-c-divider);border-radius:20px;background:var(--vp-c-bg);color:var(--vp-c-text-2);font-size:13px;cursor:pointer;transition:all .2s;letter-spacing:-.01em}
-.sug-btn:hover{border-color:var(--vp-c-brand-1);color:var(--vp-c-text-1);transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.suggestions{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:520px;margin-top:6px}
+.sug-btn{padding:7px 14px;border:1px solid var(--vp-c-divider);border-radius:18px;background:var(--vp-c-bg);color:var(--vp-c-text-2);font-size:13px;cursor:pointer;transition:all .15s;letter-spacing:-.01em}
+.sug-btn:hover{border-color:var(--vp-c-brand-1);color:var(--vp-c-text-1);background:var(--vp-c-bg-soft)}
 
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes loaderIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes loaderIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
 @keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
 
 @media(max-width:900px){.cb-side{display:none}.cb-pills .pill:not(.pill-lang){display:none}}
