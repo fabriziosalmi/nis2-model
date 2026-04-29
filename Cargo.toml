@@ -1,0 +1,57 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/ingestion",
+    "crates/vectordb",
+    "crates/rules",
+    "crates/mcp-server",
+    "crates/slm",
+    "crates/api",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "EUPL-1.2"
+authors = ["Fabrizio Trotti"]
+repository = "https://github.com/fabriziotrotti/nis2-model"
+
+[workspace.dependencies]
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# Error handling
+anyhow = "1"
+thiserror = "2"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Embedding & Vector
+fastembed = "5"
+lancedb = "0.27"
+arrow-array = "57"
+arrow-schema = "57"
+
+# Async utilities
+futures = "0.3"
+
+# JSON Schema
+schemars = "0.8"
+jsonschema = "0.28"
+
+# WASM Plugin Host
+extism = "1"
+
+# Internal crates
+nis2-ingestion = { path = "crates/ingestion" }
+nis2-vectordb = { path = "crates/vectordb" }
+nis2-rules = { path = "crates/rules" }
+nis2-mcp-server = { path = "crates/mcp-server" }
+nis2-slm = { path = "crates/slm" }
+nis2-api = { path = "crates/api" }

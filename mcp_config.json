@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "nis2-compliance": {
+      "command": "cargo",
+      "args": ["run", "--bin", "mcp-server", "--manifest-path", "/Users/fab/Documents/git/nis2-model/Cargo.toml"],
+      "env": {
+        "RUST_LOG": "info"
+      }
+    }
+  }
+}

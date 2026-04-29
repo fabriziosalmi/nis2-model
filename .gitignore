@@ -1,0 +1,7 @@
+/target
+*.gguf
+data/sources/*.pdf
+data/lancedb/
+.fastembed_cache/
+.env
+*.DS_Store

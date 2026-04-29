@@ -1,0 +1,17 @@
+[package]
+name = "nis2-ingestion"
+description = "PDF/HTML parsing and semantic chunking of EU legal texts (NIS2, DORA)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+tempfile = "3"

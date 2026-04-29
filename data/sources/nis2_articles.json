@@ -1,0 +1,165 @@
+[
+  {
+    "directive": "nis2",
+    "article": 2,
+    "title": "Ambito di applicazione",
+    "paragraphs": [
+      {
+        "number": 1,
+        "text": "La presente direttiva si applica ai soggetti pubblici o privati delle tipologie di cui all'allegato I o all'allegato II che sono considerati medie imprese ai sensi dell'articolo 2 dell'allegato della raccomandazione 2003/361/CE, o che superano i massimali per le medie imprese di cui al paragrafo 1 di tale articolo, e che prestano i loro servizi o svolgono le loro attività all'interno dell'Unione.",
+        "letters": []
+      },
+      {
+        "number": 2,
+        "text": "Indipendentemente dalle loro dimensioni, la presente direttiva si applica anche ai soggetti delle tipologie di cui all'allegato I o II, qualora:",
+        "letters": [
+          { "letter": "a", "text": "i servizi siano forniti da fornitori di reti pubbliche di comunicazione elettronica o di servizi di comunicazione elettronica accessibili al pubblico" },
+          { "letter": "b", "text": "i servizi siano forniti da prestatori di servizi fiduciari" },
+          { "letter": "c", "text": "i servizi siano forniti da registri dei nomi di dominio di primo livello e da fornitori di servizi di sistema dei nomi di dominio" },
+          { "letter": "d", "text": "il soggetto sia l'unico fornitore in uno Stato membro di un servizio che è essenziale per il mantenimento di attività sociali o economiche fondamentali" }
+        ]
+      }
+    ]
+  },
+  {
+    "directive": "nis2",
+    "article": 3,
+    "title": "Soggetti essenziali e soggetti importanti",
+    "paragraphs": [
+      {
+        "number": 1,
+        "text": "Ai fini della presente direttiva, sono considerati soggetti essenziali i seguenti soggetti:",
+        "letters": [
+          { "letter": "a", "text": "i soggetti delle tipologie di cui all'allegato I che superano i massimali per le medie imprese di cui all'articolo 2, paragrafo 1, dell'allegato della raccomandazione 2003/361/CE" },
+          { "letter": "b", "text": "i prestatori di servizi fiduciari qualificati e i registri dei nomi di dominio di primo livello nonché i fornitori di servizi DNS, indipendentemente dalle loro dimensioni" },
+          { "letter": "c", "text": "i fornitori di reti pubbliche di comunicazione elettronica o di servizi di comunicazione elettronica accessibili al pubblico che sono considerati medie imprese ai sensi dell'articolo 2 dell'allegato della raccomandazione 2003/361/CE" },
+          { "letter": "d", "text": "i soggetti della pubblica amministrazione di cui all'articolo 2, paragrafo 2, lettera f), punto i)" },
+          { "letter": "e", "text": "qualsiasi altro soggetto delle tipologie di cui all'allegato I o II che uno Stato membro identifica come soggetto essenziale ai sensi dell'articolo 2, paragrafo 2, lettere da b) a e)" }
+        ]
+      },
+      {
+        "number": 2,
+        "text": "Ai fini della presente direttiva, i soggetti delle tipologie di cui all'allegato I o II che non sono considerati soggetti essenziali ai sensi del paragrafo 1 sono considerati soggetti importanti.",
+        "letters": []
+      }
+    ]
+  },
+  {
+    "directive": "nis2",
+    "article": 20,
+    "title": "Governance",
+    "paragraphs": [
+      {
+        "number": 1,
+        "text": "Gli Stati membri provvedono affinché gli organi di gestione dei soggetti essenziali e importanti approvino le misure di gestione dei rischi di cibersicurezza adottate da tali soggetti per conformarsi all'articolo 21, sovraintendano alla sua attuazione e possano essere ritenuti responsabili della violazione di tale articolo da parte dei soggetti.",
+        "letters": []
+      },
+      {
+        "number": 2,
+        "text": "Gli Stati membri provvedono affinché i membri degli organi di gestione dei soggetti essenziali e importanti siano tenuti a seguire una formazione e incoraggino i soggetti essenziali e importanti ad offrire periodicamente una formazione analoga ai loro dipendenti, al fine di acquisire conoscenze e competenze sufficienti per individuare i rischi e valutare le pratiche di gestione dei rischi di cibersicurezza e il loro impatto sui servizi forniti dal soggetto.",
+        "letters": []
+      }
+    ]
+  },
+  {
+    "directive": "nis2",
+    "article": 21,
+    "title": "Misure di gestione dei rischi di cibersicurezza",
+    "paragraphs": [
+      {
+        "number": 1,
+        "text": "Gli Stati membri provvedono affinché i soggetti essenziali e importanti adottino misure tecniche, operative e organizzative adeguate e proporzionate per gestire i rischi posti alla sicurezza dei sistemi informatici e di rete che tali soggetti utilizzano nelle loro attività o nella fornitura dei loro servizi, nonché per prevenire o ridurre al minimo l'impatto degli incidenti per i destinatari dei loro servizi e per altri servizi.",
+        "letters": []
+      },
+      {
+        "number": 2,
+        "text": "Le misure di cui al paragrafo 1 sono basate su un approccio multirischio mirante a proteggere i sistemi informatici e di rete e il loro ambiente fisico da incidenti e comprendono almeno gli elementi seguenti:",
+        "letters": [
+          { "letter": "a", "text": "politiche di analisi dei rischi e di sicurezza dei sistemi informatici" },
+          { "letter": "b", "text": "gestione degli incidenti" },
+          { "letter": "c", "text": "continuità operativa, come la gestione del backup e il ripristino in caso di disastro, e gestione delle crisi" },
+          { "letter": "d", "text": "sicurezza della catena di approvvigionamento, compresi aspetti relativi alla sicurezza riguardanti i rapporti tra ciascun soggetto e i suoi diretti fornitori o fornitori di servizi" },
+          { "letter": "e", "text": "sicurezza dell'acquisizione, dello sviluppo e della manutenzione dei sistemi informatici e di rete, compresa la gestione e la divulgazione delle vulnerabilità" },
+          { "letter": "f", "text": "strategie e procedure per valutare l'efficacia delle misure di gestione dei rischi di cibersicurezza" },
+          { "letter": "g", "text": "pratiche di igiene informatica di base e formazione in materia di cibersicurezza" },
+          { "letter": "h", "text": "politiche e procedure relative all'uso della crittografia e, se del caso, della cifratura" },
+          { "letter": "i", "text": "sicurezza delle risorse umane, strategie di controllo dell'accesso e gestione degli attivi" },
+          { "letter": "j", "text": "uso di soluzioni di autenticazione a più fattori o di autenticazione continua, di comunicazioni vocali, video e testuali protette e di sistemi di comunicazione di emergenza protetti all'interno del soggetto, se del caso" }
+        ]
+      },
+      {
+        "number": 3,
+        "text": "Gli Stati membri provvedono affinché, nel valutare quali misure di cui al paragrafo 2 siano adeguate, i soggetti tengano conto delle vulnerabilità specifiche per ogni diretto fornitore e fornitore di servizi e della qualità complessiva dei prodotti e delle pratiche di cibersicurezza dei propri fornitori e fornitori di servizi, comprese le loro procedure di sviluppo sicuro.",
+        "letters": []
+      },
+      {
+        "number": 4,
+        "text": "Gli Stati membri provvedono affinché un soggetto che ritiene di non essere conforme alle misure di cui al paragrafo 2 adotti, senza indebito ritardo, tutte le misure correttive necessarie, adeguate e proporzionate.",
+        "letters": []
+      }
+    ]
+  },
+  {
+    "directive": "nis2",
+    "article": 23,
+    "title": "Obblighi di segnalazione",
+    "paragraphs": [
+      {
+        "number": 1,
+        "text": "Gli Stati membri provvedono affinché i soggetti essenziali e importanti notifichino senza indebito ritardo al proprio CSIRT o, se del caso, alla propria autorità competente, a norma del paragrafo 4, qualsiasi incidente che abbia un impatto significativo sulla fornitura dei loro servizi di cui al paragrafo 3 (incidente significativo).",
+        "letters": []
+      },
+      {
+        "number": 4,
+        "text": "Gli Stati membri provvedono affinché, ai fini della notifica di cui al paragrafo 1, i soggetti interessati presentino al CSIRT o, se del caso, all'autorità competente:",
+        "letters": [
+          { "letter": "a", "text": "senza indebito ritardo, e comunque entro 24 ore da quando sono venuti a conoscenza dell'incidente significativo, un preallarme che, se del caso, indichi se l'incidente significativo è sospettato di essere il risultato di atti illegittimi o malevoli o potrebbe avere un impatto transfrontaliero" },
+          { "letter": "b", "text": "senza indebito ritardo, e comunque entro 72 ore da quando sono venuti a conoscenza dell'incidente significativo, una notifica dell'incidente che, se del caso, aggiorni le informazioni di cui alla lettera a) e indichi una valutazione iniziale dell'incidente significativo, comprensiva della sua gravità e del suo impatto, nonché, ove disponibili, gli indicatori di compromissione" },
+          { "letter": "c", "text": "su richiesta di un CSIRT o, se del caso, dell'autorità competente, una relazione intermedia sui pertinenti aggiornamenti della situazione" },
+          { "letter": "d", "text": "una relazione finale entro un mese dalla presentazione della notifica dell'incidente di cui alla lettera b), comprendente una descrizione dettagliata dell'incidente, comprensiva della sua gravità e del suo impatto, il tipo di minaccia o la causa di fondo che ha probabilmente innescato l'incidente, le misure di attenuazione applicate e in corso, e l'eventuale impatto transfrontaliero dell'incidente" }
+        ]
+      }
+    ]
+  },
+  {
+    "directive": "nis2",
+    "article": 34,
+    "title": "Condizioni generali per l'imposizione di sanzioni amministrative pecuniarie ai soggetti essenziali e importanti",
+    "paragraphs": [
+      {
+        "number": 4,
+        "text": "Gli Stati membri provvedono affinché, nel caso di violazione dell'articolo 21 o dell'articolo 23, i soggetti essenziali siano soggetti a sanzioni amministrative pecuniarie pari a un massimo di almeno 10 000 000 EUR o a un massimo di almeno il 2 % del totale del fatturato mondiale annuo per l'esercizio precedente dell'impresa cui il soggetto essenziale appartiene, se tale importo è superiore.",
+        "letters": []
+      },
+      {
+        "number": 5,
+        "text": "Gli Stati membri provvedono affinché, nel caso di violazione dell'articolo 21 o dell'articolo 23, i soggetti importanti siano soggetti a sanzioni amministrative pecuniarie pari a un massimo di almeno 7 000 000 EUR o a un massimo di almeno l'1,4 % del totale del fatturato mondiale annuo per l'esercizio precedente dell'impresa cui il soggetto importante appartiene, se tale importo è superiore.",
+        "letters": []
+      }
+    ]
+  },
+  {
+    "directive": "nis2",
+    "article": 7,
+    "title": "Strategia nazionale per la cibersicurezza",
+    "paragraphs": [
+      {
+        "number": 1,
+        "text": "Ciascuno Stato membro adotta una strategia nazionale per la cibersicurezza che prevede gli obiettivi strategici, le risorse necessarie per conseguire tali obiettivi e adeguate misure strategiche e normative, al fine di raggiungere e mantenere un livello elevato di cibersicurezza.",
+        "letters": []
+      }
+    ]
+  },
+  {
+    "directive": "nis2",
+    "article": 29,
+    "title": "Accordi di condivisione delle informazioni sulla cibersicurezza",
+    "paragraphs": [
+      {
+        "number": 1,
+        "text": "Gli Stati membri provvedono affinché i soggetti che rientrano nell'ambito di applicazione della presente direttiva e, se del caso, altri soggetti che non rientrano nell'ambito di applicazione della presente direttiva possano scambiare su base volontaria informazioni pertinenti in materia di cibersicurezza tra loro, compresi informazioni relative a minacce informatiche, quasi incidenti, vulnerabilità, tecniche e procedure, indicatori di compromissione, tattiche avversarie, informazioni specifiche sugli autori delle minacce, allarmi di cibersicurezza e raccomandazioni relative alla configurazione degli strumenti di cibersicurezza per individuare gli attacchi informatici.",
+        "letters": []
+      }
+    ]
+  }
+]

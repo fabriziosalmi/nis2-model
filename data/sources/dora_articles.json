@@ -1,0 +1,87 @@
+[
+  {
+    "directive": "dora",
+    "article": 2,
+    "title": "Ambito di applicazione",
+    "paragraphs": [
+      {
+        "number": 1,
+        "text": "Il presente regolamento si applica alle seguenti entità finanziarie:",
+        "letters": [
+          { "letter": "a", "text": "enti creditizi" },
+          { "letter": "b", "text": "istituti di pagamento, compresi gli istituti di pagamento esentati a norma della direttiva (UE) 2015/2366" },
+          { "letter": "c", "text": "prestatori di servizi di informazione sui conti" },
+          { "letter": "d", "text": "istituti di moneta elettronica, compresi gli istituti di moneta elettronica esentati a norma della direttiva 2009/110/CE" },
+          { "letter": "e", "text": "imprese di investimento" },
+          { "letter": "f", "text": "prestatori di servizi per le cripto-attività autorizzati a norma del regolamento del Parlamento europeo e del Consiglio sui mercati delle cripto-attività e emittenti di token collegati ad attività" }
+        ]
+      }
+    ]
+  },
+  {
+    "directive": "dora",
+    "article": 5,
+    "title": "Governance e organizzazione",
+    "paragraphs": [
+      {
+        "number": 1,
+        "text": "Le entità finanziarie dispongono di un quadro di governance e di controllo interno che garantisce una gestione efficace e prudente di tutti i rischi informatici, conformemente all'articolo 6, paragrafo 4, al fine di raggiungere un livello elevato di resilienza operativa digitale.",
+        "letters": []
+      },
+      {
+        "number": 2,
+        "text": "L'organo di gestione dell'entità finanziaria definisce, approva, sovraintende e è responsabile dell'attuazione di tutte le disposizioni relative al quadro di gestione dei rischi informatici di cui all'articolo 6, paragrafo 1.",
+        "letters": []
+      }
+    ]
+  },
+  {
+    "directive": "dora",
+    "article": 6,
+    "title": "Quadro di gestione dei rischi informatici",
+    "paragraphs": [
+      {
+        "number": 1,
+        "text": "Le entità finanziarie dispongono di un quadro di gestione dei rischi informatici solido, completo e ben documentato, che consente loro di affrontare i rischi informatici in modo rapido, efficiente e completo e di garantire un livello elevato di resilienza operativa digitale.",
+        "letters": []
+      },
+      {
+        "number": 8,
+        "text": "Il quadro di gestione dei rischi informatici di cui al paragrafo 1 è documentato e riesaminato almeno una volta all'anno o periodicamente, nonché in caso di incidenti gravi connessi alle TIC, e secondo le istruzioni dell'autorità di vigilanza o le conclusioni derivanti da pertinenti processi di test di resilienza operativa digitale o di audit. È costantemente migliorato sulla base degli insegnamenti tratti dall'attuazione e dal monitoraggio.",
+        "letters": []
+      }
+    ]
+  },
+  {
+    "directive": "dora",
+    "article": 17,
+    "title": "Processo di gestione degli incidenti connessi alle TIC",
+    "paragraphs": [
+      {
+        "number": 1,
+        "text": "Le entità finanziarie definiscono, stabiliscono e attuano un processo di gestione degli incidenti connessi alle TIC per rilevare, gestire e notificare gli incidenti connessi alle TIC.",
+        "letters": []
+      },
+      {
+        "number": 2,
+        "text": "Le entità finanziarie registrano tutti gli incidenti connessi alle TIC e le minacce informatiche significative. Le entità finanziarie stabiliscono procedure e processi adeguati per garantire un monitoraggio, una gestione e un follow-up coerenti e integrati degli incidenti connessi alle TIC, al fine di assicurare che le cause di fondo siano individuate, documentate e affrontate per prevenire il verificarsi di tali incidenti.",
+        "letters": []
+      }
+    ]
+  },
+  {
+    "directive": "dora",
+    "article": 28,
+    "title": "Principi generali",
+    "paragraphs": [
+      {
+        "number": 1,
+        "text": "Le entità finanziarie gestiscono il rischio informatico derivante da terzi prestatori di servizi TIC come componente integrante del rischio informatico nell'ambito del loro quadro di gestione dei rischi informatici di cui all'articolo 6, paragrafo 1, e conformemente ai seguenti principi.",
+        "letters": [
+          { "letter": "a", "text": "Le entità finanziarie che hanno in essere accordi contrattuali per l'utilizzo di servizi TIC per lo svolgimento delle loro operazioni commerciali restano in ogni momento pienamente responsabili del rispetto e dell'adempimento di tutti gli obblighi ai sensi del presente regolamento e del diritto applicabile in materia di servizi finanziari." },
+          { "letter": "b", "text": "La gestione del rischio informatico derivante da terzi prestatori di servizi TIC da parte delle entità finanziarie è effettuata alla luce del principio di proporzionalità, tenendo conto della natura, della portata, della complessità e dell'importanza delle dipendenze legate alle TIC." }
+        ]
+      }
+    ]
+  }
+]
