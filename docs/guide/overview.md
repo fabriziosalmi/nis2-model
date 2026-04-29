@@ -1,41 +1,33 @@
-# Panoramica
+# Overview
 
-Il **NIS2 Compliance Engine** è un motore di conformità deterministico ed eseguibile localmente per la regolamentazione europea sulla cybersecurity.
+The NIS2 Compliance Engine is a deterministic, locally-executable compliance engine for EU cybersecurity regulation.
 
-## Il problema
+## What it does
 
-Le organizzazioni soggette alla Direttiva NIS2 devono:
+Given a `CompanyProfile` (sector, employee count, annual revenue), the engine:
 
-1. **Determinare l'applicabilità** — verificare se rientrano nell'ambito
-2. **Identificare gli obblighi** — mappare i 16 requisiti di Art. 20, 21 e 23
-3. **Calcolare il rischio sanzionatorio** — comprendere l'esposizione finanziaria
-4. **Produrre documentazione** — report di conformità con citazioni normative esatte
+1. Determines whether the entity falls under NIS2 scope (Art. 2)
+2. Classifies it as Essential (Art. 3(1)), Important (Art. 3(2)), or OutOfScope
+3. Maps all 16 applicable obligations (Art. 20, 21, 23)
+4. Calculates the maximum sanction under Art. 34
+5. Sets incident reporting deadlines (24h / 72h / 30 days per Art. 23(4))
+6. Generates a structured Italian-language compliance report
 
-I tool esistenti si basano su LLM cloud che **inventano articoli inesistenti**, forniscono **cifre approssimative** e richiedono **connettività internet**.
+## Directives covered
 
-## La soluzione
+| Directive | Coverage |
+|-----------|----------|
+| **NIS2** (EU 2022/2555) | Applicability, classification, Art. 20/21/23 obligations, Art. 34 sanctions |
+| **DORA** (EU 2022/2554) | Indexed for semantic search (14 chunks from 5 articles) |
 
-Un motore di conformità che:
+## Technology stack
 
-- **Gira interamente in locale** -- nessun dato esce dalla macchina
-- **Deterministico** -- stesso input, stesso output, sempre
-- **Cita solo fonti reali** -- ogni articolo proviene dal catalogo immutabile
-- **Validato** -- 61 test automatizzati verificano la correttezza
-
-## Direttive supportate
-
-| Direttiva | Copertura |
-|-----------|-----------|
-| **NIS2** (EU 2022/2555) | Applicabilità, classificazione, Art. 20/21/23, Art. 34 |
-| **DORA** (EU 2022/2554) | Testi indicizzati, ricerca semantica |
-
-## Stack tecnologico
-
-| Componente | Tecnologia |
-|------------|------------|
-| Linguaggio | Rust 2024 Edition |
-| Embedding | BGE-Small-EN-v1.5 (fastembed / ONNX Runtime) |
-| Vector Store | LanceDB embedded (HNSW) |
-| Protocollo | MCP (Model Context Protocol) JSON-RPC 2.0 |
-| Validazione | JSON Schema (schemars + jsonschema) |
-| Plugin WASM | Extism |
+| Component | Technology |
+|-----------|------------|
+| Language | Rust 2024 edition |
+| Embeddings | BGE-Small-EN-v1.5 via fastembed (ONNX Runtime, 384 dimensions) |
+| Vector store | LanceDB embedded (HNSW index) |
+| Protocol | MCP (JSON-RPC 2.0 over stdio) |
+| HTTP server | Axum 0.8 |
+| Validation | JSON Schema via schemars + jsonschema |
+| WASM plugins | Extism |

@@ -1,62 +1,37 @@
-# I 5 Pilastri
+# System Overview
 
-L'architettura del NIS2 Compliance Engine è organizzata in una pipeline unidirezionale a 5 stadi.
+The engine is a Cargo workspace with 6 crates organized as a unidirectional pipeline.
 
-## Flusso dati
+## Crates
+
+| Crate | Source files | Tests | Purpose |
+|-------|-------------|-------|---------|
+| `nis2-ingestion` | `chunk.rs`, `parser.rs`, `types.rs` | 3 | JSON parser, semantic chunking by legal hierarchy |
+| `nis2-vectordb` | `embed.rs`, `lance.rs`, `store.rs` | 1 | LanceDB storage, BGE-Small embeddings, HNSW search |
+| `nis2-rules` | `engine.rs`, `obligations.rs`, `schema.rs`, `validation.rs`, `adapters.rs` | 20 | Boolean decision trees, obligation catalog, JSON Schema validation |
+| `nis2-mcp-server` | `protocol.rs`, `tools.rs`, `server.rs` | 13 | MCP JSON-RPC 2.0 server over stdio |
+| `nis2-slm` | `prompt.rs`, `grammar.rs`, `inference.rs`, `report.rs` | 18 | Prompt construction, GBNF grammar, template report generation |
+| `nis2-api` | `handlers.rs`, `routes.rs` | 6 | Axum REST API, benchmark binary |
+
+## Data flow
 
 ```
-Testi Legali UE → Ingestion → Vector DB → Rule Engine → SLM → Report
-                      ↓            ↓           ↓          ↓
-                   JSON chunks  LanceDB   ComplianceStatus  Italiano formale
-                   (49 prov.)   (HNSW)    (16 obblighi)     (zero-halluc.)
+data/sources/*.json -> ingestion (parse+chunk) -> vectordb (embed+index)
+                                                        |
+CompanyProfile -> rules (evaluate) -> ComplianceStatus -> slm (report)
+                       |                    |
+                  mcp-server            api-server
+                  (stdio)              (HTTP :8080)
 ```
 
-## Architettura dei crate
+## Binaries
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Cargo Workspace                          │
-├────────────┬────────────┬────────────┬────────────┬─────────────┤
-│ ingestion  │  vectordb  │   rules    │ mcp-server │     slm     │
-│            │            │            │            │             │
-│ • Parser   │ • Embedder │ • Engine   │ • Protocol │ • Prompt    │
-│ • Chunker  │ • LanceDB  │ • Schema   │ • Tools    │ • Grammar   │
-│ • Types    │ • Search   │ • Obbligh. │ • Server   │ • Inference │
-│            │            │ • Valid.   │            │ • Report    │
-│            │            │ • Adapter  │            │             │
-├────────────┴────────────┴────────────┴────────────┴─────────────┤
-│                       nis2-api (axum REST)                       │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-## I 5 Pilastri in dettaglio
-
-### 1. [Ingestion Pipeline](/architecture/ingestion)
-
-Estrae e struttura i testi normativi da fonti ufficiali (PDF, JSON). Ogni disposizione è suddivisa in chunk semantici per unità logica (articolo → paragrafo → lettera).
-
-### 2. [Vector Store](/architecture/vectordb)
-
-Indicizza i chunk testuali come vettori 384-dimensionali (BGE-Small) in LanceDB embedded. Ricerca semantica HNSW per recuperare le disposizioni rilevanti.
-
-### 3. [Rule Engine](/architecture/rules)
-
-Alberi decisionali booleani deterministici. Valuta applicabilità (Art. 2/3), mappa 16 obblighi (Art. 20/21/23), calcola sanzioni (Art. 34). Validazione JSON Schema in ingresso e uscita.
-
-### 4. [MCP Server](/architecture/mcp)
-
-Espone il rule engine come 4 tool MCP via JSON-RPC 2.0 su stdio. Compatibile con Claude Desktop e qualsiasi client MCP.
-
-### 5. [SLM Engine](/architecture/slm)
-
-Trasforma i dati strutturati di conformità in report in italiano formale. Grammatica GBNF per generazione vincolata. Backend template per output deterministico senza modello.
-
-## Principi architetturali
-
-| Principio | Implementazione |
-|-----------|----------------|
-| **Determinismo** | Nessun elemento stocastico, temperatura = 0.0 |
-| **Zero Trust** | Nessuna API cloud, esecuzione 100% locale |
-| **Tracciabilità** | Ogni output cita l'articolo sorgente |
-| **Validazione** | JSON Schema su tutti i confini tra crate |
-| **Estensibilità** | Plugin WASM via Extism per adapter custom |
+| Binary | Crate | Purpose |
+|--------|-------|---------|
+| `indexer` | vectordb | Populate LanceDB from JSON sources |
+| `search` | vectordb | Semantic search over indexed provisions |
+| `demo` | rules | Print ComplianceStatus JSON |
+| `report` | slm | Generate Italian compliance report |
+| `mcp-server` | mcp-server | MCP JSON-RPC server |
+| `api-server` | api | Axum HTTP server |
+| `bench` | api | Benchmark suite |

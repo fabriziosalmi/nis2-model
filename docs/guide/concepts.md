@@ -1,65 +1,45 @@
-# Concetti chiave
+# Key Concepts
 
-## Determinismo
+## Determinism
 
-Ogni funzione del motore è **deterministica**: dato lo stesso input, produce sempre lo stesso output. Non ci sono elementi stocastici, LLM non vincolati, o dipendenze da servizi esterni.
-
-```
-f(CompanyProfile) → ComplianceStatus  // sempre uguale
-```
-
-## Chunk semantico
-
-I testi legali non sono suddivisi per numero di parole, ma per **unità logica normativa**:
-
-| Livello | Esempio | ID deterministico |
-|---------|---------|-------------------|
-| Articolo | Art. 21 | `nis2-21` |
-| Paragrafo | Art. 21, par. 2 | `nis2-21-2` |
-| Lettera | Art. 21(2)(a) | `nis2-21-2-a` |
-
-Ogni chunk conserva il suo `LegalReference` completo per la tracciabilità.
-
-## Classificazione delle entità
-
-Il motore implementa l'albero decisionale dell'Art. 2 e 3 NIS2:
+Every function in the engine is deterministic: same input produces the same output. There are no stochastic elements.
 
 ```
-┌──────────────────────────────────────────────┐
-│               CompanyProfile                  │
-│  { sector, employees, annual_revenue }        │
-└──────────────────┬───────────────────────────┘
-                   │
-     ┌─────────────┼──────────────┐
-     │             │              │
-  Annex I      Annex II     Nessun Annex
-  + size ≥ M   + size ≥ M        │
-     │             │              │
-  Essential    Important     Out of Scope
-  Art. 3(1)    Art. 3(2)
+engine::evaluate(&CompanyProfile) -> ComplianceStatus  // always identical
 ```
 
-::: info Soglia dimensionale
-Un'impresa è "media" (e quindi potenzialmente in ambito) se ha **≥ 50 dipendenti** oppure **≥ €10M di fatturato**, secondo la Raccomandazione UE 2003/361/EC.
-:::
+## Entity classification
 
-## Soggetti sempre in ambito
+The engine implements the decision tree from Art. 2 and 3 of NIS2:
 
-Alcuni settori sono in ambito **indipendentemente dalla dimensione** (Art. 2(2)):
+- Sector in Annex I + meets size threshold = **Essential** (Art. 3(1))
+- Sector in Annex II + meets size threshold = **Important** (Art. 3(2))
+- Sectors `digital_infrastructure`, `ict_service_management_b2b`, `public_administration` = **Essential** regardless of size (Art. 2(2))
+- Everything else = **OutOfScope**
 
-- `digital_infrastructure`
-- `ict_service_management_b2b`
-- `public_administration`
+The size threshold follows EU Recommendation 2003/361/EC: 50+ employees OR 10M+ EUR annual revenue.
 
-## Zero-Hallucination
+## Obligation catalog
 
-La garanzia di zero-hallucination si basa su tre livelli:
+The engine maps 16 obligations from three articles, hardcoded in `obligations.rs`:
 
-1. **Catalogo immutabile** — i 16 obblighi sono codificati in Rust, non generati
-2. **Template deterministico** — il report è costruito per sostituzione di variabili
-3. **Grammatica GBNF** — quando si usa un SLM, la generazione è vincolata a livello di token
+- **Art. 20**: 2 governance obligations (management approval, mandatory training)
+- **Art. 21(2)(a-j)**: 10 cybersecurity measures (risk analysis, incident management, business continuity, supply chain, etc.)
+- **Art. 23**: 4 incident reporting obligations (CSIRT notification, 24h early warning, 72h full notification, 30-day final report)
 
-```rust
-// Parole vietate nel report
-let forbidden = ["potrebbe", "forse", "probabilmente", "eventualmente"];
-```
+All obligations start with status `Pending`.
+
+## Sanctions (Art. 34)
+
+- Essential entities: max(10,000,000 EUR, 2% of worldwide annual turnover)
+- Important entities: max(7,000,000 EUR, 1.4% of worldwide annual turnover)
+
+## Semantic chunking
+
+Legal texts are split by legal unit (article/paragraph/letter), not by word count. Each chunk has a `LegalReference` with directive, article number, paragraph number, and optional letter.
+
+## Report generation
+
+The `TemplateBackend` generates reports by substituting structured `ComplianceStatus` data into fixed Italian-language templates. No generative model is involved. The report has 4 sections: scope, obligations, sanctions, incident reporting.
+
+The codebase includes a test (`report_never_contains_uncertain_language`) that verifies the output never contains hedging words like "potrebbe", "forse", "probabilmente", or "eventualmente".

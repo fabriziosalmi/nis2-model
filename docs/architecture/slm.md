@@ -1,113 +1,42 @@
 # SLM Engine
 
-**Crate**: `nis2-slm`
+**Crate**: `nis2-slm` | **Files**: `prompt.rs`, `grammar.rs`, `inference.rs`, `report.rs` | **Tests**: 18
 
-## Responsabilità
+## What it does
 
-Trasforma dati strutturati di conformità in report in italiano formale, con garanzia di zero hallucination.
+Transforms structured `ComplianceStatus` data into an Italian-language compliance report. The current implementation uses a `TemplateBackend` that generates reports by template substitution -- no language model is involved.
 
-## Moduli
+## Modules
 
-| Modulo | Responsabilità |
-|--------|---------------|
-| `prompt` | System prompt, ChatML template, InferenceParams |
-| `grammar` | GBNF per generazione vincolata |
-| `inference` | Trait backend + TemplateBackend |
-| `report` | Generatore deterministico di report |
+### `prompt.rs`
 
-## Prompt Engineering
+Builds a ChatML-formatted prompt from `ComplianceStatus` data. Defines `InferenceParams` with deterministic defaults (temperature=0.0, max_tokens=2048, top_p=1.0, repeat_penalty=1.1). The system prompt instructs the model to respond only in formal Italian, cite only provided articles, and never use hedging language.
 
-Il system prompt vincola il comportamento del modello:
+### `grammar.rs`
 
-```
-REGOLE INDEROGABILI:
-1. Rispondi ESCLUSIVAMENTE in italiano formale
-2. Cita SOLO gli articoli forniti nel contesto JSON
-3. Non fornire MAI consulenza legale
-4. Struttura: Ambito → Obblighi → Sanzioni
-5. No "potrebbe", "forse", "probabilmente"
-```
+Defines a GBNF grammar (`COMPLIANCE_REPORT_GRAMMAR`) that constrains output to a 4-section report structure with NIS2 article reference patterns. Also defines `TOOL_OUTPUT_GRAMMAR` for structured tool responses. Provides `grammar_for_mode()` to select between them.
 
-### Formato ChatML
+### `inference.rs`
 
-```
-<|im_start|>system
-{system_prompt}
-<|im_end|>
-<|im_start|>user
-DATI DI CONFORMITÀ (JSON):
-```json
-{compliance_status}
-```
-<|im_end|>
-<|im_start|>assistant
-```
+Defines the `InferenceBackend` trait with `generate(prompt, params) -> Result<String>` and `name() -> &str`. Implements `TemplateBackend` which ignores the prompt and instead parses the embedded JSON to generate reports deterministically.
 
-## GBNF Grammar
+### `report.rs`
 
-La grammatica forza una struttura a 4 sezioni:
+The actual report generator. Produces 4 sections:
 
-```gbnf
-root ::= section-ambito section-obblighi section-sanzioni section-incidenti
-section-ambito ::= "## Ambito di applicazione\n\n" paragraph "\n\n"
-article-ref ::= "Art. " [0-9]+ ("(" [0-9]+ ")" ("(" [a-j] ")")?)?
-```
+1. **Ambito di applicazione** -- scope determination with entity classification
+2. **Obblighi rilevanti** -- all 16 obligations listed with article references
+3. **Sanzioni potenziali** -- Art. 34 maximum penalty
+4. **Segnalazione incidenti** -- 24h/72h/30d deadlines
 
-## Backend di inferenza
+For out-of-scope entities, produces a short non-applicability statement instead.
 
-### `InferenceBackend` Trait
+## Tests (18)
 
-```rust
-pub trait InferenceBackend {
-    fn generate(&self, prompt: &str, params: &InferenceParams) -> Result<String>;
-    fn name(&self) -> &str;
-}
-```
+Prompt tests: `prompt_contains_system_instructions`, `prompt_contains_compliance_data`, `prompt_ends_with_assistant_tag`, `default_params_are_deterministic`
 
-### `TemplateBackend` (default)
+Grammar tests: `grammar_contains_all_sections`, `grammar_enforces_article_pattern`, `mode_selects_correct_grammar`
 
-Genera report **senza modello**, per sostituzione di variabili:
+Inference tests: `template_backend_generates_report`, `template_backend_cites_articles`, `template_backend_name`
 
-- Zero hallucination garantita
-- Nessun download di modello
-- Generazione istantanea
-- Output deterministico
-
-### `LlamaCppBackend` (planned)
-
-Inferenza con modelli GGUF locali (es. Qwen-2.5-0.5B-Instruct):
-
-- Temperatura = 0.0 (greedy decoding)
-- Grammatica GBNF applicata a livello di token
-- Post-validazione contro lo schema
-
-## Parametri di inferenza
-
-```rust
-InferenceParams {
-    temperature: 0.0,      // Deterministico
-    max_tokens: 2048,      // Sufficiente per report completo
-    top_p: 1.0,            // Disabilitato con temp=0
-    repeat_penalty: 1.1,   // Penalità ripetizione
-}
-```
-
-## Report di output
-
-Il report segue una struttura fissa:
-
-1. **Ambito di applicazione** — classificazione del soggetto
-2. **Obblighi rilevanti** — elenco dei 16 obblighi con Art. di riferimento
-3. **Sanzioni potenziali** — importo massimo con base legale
-4. **Segnalazione incidenti** — tempistiche 24h / 72h / 30gg
-
-## Test
-
-```bash
-cargo test -p nis2-slm  # 18 test
-```
-
-Test critici:
-- `report_never_contains_uncertain_language` — parole vietate
-- `report_uses_deterministic_formula` — formula "Sulla base dei dati forniti..."
-- `template_backend_cites_articles` — tutti gli articoli citati
+Report tests: `essential_report_has_all_sections`, `essential_report_cites_classification`, `essential_report_lists_all_obligations`, `essential_report_shows_sanction`, `essential_report_shows_deadlines`, `out_of_scope_report_states_non_applicability`, `report_never_contains_uncertain_language`, `report_uses_deterministic_formula`

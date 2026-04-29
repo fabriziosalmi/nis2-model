@@ -1,93 +1,64 @@
-# Quick Start
+# Getting Started
 
-## Prerequisiti
+## Prerequisites
 
-- **Rust** ≥ 1.85 (2024 edition)
-- ~500MB di RAM per ONNX Runtime (modello BGE-Small)
-- macOS, Linux o Windows con toolchain Rust
+- **Rust** 1.85+ (2024 edition)
+- ~500 MB RAM for ONNX Runtime (BGE-Small model, downloaded on first run)
 
-## Installazione
+## Build
 
 ```bash
-# Clona il repository
 git clone https://github.com/fabriziosalmi/nis2-model.git
 cd nis2-model
-
-# Compila tutto il workspace
 cargo build --workspace
 ```
 
-::: tip Prima compilazione
-La prima compilazione scarica automaticamente il modello BGE-Small-EN-v1.5 (~33MB). Le compilazioni successive saranno istantanee.
-:::
-
-## Esecuzione dei test
+## Run tests
 
 ```bash
-# Esegui tutti i 61 test
-cargo test --workspace
+cargo test --workspace   # 61 tests across 6 crates
 ```
 
-## Indicizzazione dei testi legali
+## Index legal texts
 
-Prima di poter effettuare ricerche semantiche, è necessario popolare il vector store:
+The vector store must be populated before semantic search works:
 
 ```bash
-# Indicizza 49 chunk (35 NIS2 + 14 DORA) in LanceDB
 cargo run --bin indexer
 ```
 
-Output atteso:
-```
-INFO indexer: Parsed 35 NIS2 chunks
-INFO indexer: Indexed 35 NIS2 chunks
-INFO indexer: Parsed 14 DORA chunks
-INFO indexer: Indexed 14 DORA chunks
-INFO indexer: Indexing complete.
-```
+This parses `data/sources/nis2_articles.json` (35 chunks) and `data/sources/dora_articles.json` (14 chunks) into LanceDB at `data/lancedb/`.
 
-## Ricerca semantica
+## Semantic search
 
 ```bash
-# Cerca disposizioni sull'autenticazione multi-fattore
 cargo run --bin search -- "autenticazione multi-fattore"
 ```
 
-```
-1. [score: 0.6443] NIS2 Art. 21(2)(j)
-   uso di soluzioni di autenticazione a più fattori...
-```
-
-## Generazione report
+## Generate a compliance report
 
 ```bash
-# Report di conformità completo in italiano
-cargo run --bin report
+cargo run --bin report   # Italian compliance report (template backend)
+cargo run --bin demo     # Raw ComplianceStatus JSON
 ```
 
-```
-## Ambito di applicazione
-Sulla base dei dati forniti, risulta che l'azienda rientra
-nell'ambito di applicazione della Direttiva (UE) 2022/2555 (NIS2),
-in qualità di soggetto essenziale ai sensi dell'Art. 3(1).
-
-## Obblighi rilevanti (16 totali)
-- Art. 20(1): Governance organi direttivi
-- Art. 21(2)(a): Analisi dei rischi
-...
-```
-
-## Server MCP
+## Start the REST API server
 
 ```bash
-# Avvia il server MCP (JSON-RPC su stdio)
-cargo run --bin mcp-server
+cargo run --bin api-server                 # listens on 0.0.0.0:8080
+cargo run --bin api-server -- --port 3000  # custom port
 ```
 
-Vedi la sezione [MCP Tools](/api/mcp-tools) per i dettagli sui tool disponibili.
+## Start the MCP server
 
-## Prossimi passi
+```bash
+cargo run --bin mcp-server   # JSON-RPC over stdio
+```
 
-- Leggi i [Concetti chiave](/guide/concepts)
-- Esplora l'[Architettura](/architecture/overview)
-- Consulta le [API](/api/mcp-tools)
+See [MCP Tools](/api/mcp-tools) for tool definitions.
+
+## Run benchmarks
+
+```bash
+cargo run --bin bench --release
+```

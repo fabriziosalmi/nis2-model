@@ -13,7 +13,7 @@ members = [
 version = "0.0.2"
 edition = "2024"
 license = "EUPL-1.2"
-authors = ["Fabrizio Trotti"]
+authors = ["Fabrizio Salmi"]
 repository = "https://github.com/fabriziosalmi/nis2-model"
 
 [workspace.dependencies]

@@ -1,66 +1,29 @@
-# Segnalazione Incidenti (Art. 23)
+# Incident Reporting (Art. 23)
 
-L'Art. 23 della Direttiva (UE) 2022/2555 stabilisce gli obblighi di segnalazione degli incidenti significativi.
+The engine sets incident reporting deadlines as defined in Art. 23 of Directive (EU) 2022/2555.
 
-## Tempistiche obbligatorie
+## Deadlines
 
-```
-Conoscenza dell'incidente
-         │
-         ├── entro 24 ore ──→ Preallarme (Art. 23(4)(a))
-         │
-         ├── entro 72 ore ──→ Notifica completa (Art. 23(4)(b))
-         │
-         └── entro 30 giorni → Relazione finale (Art. 23(4)(d))
-```
+| Phase | Deadline | Article | Field in IncidentReporting |
+|-------|----------|---------|---------------------------|
+| Early warning | 24 hours | Art. 23(4)(a) | `early_warning_hours: 24` |
+| Full notification | 72 hours | Art. 23(4)(b) | `notification_hours: 72` |
+| Final report | 30 days | Art. 23(4)(d) | `final_report_days: 30` |
 
-## Dettaglio delle fasi
+## Implementation
 
-### Preallarme — 24 ore
-
-**Art. 23(4)(a)**: Il soggetto deve trasmettere al CSIRT un preallarme che indichi:
-- Se l'incidente è sospettato di essere causato da atti illegittimi o malevoli
-- Se può avere un impatto transfrontaliero
-
-### Notifica completa — 72 ore
-
-**Art. 23(4)(b)**: Aggiornamento del preallarme con:
-- Valutazione iniziale dell'incidente (gravità, impatto)
-- Indicatori di compromissione (IoC), se disponibili
-
-### Relazione finale — 30 giorni
-
-**Art. 23(4)(d)**: Relazione dettagliata contenente:
-- Descrizione dettagliata dell'incidente
-- Tipo di minaccia o causa principale
-- Misure di attenuazione applicate e in corso
-- Impatto transfrontaliero, se presente
-
-## Incidente significativo
-
-Un incidente è considerato **significativo** (Art. 23(3)) se:
-
-- Ha causato o può causare gravi perturbazioni operative dei servizi
-- Ha causato o può causare perdite finanziarie per il soggetto
-- Ha pregiudicato o può pregiudicare altre persone fisiche o giuridiche causando perdite materiali o immateriali considerevoli
-
-## Destinatari della segnalazione
-
-| Destinatario | Ruolo |
-|-------------|-------|
-| **CSIRT** | Computer Security Incident Response Team nazionale |
-| **Autorità competente** | In alternativa al CSIRT, se previsto dal diritto nazionale |
-
-## Implementazione
+In `crates/rules/src/engine.rs`, when an entity is in scope, the `IncidentReporting` struct is set:
 
 ```rust
-pub struct IncidentReporting {
-    pub early_warning_hours: u32,    // 24
-    pub notification_hours: u32,     // 72
-    pub final_report_days: u32,      // 30
+IncidentReporting {
+    early_warning_hours: 24,
+    notification_hours: 72,
+    final_report_days: 30,
 }
 ```
 
-::: warning Sanzioni per mancata segnalazione
-La mancata segnalazione di un incidente significativo costituisce violazione dell'Art. 23 e può dare luogo alle sanzioni previste dall'Art. 34.
-:::
+For out-of-scope entities, `incident_reporting` is `None`.
+
+## Test
+
+The `incident_reporting_deadlines_correct` test in `engine.rs` verifies these exact values.

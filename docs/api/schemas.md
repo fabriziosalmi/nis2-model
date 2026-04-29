@@ -1,100 +1,53 @@
 # JSON Schema
 
-Il rule engine genera e valida JSON Schema a runtime per tutti i tipi di input e output.
+All input/output types derive `schemars::JsonSchema` for automatic schema generation. Runtime validation uses `jsonschema` crate.
 
-## CompanyProfile (Input)
+## CompanyProfile (input to `engine::evaluate`)
 
-```json
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "required": [
-    "name", "sector", "employees",
-    "annual_revenue_eur_m", "balance_sheet_eur_m",
-    "services", "member_states"
-  ],
-  "properties": {
-    "name": { "type": "string" },
-    "sector": { "type": "string" },
-    "sub_sector": { "type": ["string", "null"] },
-    "employees": { "type": "integer", "minimum": 0 },
-    "annual_revenue_eur_m": { "type": "number" },
-    "balance_sheet_eur_m": { "type": "number" },
-    "services": {
-      "type": "array",
-      "items": { "type": "string" }
-    },
-    "member_states": {
-      "type": "array",
-      "items": { "type": "string" }
-    }
-  }
-}
-```
+| Field | Type | Required |
+|-------|------|----------|
+| `name` | String | Yes |
+| `sector` | String | Yes |
+| `sub_sector` | String or null | No |
+| `employees` | u32 | Yes |
+| `annual_revenue_eur_m` | f64 | Yes |
+| `balance_sheet_eur_m` | f64 | Yes |
+| `services` | Vec\<String\> | Yes |
+| `member_states` | Vec\<String\> | Yes |
 
-## ComplianceStatus (Output)
+## ComplianceStatus (output of `engine::evaluate`)
 
-```json
-{
-  "type": "object",
-  "required": ["applicable", "category", "obligations"],
-  "properties": {
-    "applicable": { "type": "boolean" },
-    "category": {
-      "type": "string",
-      "enum": ["Essential", "Important", "OutOfScope"]
-    },
-    "obligations": {
-      "type": "array",
-      "items": { "$ref": "#/definitions/Obligation" }
-    },
-    "max_sanction_eur": { "type": ["number", "null"] },
-    "incident_reporting": {
-      "type": ["object", "null"],
-      "properties": {
-        "early_warning_hours": { "type": "integer" },
-        "notification_hours": { "type": "integer" },
-        "final_report_days": { "type": "integer" }
-      }
-    }
-  }
-}
-```
+| Field | Type | Description |
+|-------|------|-------------|
+| `applicable` | bool | Whether NIS2 applies |
+| `category` | enum | Essential, Important, or OutOfScope |
+| `obligations` | Vec\<Obligation\> | 16 items when in scope, 0 when out |
+| `max_sanction_eur` | Option\<f64\> | None when out of scope |
+| `incident_reporting` | Option\<IncidentReporting\> | None when out of scope |
 
 ## Obligation
 
-```json
-{
-  "type": "object",
-  "required": ["id", "article_ref", "description", "legal_text", "status"],
-  "properties": {
-    "id": { "type": "string" },
-    "article_ref": { "type": "string" },
-    "description": { "type": "string" },
-    "legal_text": { "type": "string" },
-    "status": {
-      "type": "string",
-      "enum": ["Pending", "Compliant", "NonCompliant", "PartiallyCompliant"]
-    }
-  }
-}
-```
+| Field | Type |
+|-------|------|
+| `id` | String (e.g. `nis2_art21_2_a`) |
+| `article_ref` | String (e.g. `Art. 21(2)(a)`) |
+| `description` | String (Italian) |
+| `legal_text` | String (Italian) |
+| `status` | enum: Pending, Compliant, NonCompliant, PartiallyCompliant |
 
-## Validazione runtime
+## IncidentReporting
+
+| Field | Type | Value |
+|-------|------|-------|
+| `early_warning_hours` | u32 | 24 |
+| `notification_hours` | u32 | 72 |
+| `final_report_days` | u32 | 30 |
+
+## Runtime validation
 
 ```rust
-use nis2_rules::validation;
-
-// Validazione input
-let json = serde_json::json!({ ... });
-validation::validate_company_profile(&json)?;
-
-// Validazione output
-let status = engine::evaluate(&profile);
-let output_json = serde_json::to_value(&status)?;
-validation::validate_compliance_status(&output_json)?;
+nis2_rules::validation::validate_company_profile(&json_value)?;
+nis2_rules::validation::validate_compliance_status(&json_value)?;
 ```
 
-::: tip Generazione automatica
-Gli schema sono generati automaticamente dal codice Rust via `schemars::JsonSchema`. Non sono scritti a mano.
-:::
+Schemas are generated from Rust types at compile time via `schemars`, not written by hand.

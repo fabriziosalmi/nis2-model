@@ -1,72 +1,44 @@
 # MCP Server
 
-**Crate**: `nis2-mcp-server`
+**Crate**: `nis2-mcp-server` | **Files**: `protocol.rs`, `tools.rs`, `server.rs` | **Tests**: 13
 
-## Responsabilità
+## What it does
 
-Espone il rule engine come tool richiamabili da client AI (Claude Desktop, ecc.) via [Model Context Protocol](https://modelcontextprotocol.io/) (JSON-RPC 2.0).
+Exposes the rule engine as 4 callable tools via the Model Context Protocol (MCP spec 2024-11-05). Communicates over stdin/stdout using JSON-RPC 2.0.
 
-## Protocollo
+## Protocol methods
 
-Il server implementa la specifica MCP **2024-11-05**:
-
-| Metodo | Descrizione |
+| Method | Description |
 |--------|-------------|
-| `initialize` | Handshake, capabilities exchange |
-| `notifications/initialized` | Conferma inizializzazione |
-| `tools/list` | Elenca i 4 tool disponibili |
-| `tools/call` | Esecuzione di un tool |
+| `initialize` | Handshake, returns server capabilities |
+| `notifications/initialized` | Client confirms initialization |
+| `tools/list` | Returns definitions for all 4 tools |
+| `tools/call` | Executes a tool by name with JSON arguments |
 
-## Trasporto
+## Tools
 
-- **stdio** (default): JSON-RPC su stdin/stdout, log su stderr
+See [MCP Tools](/api/mcp-tools) for full input/output documentation.
 
-## Tool disponibili
+- `verifica_applicabilita` -- applicability check (3 params: settore, dipendenti, fatturato_mln_eur)
+- `calcola_sanzione` -- Art. 34 sanction calculation (same 3 params)
+- `lista_obblighi` -- list all 16 obligations with legal text (same 3 params)
+- `valuta_compliance` -- full evaluation returning ComplianceStatus JSON (8 params)
 
-Vedi [MCP Tools](/api/mcp-tools) per la documentazione completa.
-
-## Architettura interna
-
-```
-stdin → JSON parse → Router → Tool dispatch → Rule Engine → JSON response → stdout
-                        │
-                   ┌────┼────┐
-                   │    │    │
-              initialize  tools/list  tools/call
-                   │    │    │
-                   └────┼────┘
-                        │
-                   stderr (log)
-```
-
-## Configurazione Claude Desktop
-
-Copia in `~/Library/Application Support/Claude/claude_desktop_config.json`:
+## Claude Desktop configuration
 
 ```json
 {
   "mcpServers": {
     "nis2-compliance": {
       "command": "cargo",
-      "args": [
-        "run", "--bin", "mcp-server",
-        "--manifest-path", "/path/to/nis2-model/Cargo.toml"
-      ],
-      "env": {
-        "RUST_LOG": "info"
-      }
+      "args": ["run", "--bin", "mcp-server", "--manifest-path", "/path/to/nis2-model/Cargo.toml"]
     }
   }
 }
 ```
 
-## Test
+## Tests (13)
 
-```bash
-cargo test -p nis2-mcp-server  # 13 test
-```
+Server tests: `initialize_returns_capabilities`, `tools_list_returns_four_tools`, `tools_call_verifica_applicabilita`, `tools_call_unknown_returns_error`, `unknown_method_returns_error`
 
-Test coperti:
-- Lifecycle: `initialize` → `tools/list` → `tools/call`
-- Tutti i 4 tool con input validi e invalidi
-- Gestione errori per metodi sconosciuti
+Tool tests: `list_tools_returns_four`, `verifica_applicabilita_energy`, `verifica_applicabilita_out_of_scope`, `calcola_sanzione_essential`, `lista_obblighi_returns_16`, `valuta_compliance_full`, `unknown_tool_returns_error`, `missing_params_returns_error`

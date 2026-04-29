@@ -1,85 +1,24 @@
 # Ingestion Pipeline
 
-**Crate**: `nis2-ingestion`
+**Crate**: `nis2-ingestion` | **Files**: `chunk.rs`, `parser.rs`, `types.rs` | **Tests**: 3
 
-## Responsabilità
+## What it does
 
-Estrae testi normativi da fonti strutturate e li suddivide in chunk semantici con riferimenti legali tracciabili.
+Parses structured legal JSON files and splits them into semantic chunks with deterministic IDs.
 
-## Tipi principali
+## Types
 
-### `LegalReference`
+`LegalReference` identifies a provision by directive, article, paragraph, and optional letter. `Chunk` pairs a `LegalReference` with its text content and a SHA-256 hash ID.
 
-```rust
-pub struct LegalReference {
-    pub directive: Directive,    // NIS2 o DORA
-    pub article: u32,            // Numero articolo
-    pub paragraph: u32,          // Numero paragrafo
-    pub letter: Option<char>,    // Lettera (a-j)
-}
-```
+## Data sources
 
-### `Chunk`
+| File | Directive | Chunks |
+|------|-----------|--------|
+| `data/sources/nis2_articles.json` | NIS2 (EU 2022/2555) | 35 |
+| `data/sources/dora_articles.json` | DORA (EU 2022/2554) | 14 |
 
-```rust
-pub struct Chunk {
-    pub id: String,              // Hash deterministico
-    pub reference: LegalReference,
-    pub text: String,            // Testo della disposizione
-}
-```
+## Tests
 
-## ID deterministico
-
-L'ID di ogni chunk è calcolato come hash SHA-256 del suo `LegalReference`:
-
-```
-nis2-21-2-a → SHA-256 → "a1b2c3d4..."
-```
-
-Questo garantisce che lo stesso articolo produca sempre lo stesso ID, indipendentemente dall'ordine di elaborazione.
-
-## Parser JSON
-
-Il parser legge file JSON strutturati con il formato:
-
-```json
-{
-  "directive": "NIS2",
-  "articles": [
-    {
-      "number": 21,
-      "title": "Misure di gestione dei rischi",
-      "paragraphs": [
-        {
-          "number": 2,
-          "letters": [
-            {
-              "letter": "a",
-              "text": "politiche di analisi dei rischi..."
-            }
-          ]
-        }
-      ]
-    }
-  ]
-}
-```
-
-## Dati sorgente
-
-| File | Direttiva | Articoli | Chunk |
-|------|-----------|----------|-------|
-| `nis2_articles.json` | NIS2 (2022/2555) | 8 | 35 |
-| `dora_articles.json` | DORA (2022/2554) | 5 | 14 |
-| **Totale** | | **13** | **49** |
-
-## Test
-
-```bash
-cargo test -p nis2-ingestion  # 3 test
-```
-
-- `chunk_id_is_deterministic` — stesso input → stesso hash
-- `different_references_produce_different_ids` — unicità
-- `parse_json_articles` — roundtrip completo dal JSON
+- `chunk_id_is_deterministic` -- same reference always produces the same hash
+- `different_references_produce_different_ids` -- uniqueness guarantee
+- `parse_json_articles` -- full parse roundtrip from JSON source files

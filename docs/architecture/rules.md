@@ -1,109 +1,53 @@
 # Rule Engine
 
-**Crate**: `nis2-rules`
+**Crate**: `nis2-rules` | **Files**: `engine.rs`, `obligations.rs`, `schema.rs`, `validation.rs`, `adapters.rs` | **Tests**: 20
 
-## Responsabilità
+## What it does
 
-Valutazione deterministica della conformità NIS2. Ogni decisione è un albero booleano senza ambiguità.
+Deterministic boolean decision trees that evaluate a `CompanyProfile` and produce a `ComplianceStatus`.
 
-## Moduli
+## `engine::evaluate()`
 
-| Modulo | Responsabilità |
-|--------|---------------|
-| `engine` | Applicabilità, classificazione, calcolo sanzioni |
-| `obligations` | Catalogo immutabile dei 16 obblighi |
-| `schema` | Tipi con derivazione JSON Schema |
-| `validation` | Validazione runtime input/output |
-| `adapters` | Plugin WASM via Extism |
+The core function. It:
 
-## Albero decisionale
+1. Checks if the sector is in `ANNEX_I_SECTORS` (11 sectors) or `ANNEX_II_SECTORS` (7 sectors)
+2. Checks if the entity meets the size threshold (50+ employees OR 10M+ EUR revenue)
+3. Special case: `digital_infrastructure`, `ict_service_management_b2b`, `public_administration` are always in scope
+4. If in scope: attaches all 16 obligations (Art. 20: 2 + Art. 21: 10 + Art. 23: 4)
+5. Calculates `max_sanction_eur` using Art. 34 formula
+6. Sets `incident_reporting` deadlines (24h, 72h, 30d)
 
-```rust
-pub fn evaluate(profile: &CompanyProfile) -> ComplianceStatus
-```
+## Sectors
 
-```
-CompanyProfile
-     │
-     ├── Settore in Annex I + dimensione ≥ media
-     │   └── Essential (Art. 3(1))
-     │
-     ├── Settore in Annex II + dimensione ≥ media
-     │   └── Important (Art. 3(2))
-     │
-     ├── Settore "always in scope" (qualsiasi dimensione)
-     │   └── Essential (Art. 2(2))
-     │
-     └── Altrimenti
-         └── OutOfScope
-```
+**Annex I** (11): `energy`, `transport`, `banking`, `financial_market_infrastructure`, `health`, `drinking_water`, `waste_water`, `digital_infrastructure`, `ict_service_management_b2b`, `public_administration`, `space`
 
-## Settori
+**Annex II** (7): `postal_courier`, `waste_management`, `chemicals`, `food`, `manufacturing`, `digital_providers`, `research`
 
-### Annex I (Altamente critici)
-`energy`, `transport`, `banking`, `financial_market_infrastructure`, `health`, `drinking_water`, `waste_water`, `digital_infrastructure`, `ict_service_management_b2b`, `public_administration`, `space`
+## Obligation catalog (`obligations.rs`)
 
-### Annex II (Altri settori critici)
-`postal_courier`, `waste_management`, `chemicals`, `food`, `manufacturing`, `digital_providers`, `research`
+- `art20_obligations()` -- 2 obligations (governance approval, mandatory training)
+- `art21_obligations()` -- 10 obligations (Art. 21(2)(a) through (j))
+- `art23_obligations()` -- 4 obligations (CSIRT notification, 24h, 72h, 30d)
 
-## Catalogo obblighi
+All obligations are in Italian (as they are from the Italian transposition of the directive).
 
-### Art. 20 — Governance (2 obblighi)
+## JSON Schema validation (`validation.rs`)
 
-| ID | Descrizione |
-|----|-------------|
-| `nis2_art20_1` | Approvazione misure di gestione rischi |
-| `nis2_art20_2` | Formazione obbligatoria cybersecurity organi direttivi |
+All types derive `schemars::JsonSchema`. Runtime validation uses `jsonschema`:
 
-### Art. 21(2) — Misure di cybersecurity (10 obblighi)
+- `validate_company_profile()` -- validates input
+- `validate_compliance_status()` -- validates output
 
-| ID | Lettera | Descrizione |
-|----|---------|-------------|
-| `nis2_art21_2_a` | (a) | Politiche di analisi dei rischi |
-| `nis2_art21_2_b` | (b) | Gestione degli incidenti |
-| `nis2_art21_2_c` | (c) | Continuità operativa e gestione crisi |
-| `nis2_art21_2_d` | (d) | Sicurezza catena di approvvigionamento |
-| `nis2_art21_2_e` | (e) | Sicurezza sviluppo e manutenzione sistemi |
-| `nis2_art21_2_f` | (f) | Valutazione efficacia misure |
-| `nis2_art21_2_g` | (g) | Igiene informatica e formazione |
-| `nis2_art21_2_h` | (h) | Crittografia e cifratura |
-| `nis2_art21_2_i` | (i) | Sicurezza risorse umane e controllo accessi |
-| `nis2_art21_2_j` | (j) | Autenticazione multi-fattore |
+## WASM adapters (`adapters.rs`)
 
-### Art. 23 — Segnalazione incidenti (4 obblighi)
+Provides an `IdentityAdapter` for Extism WASM plugin integration. Currently a passthrough that validates JSON structure.
 
-| ID | Descrizione | Tempistica |
-|----|-------------|------------|
-| `nis2_art23_1` | Notifica incidenti significativi | Senza ritardo |
-| `nis2_art23_4_a` | Preallarme | 24 ore |
-| `nis2_art23_4_b` | Notifica completa | 72 ore |
-| `nis2_art23_4_d` | Relazione finale | 30 giorni |
+## Tests (20)
 
-## Sanzioni (Art. 34)
+Engine tests: `large_energy_company_is_essential`, `medium_food_company_is_important`, `small_unrelated_company_is_out_of_scope`, `digital_infra_always_in_scope`, `in_scope_entity_has_16_obligations`, `out_of_scope_has_no_obligations`, `all_obligations_are_pending_initially`, `sanction_essential_uses_floor`, `sanction_essential_uses_two_percent`, `incident_reporting_deadlines_correct`, `output_is_valid_json`
 
-| Categoria | Formula | Floor |
-|-----------|---------|-------|
-| Essential | max(€10M, 2% fatturato mondiale) | €10.000.000 |
-| Important | max(€7M, 1.4% fatturato mondiale) | €7.000.000 |
+Obligation tests: `art21_has_ten_obligations`, `all_obligation_ids_are_unique`, `all_obligations_start_pending`
 
-## JSON Schema Validation
+Validation tests: `valid_company_profile_passes`, `missing_required_field_fails`, `wrong_type_fails`, `engine_output_validates_against_schema`
 
-Tutti i tipi derivano `schemars::JsonSchema`:
-
-```rust
-#[derive(Serialize, Deserialize, JsonSchema)]
-pub struct CompanyProfile { ... }
-```
-
-Validazione runtime:
-
-```rust
-validation::validate_company_profile(&json)?;
-validation::validate_compliance_status(&json)?;
-```
-
-## Test
-
-```bash
-cargo test -p nis2-rules  # 20 test
-```
+Adapter tests: `identity_adapter_parses_valid_json`, `identity_adapter_rejects_invalid_json`
