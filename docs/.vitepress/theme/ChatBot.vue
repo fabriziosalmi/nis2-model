@@ -83,12 +83,25 @@ function exploreSuggestions(uiLang, limit = 4) {
 
 function search(query) {
   const t0 = performance.now()
-  const results = bm25Search(dataset.value, query, 3)
-  const elapsed = performance.now() - t0
   const uiLang = lang.value
 
+  // Filter dataset by UI language first, fallback to full dataset
+  const langDataset = dataset.value.filter(d =>
+    uiLang === 'it' ? isItalian(d.q) : !isItalian(d.q)
+  )
+  let results = bm25Search(langDataset, query, 3)
+  let searchPool = langDataset
+
+  // Fallback: if no good results in lang-filtered set, try full dataset
+  if (!results.length || results[0].score <= 0.5) {
+    results = bm25Search(dataset.value, query, 3)
+    searchPool = dataset.value
+  }
+
+  const elapsed = performance.now() - t0
+
   if (results.length > 0 && results[0].score > 0.5) {
-    const entry = dataset.value[results[0].idx]
+    const entry = searchPool[results[0].idx]
     const cat = entry.c.replace(/_impl$/, '')
     visitedCategories.value = new Set([...visitedCategories.value, cat])
     stats.value.hits++
@@ -178,20 +191,17 @@ onMounted(async () => {
 <div v-else class="app">
   <header class="hd">
     <div class="hd-left">
-      <!-- Toggle left sidebar -->
       <button class="hd-toggle" @click="showLeft = !showLeft" :title="t.coverageLabel">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
       </button>
-      <svg class="hd-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      <div>
-        <div class="hd-title">{{ t.title }}</div>
-        <div class="hd-sub">{{ stats.entries }} entries · {{ t.sub }}</div>
-      </div>
+      <div class="hd-cov">{{ coverage.explored }}/{{ coverage.total }}</div>
+    </div>
+    <div class="hd-center">
+      <svg class="hd-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <div class="hd-title">{{ t.title }}</div>
     </div>
     <div class="hd-right">
-      <div class="hd-cov">{{ coverage.explored }}/{{ coverage.total }}</div>
       <button class="lang-btn" @click="lang = lang === 'it' ? 'en' : 'it'">{{ lang.toUpperCase() }}</button>
-      <!-- Toggle right sidebar -->
       <button class="hd-toggle" @click="showRight = !showRight" :title="t.session">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
       </button>
@@ -295,12 +305,13 @@ onMounted(async () => {
 .loader-bar{width:140px;height:2px;background:var(--vp-c-divider);border-radius:1px;overflow:hidden;margin:0 auto}
 .loader-fill{height:100%;background:var(--vp-c-brand-1);border-radius:1px;transition:width .3s}
 
-/* Header */
-.hd{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;border-bottom:1px solid var(--vp-c-divider);flex-shrink:0}
-.hd-left,.hd-right{display:flex;align-items:center;gap:8px}
+/* Header — 3 column centered */
+.hd{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:8px 12px;border-bottom:1px solid var(--vp-c-divider);flex-shrink:0}
+.hd-left{display:flex;align-items:center;gap:8px}
+.hd-center{display:flex;align-items:center;justify-content:center;gap:6px}
+.hd-right{display:flex;align-items:center;gap:8px;justify-content:flex-end}
 .hd-icon{color:var(--vp-c-brand-1);flex-shrink:0}
 .hd-title{font-size:13px;font-weight:600;letter-spacing:-.02em}
-.hd-sub{font-size:10px;color:var(--vp-c-text-3)}
 .hd-cov{font-size:11px;color:var(--vp-c-text-3);font-variant-numeric:tabular-nums;font-weight:500}
 .hd-toggle{
   padding:4px;border:none;background:none;color:var(--vp-c-text-3);
