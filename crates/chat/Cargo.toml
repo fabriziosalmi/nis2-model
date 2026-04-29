@@ -1,0 +1,14 @@
+[package]
+name = "nis2-chat"
+description = "Semantic Q&A cache with deterministic fallback for NIS2 compliance questions"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+nis2-rules.workspace = true
+nis2-slm.workspace = true

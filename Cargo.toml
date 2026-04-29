@@ -7,6 +7,7 @@ members = [
     "crates/mcp-server",
     "crates/slm",
     "crates/api",
+    "crates/chat",
 ]
 
 [workspace.package]
@@ -59,3 +60,4 @@ nis2-rules = { path = "crates/rules" }
 nis2-mcp-server = { path = "crates/mcp-server" }
 nis2-slm = { path = "crates/slm" }
 nis2-api = { path = "crates/api" }
+nis2-chat = { path = "crates/chat" }

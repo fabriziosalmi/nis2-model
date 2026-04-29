@@ -4622,6 +4622,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "nis2-chat"
+version = "0.0.2"
+dependencies = [
+ "anyhow",
+ "nis2-rules",
+ "nis2-slm",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "nis2-ingestion"
 version = "0.0.2"
 dependencies = [
