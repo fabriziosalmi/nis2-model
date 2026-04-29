@@ -4,6 +4,7 @@ import ChatMessages from './ChatMessages.vue'
 import ChatInput from './ChatInput.vue'
 import { bm25Search, isItalian, findFollowUps } from './search.js'
 import { formatAnswer } from './formatter.js'
+import { getStrings, getCategoryName } from './i18n.js'
 
 const dataset = ref([])
 const messages = ref([])
@@ -16,103 +17,41 @@ const totalMs = ref(0)
 const ready = ref(false)
 const loadProgress = ref(0)
 
-// Auto-detect browser language
 const lang = ref('en')
 onMounted(() => {
   const nav = navigator.language || navigator.userLanguage || 'en'
   if (nav.startsWith('it')) lang.value = 'it'
 })
 
-const t = computed(() => lang.value === 'it' ? {
-  title: 'NIS2 Compliance Engine',
-  sub: 'Deterministico · Zero LLM',
-  placeholder: 'Chiedi qualcosa sulla conformità NIS2...',
-  loading: 'Caricamento knowledge base...',
-  welcome: 'Chiedi qualsiasi cosa su NIS2',
-  welcomeSub: 'risposte pre-calcolate · IT/EN · Art. 20, 21, 23, 34',
-  miss: 'Domanda non trovata. Prova a riformulare o usa uno dei suggerimenti.',
-  coverage: 'Copertura',
-  session: 'Sessione',
-  queries: 'Domande',
-  hits: 'Risposte',
-  areas: 'Aree esplorate',
-  recent: 'Recenti',
-  linkProject: 'Progetto NIS2',
-  linkEngine: 'Motore',
-} : {
-  title: 'NIS2 Compliance Engine',
-  sub: 'Deterministic · Zero LLM',
-  placeholder: 'Ask anything about NIS2 compliance...',
-  loading: 'Loading knowledge base...',
-  welcome: 'Ask anything about NIS2',
-  welcomeSub: 'pre-computed answers · IT/EN · Art. 20, 21, 23, 34',
-  miss: 'Question not found. Try rephrasing or use a suggestion below.',
-  coverage: 'Coverage',
-  session: 'Session',
-  queries: 'Queries',
-  hits: 'Hits',
-  areas: 'Areas explored',
-  recent: 'Recent',
-  linkProject: 'NIS2 Project',
-  linkEngine: 'Engine',
-})
+const t = computed(() => getStrings(lang.value))
 
 const visitedCategories = ref(new Set())
-const AREAS = [
-  { id:'applicability' },
-  { id:'governance' },
-  { id:'access_control' },
-  { id:'encryption' },
-  { id:'incident_response' },
-  { id:'business_continuity' },
-  { id:'supply_chain' },
-  { id:'vulnerability_mgmt' },
-  { id:'risk_assessment' },
-  { id:'network_security' },
-  { id:'detection' },
-  { id:'email_security' },
-  { id:'documentation' },
-  { id:'remote_work' },
-  { id:'physical' },
-  { id:'legal' },
-  { id:'sanctions' },
-  { id:'asset_management' },
-  { id:'development' },
+const AREA_IDS = [
+  'applicability','governance','access_control','encryption','incident_response',
+  'business_continuity','supply_chain','vulnerability_mgmt','risk_assessment',
+  'network_security','detection','email_security','documentation',
+  'remote_work','physical','legal','sanctions','asset_management','development',
 ]
 const coverage = computed(() => {
-  const explored = AREAS.filter(a => visitedCategories.value.has(a.id)).length
-  return { explored, total: AREAS.length }
+  const explored = AREA_IDS.filter(a => visitedCategories.value.has(a)).length
+  return { explored, total: AREA_IDS.length }
 })
 const areaStatus = computed(() =>
-  AREAS.map(a => ({ ...a, name: a.id.replace(/_/g, ' '), visited: visitedCategories.value.has(a.id) }))
+  AREA_IDS.map(id => ({
+    id,
+    name: getCategoryName(id, lang.value),
+    visited: visitedCategories.value.has(id),
+  }))
 )
-
-const suggestions = computed(() => lang.value === 'it' ? [
-  { text: 'La mia azienda rientra nella NIS2?' },
-  { text: 'Da dove iniziare con NIS2?' },
-  { text: 'Ci hanno hackerato, cosa facciamo?' },
-  { text: 'Quanto costa adeguarsi a NIS2?' },
-  { text: 'Serve la crittografia?' },
-  { text: 'Quali sono le sanzioni NIS2?' },
-] : [
-  { text: 'Does NIS2 apply to my company?' },
-  { text: 'Where to start with NIS2?' },
-  { text: 'We got hacked, what do we do?' },
-  { text: 'What are the NIS2 obligations?' },
-  { text: 'Do we need encryption?' },
-  { text: 'What are the NIS2 sanctions?' },
-])
 
 function filterAsked(items) {
   return items.filter(q => !askedQuestions.value.has(q.toLowerCase()))
 }
 
-// Find questions from unexplored categories to prevent dead ends
 function exploreSuggestions(qLang, limit = 4) {
   const explored = visitedCategories.value
-  const unexplored = AREAS.filter(a => !explored.has(a.id)).map(a => a.id)
+  const unexplored = AREA_IDS.filter(a => !explored.has(a))
   if (!unexplored.length) return []
-
   const candidates = []
   for (const cat of unexplored) {
     const entries = dataset.value.filter(d => {
@@ -138,20 +77,16 @@ function search(query) {
     stats.value.hits++
     const rawFollowUps = findFollowUps(dataset.value, entry.c, qLang)
     let followUps = filterAsked(rawFollowUps)
-    // Backfill with unexplored categories if running low
     if (followUps.length < 2) {
-      const explore = exploreSuggestions(qLang, 4 - followUps.length)
-      followUps = [...followUps, ...explore]
+      followUps = [...followUps, ...exploreSuggestions(qLang, 4 - followUps.length)]
     }
     return {
       hit: true, answer: entry.a, html: formatAnswer(entry.a),
-      category: entry.c, followUps, elapsed,
+      category: getCategoryName(entry.c, qLang), followUps, elapsed,
     }
   }
-  const miss = qLang === 'it'
-    ? ['La mia azienda rientra nella NIS2?','Da dove iniziare con NIS2?','Quali sono gli obblighi NIS2?','Quanto costa adeguarsi?']
-    : ['Does NIS2 apply to my company?','Where to start with NIS2?','What are the NIS2 obligations?','What are the sanctions?']
-  let followUps = filterAsked(miss)
+  const missStrings = getStrings(qLang)
+  let followUps = filterAsked(missStrings.missSuggestions)
   if (followUps.length < 2) followUps = [...followUps, ...exploreSuggestions(qLang, 4 - followUps.length)]
   return { hit: false, elapsed, followUps }
 }
@@ -170,6 +105,8 @@ async function sendMessage(text) {
   const result = search(query)
   totalMs.value += result.elapsed
   stats.value.avgMs = totalMs.value / stats.value.queries
+  const qLang = isItalian(query) ? 'it' : lang.value
+  const missText = getStrings(qLang).miss
 
   if (result.hit) {
     const msg = { role:'assistant', text:result.answer, html:result.html, category:result.category, followUps:result.followUps, typing:true, displayHtml:'' }
@@ -181,7 +118,7 @@ async function sendMessage(text) {
     }
     msg.typing = false; msg.displayHtml = result.html
   } else {
-    messages.value.push({ role:'assistant', text: t.value.miss, html: t.value.miss, category:'miss', followUps:result.followUps, typing:false, displayHtml:'' })
+    messages.value.push({ role:'assistant', text: missText, html: missText, category:'miss', followUps:result.followUps, typing:false, displayHtml:'' })
   }
   isLoading.value = false
   await nextTick(); scrollBottom()
@@ -210,7 +147,6 @@ onMounted(async () => {
 </script>
 
 <template>
-<!-- Loader -->
 <div v-if="!ready" class="loader">
   <div class="loader-inner">
     <div class="loader-icon">
@@ -223,7 +159,6 @@ onMounted(async () => {
   </div>
 </div>
 
-<!-- Main -->
 <div v-else class="cb">
   <header class="cb-hd">
     <div class="cb-hd-l">
@@ -240,16 +175,15 @@ onMounted(async () => {
         {{ lang === 'it' ? '🇮🇹 IT' : '🇬🇧 EN' }}
       </button>
       <div class="pill">
-        <span class="pill-l">{{ t.coverage }}</span>
+        <span class="pill-l">{{ t.coverageLabel }}</span>
         <span class="pill-v">{{ coverage.explored }}/{{ coverage.total }}</span>
       </div>
     </div>
   </header>
 
   <div class="cb-body">
-    <!-- Left sidebar -->
     <aside class="cb-side cb-side-l">
-      <div class="side-hd">{{ t.coverage }}</div>
+      <div class="side-hd">{{ t.coverageLabel }}</div>
       <div class="area-list">
         <div v-for="a in areaStatus" :key="a.id" :class="['area-item', { visited: a.visited }]">
           <span :class="['area-dot', { on: a.visited }]"></span>
@@ -268,7 +202,6 @@ onMounted(async () => {
       </div>
     </aside>
 
-    <!-- Center -->
     <div class="cb-center">
       <ChatMessages ref="chatEl" :messages="messages" :isLoading="isLoading" @followUp="sendMessage">
         <template #welcome>
@@ -279,9 +212,7 @@ onMounted(async () => {
             <h2>{{ t.welcome }}</h2>
             <p>{{ stats.entries }} {{ t.welcomeSub }}</p>
             <div class="suggestions">
-              <button v-for="s in suggestions" :key="s.text" @click="sendMessage(s.text)" class="sug-btn">
-                {{ s.text }}
-              </button>
+              <button v-for="s in t.suggestions" :key="s" @click="sendMessage(s)" class="sug-btn">{{ s }}</button>
             </div>
           </div>
         </template>
@@ -289,7 +220,6 @@ onMounted(async () => {
       <ChatInput v-model:input="input" :disabled="isLoading || !stats.entries" :placeholder="t.placeholder" @send="sendMessage()" />
     </div>
 
-    <!-- Right sidebar -->
     <aside class="cb-side cb-side-r">
       <div class="side-hd">{{ t.session }}</div>
       <div class="ss">
@@ -315,7 +245,6 @@ onMounted(async () => {
 *{box-sizing:border-box}
 .cb,.loader{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 
-/* Loader */
 .loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--vp-c-bg);z-index:999}
 .loader-inner{text-align:center;animation:loaderIn .6s ease}
 .loader-icon{margin:0 auto 20px;color:var(--vp-c-brand-1);animation:pulse 2s infinite}
@@ -325,37 +254,32 @@ onMounted(async () => {
 .loader-fill{height:100%;background:var(--vp-c-brand-1);border-radius:2px;transition:width .3s}
 .loader-pct{font-size:11px;color:var(--vp-c-text-3);margin-top:8px;display:block;font-variant-numeric:tabular-nums}
 
-/* Main */
 .cb{display:flex;flex-direction:column;height:100vh;max-height:100vh;overflow:hidden;background:var(--vp-c-bg)}
 
-/* Header — compact */
 .cb-hd{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid var(--vp-c-divider);flex-shrink:0;gap:12px}
 .cb-hd-l{display:flex;align-items:center;gap:10px}
 .cb-logo{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--vp-c-brand-1);border-radius:8px}
 .cb-title{font-size:14px;font-weight:600;margin:0;letter-spacing:-.02em;color:var(--vp-c-text-1)}
-.cb-sub{font-size:11px;color:var(--vp-c-text-3);margin:0;letter-spacing:-.01em}
+.cb-sub{font-size:11px;color:var(--vp-c-text-3);margin:0}
 
 .cb-pills{display:flex;gap:6px;align-items:center}
 .pill{display:flex;align-items:center;gap:5px;padding:3px 8px;background:var(--vp-c-bg-soft);border:1px solid var(--vp-c-divider);border-radius:6px;font-size:11px}
-.pill-lang{cursor:pointer;font-weight:600;transition:background .15s;border:1px solid var(--vp-c-divider);background:var(--vp-c-bg-soft)}
+.pill-lang{cursor:pointer;font-weight:600;transition:background .15s}
 .pill-lang:hover{background:var(--vp-c-brand-soft)}
 .pill-l{color:var(--vp-c-text-3);font-weight:500}
 .pill-v{color:var(--vp-c-text-1);font-weight:600;font-variant-numeric:tabular-nums}
 
-/* Body */
 .cb-body{display:flex;flex:1;overflow:hidden}
 
-/* Sidebars */
 .cb-side{width:190px;flex-shrink:0;padding:14px;overflow-y:auto;display:flex;flex-direction:column;background:var(--vp-c-bg-soft)}
 .cb-side-l{border-right:1px solid var(--vp-c-divider)}
 .cb-side-r{border-left:1px solid var(--vp-c-divider)}
 .side-hd{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--vp-c-text-3);margin-bottom:10px}
 
-/* Coverage list */
 .area-list{display:flex;flex-direction:column;gap:1px}
-.area-item{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:4px;font-size:11.5px;color:var(--vp-c-text-3);transition:color .2s;letter-spacing:-.01em}
+.area-item{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:4px;font-size:11.5px;color:var(--vp-c-text-3);transition:color .2s}
 .area-item.visited{color:var(--vp-c-text-1);font-weight:500}
-.area-dot{width:6px;height:6px;border-radius:50%;background:var(--vp-c-divider);flex-shrink:0;transition:background .3s}
+.area-dot{width:6px;height:6px;border-radius:50%;background:var(--vp-c-divider);flex-shrink:0;transition:all .3s}
 .area-dot.on{background:var(--vp-c-brand-1);box-shadow:0 0 6px rgba(59,130,246,.4)}
 .area-name{text-transform:capitalize}
 
@@ -363,9 +287,8 @@ onMounted(async () => {
 .side-link{font-size:11px;color:var(--vp-c-text-3);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .15s}
 .side-link:hover{color:var(--vp-c-brand-1)}
 
-/* Session */
 .ss{display:flex;flex-direction:column;gap:6px}
-.ss-row{display:flex;justify-content:space-between;font-size:11.5px;color:var(--vp-c-text-3);letter-spacing:-.01em}
+.ss-row{display:flex;justify-content:space-between;font-size:11.5px;color:var(--vp-c-text-3)}
 .ss-val{font-weight:600;color:var(--vp-c-text-1);font-variant-numeric:tabular-nums}
 
 .trail{display:flex;flex-direction:column;gap:1px}
@@ -374,21 +297,18 @@ onMounted(async () => {
 .trail-item svg{flex-shrink:0;opacity:.3;margin-top:2px}
 .trail-text{line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
-/* Center */
 .cb-center{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 
-/* Welcome */
 .welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;gap:10px;animation:fadeIn .6s ease}
 .w-shield{color:var(--vp-c-brand-1);opacity:.12}
 .welcome h2{font-size:20px;font-weight:600;margin:0;letter-spacing:-.03em;color:var(--vp-c-text-1)}
-.welcome p{color:var(--vp-c-text-3);font-size:13px;margin:0;letter-spacing:-.01em}
+.welcome p{color:var(--vp-c-text-3);font-size:13px;margin:0}
 .suggestions{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:520px;margin-top:6px}
-.sug-btn{padding:7px 14px;border:1px solid var(--vp-c-divider);border-radius:18px;background:var(--vp-c-bg);color:var(--vp-c-text-2);font-size:13px;cursor:pointer;transition:all .15s;letter-spacing:-.01em}
+.sug-btn{padding:7px 14px;border:1px solid var(--vp-c-divider);border-radius:18px;background:var(--vp-c-bg);color:var(--vp-c-text-2);font-size:13px;cursor:pointer;transition:all .15s}
 .sug-btn:hover{border-color:var(--vp-c-brand-1);color:var(--vp-c-text-1);background:var(--vp-c-bg-soft)}
 
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes loaderIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
 @keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
-
 @media(max-width:900px){.cb-side{display:none}.cb-pills .pill:not(.pill-lang){display:none}}
 </style>
