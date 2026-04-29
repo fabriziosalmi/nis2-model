@@ -48,7 +48,7 @@ export function findFollowUps(dataset, category, lang) {
   const langFiltered = candidates.filter(d =>
     lang === 'it' ? isItalian(d.q) : !isItalian(d.q)
   )
-  const pool = langFiltered.length >= 3 ? langFiltered : candidates
+  const pool = langFiltered.length > 0 ? langFiltered : candidates
   const seen = new Set()
   const result = []
   for (const d of pool) {

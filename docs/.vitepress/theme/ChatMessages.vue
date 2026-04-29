@@ -146,7 +146,7 @@ defineEmits(['followUp'])
   flex-shrink:0;margin-top:1px;
 }
 .msg-rich :deep(.step-text){
-  flex:1;line-height:1.55;font-size:13.5px;
+  flex:1;line-height:1.6;font-size:14px;
   color:var(--vp-c-text-1);
 }
 
