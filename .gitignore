@@ -1,7 +1,38 @@
+# Rust
 /target
+Cargo.lock
+
+# Models & ML artifacts
 *.gguf
-data/sources/*.pdf
-data/lancedb/
+*.onnx
+*.bin
 .fastembed_cache/
+
+# Data artifacts (regenerable)
+data/lancedb/
+data/chunks/
+
+# Source PDFs (not redistributable)
+data/sources/*.pdf
+
+# Environment & secrets
 .env
+.env.*
+!.env.example
+
+# OS artifacts
 *.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# VitePress build output
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+node_modules/

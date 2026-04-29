@@ -47,6 +47,6 @@ async fn main() -> Result<()> {
         info!("Indexed {indexed} DORA chunks");
     }
 
-    info!("✅ Indexing complete.");
+    info!("Indexing complete.");
     Ok(())
 }

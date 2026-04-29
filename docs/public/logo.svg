@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a56db"/>
+      <stop offset="50%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#db2777"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="15" width="80" height="70" rx="8" fill="url(#g)" opacity="0.1"/>
+  <rect x="10" y="15" width="80" height="70" rx="8" stroke="url(#g)" stroke-width="2.5" fill="none"/>
+  <path d="M30 35 L50 25 L70 35 L70 55 L50 65 L30 55 Z" stroke="url(#g)" stroke-width="2" fill="url(#g)" fill-opacity="0.15"/>
+  <path d="M50 25 L50 65" stroke="url(#g)" stroke-width="1.5" opacity="0.5"/>
+  <path d="M30 35 L70 55" stroke="url(#g)" stroke-width="1.5" opacity="0.5"/>
+  <path d="M70 35 L30 55" stroke="url(#g)" stroke-width="1.5" opacity="0.5"/>
+  <circle cx="50" cy="45" r="6" fill="url(#g)"/>
+  <text x="50" y="48" text-anchor="middle" font-family="system-ui" font-size="7" font-weight="700" fill="white">✓</text>
+  <text x="50" y="80" text-anchor="middle" font-family="system-ui" font-size="8" font-weight="700" fill="url(#g)">NIS2</text>
+</svg>

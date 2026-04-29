@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
     let embedder = Embedder::new(EmbedModel::BgeSmall)?;
     let store = LanceStore::open("data/lancedb", embedder).await?;
 
-    println!("🔍 Query: \"{query}\"\n");
+    println!("Query: \"{query}\"\n");
 
     let results = store.search(&query, 5).await?;
 

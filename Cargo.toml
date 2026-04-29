@@ -10,11 +10,11 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.0.2"
 edition = "2024"
 license = "EUPL-1.2"
 authors = ["Fabrizio Trotti"]
-repository = "https://github.com/fabriziotrotti/nis2-model"
+repository = "https://github.com/fabriziosalmi/nis2-model"
 
 [workspace.dependencies]
 # Serialization
@@ -40,6 +40,10 @@ arrow-schema = "57"
 
 # Async utilities
 futures = "0.3"
+
+# HTTP Server
+axum = "0.8"
+tower-http = { version = "0.6", features = ["cors", "trace"] }
 
 # JSON Schema
 schemars = "0.8"
