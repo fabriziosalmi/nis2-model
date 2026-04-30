@@ -764,59 +764,18 @@ pub fn build_dataset() -> Vec<CacheEntry> {
         });
     }
 
-    // --- Italian + EN paraphrase entries from dataset_it ---
-    for (q, a, cat) in crate::dataset_it::italian_entries() {
-        entries.push(CacheEntry {
-            question: q.to_string(),
-            answer: a.to_string(),
-            category: cat.to_string(),
-            follow_ups: vec![],
-            embedding: vec![],
-        });
+    // --- Italian Refactored Domains ---
+    for (q, a, cat) in crate::it::basics::entries() {
+        entries.push(CacheEntry { question: q.to_string(), answer: a.to_string(), category: cat.to_string(), follow_ups: vec![], embedding: vec![] });
     }
-
-    // --- Italian expansion (2x coverage) ---
-    for (q, a, cat) in crate::dataset_it2::italian_expansion() {
-        entries.push(CacheEntry {
-            question: q.to_string(),
-            answer: a.to_string(),
-            category: cat.to_string(),
-            follow_ups: vec![],
-            embedding: vec![],
-        });
+    for (q, a, cat) in crate::it::legal::entries() {
+        entries.push(CacheEntry { question: q.to_string(), answer: a.to_string(), category: cat.to_string(), follow_ups: vec![], embedding: vec![] });
     }
-
-    // --- Italian deep-dive entries (long-form detailed answers) ---
-    for (q, a, cat) in crate::dataset_it3::italian_deep() {
-        entries.push(CacheEntry {
-            question: q.to_string(),
-            answer: a.to_string(),
-            category: cat.to_string(),
-            follow_ups: vec![],
-            embedding: vec![],
-        });
+    for (q, a, cat) in crate::it::tech_ops::entries() {
+        entries.push(CacheEntry { question: q.to_string(), answer: a.to_string(), category: cat.to_string(), follow_ups: vec![], embedding: vec![] });
     }
-
-    // --- Italian Practical Solutions ---
-    for (q, a, cat) in crate::dataset_it4::italian_practical() {
-        entries.push(CacheEntry {
-            question: q.to_string(),
-            answer: a.to_string(),
-            category: cat.to_string(),
-            follow_ups: vec![],
-            embedding: vec![],
-        });
-    }
-
-    // --- Italian Massive Solutions ---
-    for (q, a, cat) in crate::dataset_it5::italian_massive() {
-        entries.push(CacheEntry {
-            question: q.to_string(),
-            answer: a.to_string(),
-            category: cat.to_string(),
-            follow_ups: vec![],
-            embedding: vec![],
-        });
+    for (q, a, cat) in crate::it::governance::entries() {
+        entries.push(CacheEntry { question: q.to_string(), answer: a.to_string(), category: cat.to_string(), follow_ups: vec![], embedding: vec![] });
     }
 
     // --- Scenario entries (panic questions EN+IT) ---

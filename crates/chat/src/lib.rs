@@ -9,11 +9,8 @@
 
 pub mod cache;
 pub mod dataset;
-pub mod dataset_it;
-pub mod dataset_it2;
-pub mod dataset_it3;
-pub mod dataset_it4;
-pub mod dataset_it5;
+pub mod it;
+
 pub mod dataset_legal;
 pub mod dataset_ops;
 pub mod dataset_scenarios;
