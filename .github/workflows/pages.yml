@@ -31,6 +31,10 @@ jobs:
         if: hashFiles('Cargo.toml') != ''
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Install protoc
+        if: hashFiles('Cargo.toml') != ''
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
       - name: Run Rust tests
         if: hashFiles('Cargo.toml') != ''
         run: cargo test --workspace
