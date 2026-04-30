@@ -43,6 +43,14 @@ defineEmits(['followUp'])
           {{ m.catLink.label }}
         </a>
       </div>
+
+      <!-- Glossary terms -->
+      <div v-if="m.glossary?.length && !m.typing" class="gloss">
+        <div class="gloss-row" v-for="g in m.glossary" :key="g.term">
+          <span class="gloss-term">{{ g.term }}</span>
+          <span class="gloss-def">{{ g.def }}</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -206,6 +214,18 @@ defineEmits(['followUp'])
   background:rgba(99,102,241,.06);color:var(--vp-c-text-3);
   font-weight:500;letter-spacing:.01em;white-space:nowrap;
 }
+
+/* Glossary terms */
+.gloss{
+  padding:6px 12px 8px;border-top:1px solid var(--vp-c-divider);
+  display:flex;flex-direction:column;gap:2px;
+}
+.gloss-row{display:flex;align-items:baseline;gap:6px;font-size:10.5px;line-height:1.4}
+.gloss-term{
+  font-weight:600;color:var(--vp-c-text-2);white-space:nowrap;
+  letter-spacing:.02em;flex-shrink:0;
+}
+.gloss-def{color:var(--vp-c-text-3);}
 
 /* Dots */
 .dots{display:flex;gap:5px;padding:12px 16px}

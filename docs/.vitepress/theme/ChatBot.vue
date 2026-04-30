@@ -4,6 +4,7 @@ import ChatMessages from './ChatMessages.vue'
 import ChatInput from './ChatInput.vue'
 import { bm25Search, isItalian, findFollowUps } from './search.js'
 import { formatAnswer, extractArticles, getCategoryLink } from './formatter.js'
+import { findTerms, GLOSSARY_SIZE } from './glossary.js'
 import { getStrings, getCategoryName } from './i18n.js'
 
 const dataset = ref([])
@@ -117,6 +118,7 @@ function search(query) {
       catLink: getCategoryLink(entry.c, uiLang),
       severity: entry.s || 'info',
       deadline: entry.d || '',
+      glossary: findTerms(entry.a).map(t => ({ term: t.term.toUpperCase(), def: uiLang === 'it' ? t.it : t.en })),
       standards: entry.r || [],
     }
   }
@@ -143,7 +145,7 @@ async function sendMessage(text) {
   const missText = t.value.miss
 
   if (result.hit) {
-    const msg = { role:'assistant', text:result.answer, html:result.html, category:result.category, followUps:result.followUps, refs:result.refs, catLink:result.catLink, severity:result.severity, deadline:result.deadline, standards:result.standards, typing:true, displayHtml:'' }
+    const msg = { role:'assistant', text:result.answer, html:result.html, category:result.category, followUps:result.followUps, refs:result.refs, catLink:result.catLink, severity:result.severity, deadline:result.deadline, standards:result.standards, glossary:result.glossary, typing:true, displayHtml:'' }
     messages.value.push(msg)
     const words = result.answer.split(' ')
     for (let i = 0; i < words.length; i++) {
