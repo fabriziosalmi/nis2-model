@@ -16,15 +16,19 @@ defineEmits(['followUp'])
       <!-- ── ASSISTANT MESSAGE ── -->
       <template v-else>
 
-        <!-- Section 1: Category badge -->
+        <!-- Section 1: Category badge + confidence -->
         <div v-if="m.category && m.category !== 'miss'" class="section-meta">
           <span :class="['sev-dot', m.severity || 'info']"></span>
           <span class="m-cat">{{ m.category }}</span>
           <span v-if="m.deadline" class="m-deadline">{{ m.deadline }}</span>
+          <span class="meta-spacer"></span>
+          <span v-if="m.confidence && !m.typing" class="confidence-badge" :class="m.confidence >= 80 ? 'conf-high' : m.confidence >= 50 ? 'conf-med' : 'conf-low'">
+            {{ m.confidence }}% match
+          </span>
         </div>
 
         <!-- Section 2: Main answer -->
-        <div class="section-answer">
+        <div :class="['section-answer', { 'fade-up': !m.typing }]">
           <div class="msg-rich" v-html="m.typing ? m.displayHtml : m.html"></div>
           <span v-if="m.typing" class="cursor-blink">▋</span>
         </div>
@@ -135,6 +139,14 @@ defineEmits(['followUp'])
   font-size:9.5px;color:var(--vp-c-text-3);
   font-weight:500;letter-spacing:.02em;
 }
+.meta-spacer{flex:1}
+.confidence-badge{
+  font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;
+  font-variant-numeric:tabular-nums;letter-spacing:.02em;
+}
+.conf-high{background:rgba(34,197,94,.08);color:rgba(34,197,94,.85)}
+.conf-med{background:rgba(245,158,11,.08);color:rgba(245,158,11,.85)}
+.conf-low{background:rgba(239,68,68,.08);color:rgba(239,68,68,.85)}
 
 /* ── SECTION 2: MAIN ANSWER ── */
 .section-answer{
@@ -296,6 +308,8 @@ defineEmits(['followUp'])
 @keyframes slideIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+@keyframes fadeBlur{from{opacity:0;filter:blur(2px);transform:translateY(6px)}to{opacity:1;filter:blur(0);transform:translateY(0)}}
+.fade-up{animation:fadeBlur .4s ease-out}
 
 /* ── RESPONSIVE ── */
 @media(max-width:768px){
