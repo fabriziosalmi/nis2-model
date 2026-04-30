@@ -55,7 +55,7 @@ const t = computed(() => getStrings(props.lang))
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
               Art. {{ r.num }}
             </a>
-            <span v-for="s in (m.standards || [])" :key="s" class="std-chip">{{ s }}</span>
+            <a v-for="s in (m.standards || [])" :key="s.label" :href="s.url" target="_blank" class="std-chip">{{ s.label }}</a>
             <a v-if="m.catLink" :href="m.catLink.url" target="_blank" class="ref-link ref-cat">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
               {{ m.catLink.label }}
@@ -223,7 +223,10 @@ const t = computed(() => getStrings(props.lang))
 .std-chip{
   font-size:11px;padding:4px 12px;border-radius:9999px;
   background:var(--vp-c-bg-alt);color:var(--vp-c-text-2);font-weight:500;white-space:nowrap;
+  text-decoration:none;transition:all .15s ease-out;display:inline-block;
 }
+.std-chip:hover{color:var(--vp-c-text-1);background:var(--vp-c-bg-soft)}
+.std-chip:active{background:var(--vp-c-bg-soft)}
 
 /* ── GLOSSARY ── */
 .section-glossary{padding:16px 24px;border-top:1px solid var(--vp-c-divider)}

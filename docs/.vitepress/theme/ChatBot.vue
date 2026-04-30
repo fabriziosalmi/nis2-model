@@ -522,15 +522,8 @@ const citedArticles = computed(() => {
 
     <!-- Right sidebar: Command Dashboard -->
     <aside v-if="showRight && !focusMode" class="side side-r">
-      <!-- Status badge -->
-      <div class="side-label">{{ lang === 'it' ? 'Stato Conformità' : 'Compliance Status' }}</div>
-      <div :class="['status-badge', coverage.pct >= 70 ? 'status-ok' : coverage.pct > 0 ? 'status-eval' : 'status-none']" :title="coverage.pct >= 70 ? t.tooltips?.statusOk : coverage.pct > 0 ? t.tooltips?.statusEval : t.tooltips?.statusNone">
-        <span class="status-dot"></span>
-        {{ coverage.pct >= 70 ? (lang === 'it' ? 'IN REGOLA' : 'COMPLIANT') : coverage.pct > 0 ? (lang === 'it' ? 'IN VALUTAZIONE' : 'EVALUATING') : (lang === 'it' ? 'NON VALUTATO' : 'NOT ASSESSED') }}
-      </div>
-
       <!-- Normativa identificata -->
-      <div class="side-label" style="margin-top:16px">{{ lang === 'it' ? 'Norme Identificate' : 'Identified Legislation' }}</div>
+      <div class="side-label">{{ lang === 'it' ? 'Norme Identificate' : 'Identified Legislation' }}</div>
       <div class="side-panel">
         <template v-if="citedArticles.length">
           <a v-for="art in citedArticles" :key="art.num" :href="art.url" target="_blank" class="norm-card" :title="t.tooltips?.normCard + ' — Art. ' + art.num">

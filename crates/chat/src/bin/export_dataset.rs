@@ -39,8 +39,8 @@ fn deadline_for(cat: &str) -> &'static str {
     }
 }
 
-fn standards_for(cat: &str) -> Vec<&'static str> {
-    match cat {
+fn standards_for(cat: &str) -> Vec<serde_json::Value> {
+    let stubs = match cat {
         c if c.contains("incident") => vec!["ISO 27001 A.16", "NIST CSF RS.RP", "CIS 17"],
         c if c.contains("governance") => vec!["ISO 27001 A.5", "NIST CSF GV.OC"],
         c if c.contains("access_control") => vec!["ISO 27001 A.9", "NIST CSF PR.AC", "CIS 5,6"],
@@ -60,7 +60,15 @@ fn standards_for(cat: &str) -> Vec<&'static str> {
         c if c.contains("asset") => vec!["ISO 27001 A.8", "NIST CSF ID.AM", "CIS 1,2"],
         c if c.contains("development") => vec!["ISO 27001 A.14", "NIST CSF PR.IP", "CIS 16"],
         _ => vec![],
-    }
+    };
+    
+    stubs.into_iter().map(|s| {
+        let url = if s.starts_with("ISO") { "https://www.iso.org/isoiec-27001-information-security.html" }
+        else if s.starts_with("NIST") { "https://www.nist.gov/cyberframework" }
+        else if s.starts_with("CIS") { "https://www.cisecurity.org/controls/" }
+        else { "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022L2555" };
+        serde_json::json!({ "label": s, "url": url })
+    }).collect()
 }
 
 fn main() {
