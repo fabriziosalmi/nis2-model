@@ -2,7 +2,7 @@
 
 # NIS2 Compliance Assistant
 
-**A deterministic, zero-hallucination compliance engine and interactive assistant for the NIS2 Directive and DORA Regulation.**
+**A deterministic compliance engine and web interface for the NIS2 Directive and DORA Regulation.**
 
 [![License: EUPL-1.2](https://img.shields.io/badge/License-EUPL--1.2-blue.svg)](https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12)
 [![Rust](https://img.shields.io/badge/Rust-2024_Edition-orange.svg)](https://www.rust-lang.org/)
@@ -12,28 +12,28 @@
 
 ---
 
-Welcome to the **NIS2 Compliance Assistant**. This project is a hybrid platform that unifies the strict, mathematical reliability of a deterministic rules engine with the accessibility of an interactive, intelligent web application.
+Welcome to the NIS2 Compliance Assistant. This project is a hybrid platform that unifies a deterministic rules engine with an interactive web application.
 
-It is designed to solve the "hallucination problem" inherent in LLM-based compliance tools by relying on a strict, pre-compiled Rust logic engine that evaluates organizational data against legal texts with zero margin for creative interpretation.
+It is designed to evaluate organizational data against legal texts using a strict, pre-compiled Rust logic engine, providing consistent and repeatable compliance assessments.
 
-## 🌟 The Unified Vision
+## Architecture
 
 This project consists of two tightly integrated layers:
 
 ### 1. The Interactive Assistant (Web UI)
-A highly accessible, browser-based intelligent assistant deployed via VitePress. 
-- **Semantic Chatbot:** Powered by a pre-computed, deterministic dataset of hundreds of verified Q&A entries across 5 languages.
-- **Guided Assessment:** Interactive paths to map your organization's profile directly against legal requirements.
-- **Privacy-First:** Evaluates rules locally and securely. No compliance data is sent to external AI providers.
+A browser-based application deployed via VitePress. 
+- **Semantic Chatbot:** Driven by a pre-computed dataset of verified Q&A entries across 5 languages.
+- **Guided Assessment:** Interactive paths to map an organization's profile directly against legal requirements.
+- **Local Evaluation:** Evaluates rules locally and securely within the browser via WebAssembly. No compliance data is transmitted to external providers.
 
 ### 2. The Deterministic Engine (Rust Core)
-The algorithmic brain of the platform. A robust Rust workspace that models the compliance logic of the [NIS2 Directive (EU 2022/2555)](https://eur-lex.europa.eu/eli/dir/2022/2555) and indexes [DORA Regulation (EU 2022/2554)](https://eur-lex.europa.eu/eli/reg/2022/2554).
+The core logic of the platform. A Rust workspace that models the compliance constraints of the [NIS2 Directive (EU 2022/2555)](https://eur-lex.europa.eu/eli/dir/2022/2555) and indexes the [DORA Regulation (EU 2022/2554)](https://eur-lex.europa.eu/eli/reg/2022/2554).
 - **Rule Evaluation:** Given a company profile (sector, size, revenue), it evaluates applicability, maps the 16 core obligations, and calculates maximum sanctions.
-- **Integration Ready:** Exposes the logic via REST APIs, an MCP (Model Context Protocol) server for LLMs, and CLI reporting tools.
+- **Integration Ready:** Exposes the logic via WebAssembly (WASM), REST APIs, an MCP (Model Context Protocol) server, and CLI reporting tools.
 
 ---
 
-## 🛠 For Developers: The Rust Engine
+## For Developers: The Rust Engine
 
 The workspace is composed of several specialized crates:
 
@@ -45,12 +45,13 @@ The workspace is composed of several specialized crates:
 | [`nis2-mcp-server`](crates/mcp-server/) | Exposes 4 assessment tools via MCP JSON-RPC 2.0 over stdio | 13 |
 | [`nis2-slm`](crates/slm/) | Generates localized compliance reports via template substitution | 18 |
 | [`nis2-api`](crates/api/) | Axum REST API endpoints and benchmark binary | 6 |
+| [`nis2-chat`](crates/chat/) | Dataset generation and tools for the web interface | 1 |
 
 ### Build and Test
 
 ```bash
 cargo build --workspace
-cargo test --workspace   # 61 tests
+cargo test --workspace
 ```
 
 ### Rule Engine Logic
@@ -79,25 +80,26 @@ CompanyProfile { sector, employees, annual_revenue_eur_m }
 | `report` | `cargo run --bin report` | Generates localized markdown compliance report |
 | `mcp-server` | `cargo run --bin mcp-server` | MCP JSON-RPC server (stdio) |
 | `api-server` | `cargo run --bin api-server` | HTTP server on port 8080 |
+| `export_dataset`| `cargo run --bin export_dataset`| Exports Q&A dataset for VitePress |
 | `bench` | `cargo run --bin bench --release` | Benchmark suite |
 
 ---
 
-## ⚠️ Limitations
+## Limitations
 
-This tool evaluates a **subset** of the NIS2 Directive. Before relying on its outputs, understand these constraints:
+This tool evaluates a subset of the NIS2 Directive. Before relying on its outputs, understand these constraints:
 
 | Area | Status |
 |------|--------|
 | Articles covered | Art. 2, 3, 20, 21, 23, 34 |
 | Articles NOT covered | Art. 7-9, 13-14, 26-29, 32-33, 35 |
-| National transpositions | **Not implemented** (e.g. Italian D.Lgs. 138/2024) — EU Directive only |
+| National transpositions | Not implemented (e.g. Italian D.Lgs. 138/2024) — EU Directive only |
 | Size thresholds | Simplified (employees OR revenue) — linked/partner enterprise rules not implemented |
-| Sub-sector / Balance Sheet | Accepted as input but **not used** for deterministic logic |
+| Sub-sector / Balance Sheet | Accepted as input but not used for deterministic logic |
 
 ---
 
-## ⚖️ Legal Disclaimer
+## Legal Disclaimer
 
 > **This tool does NOT provide legal advice.** All outputs are automated classifications generated by deterministic software. They do not replace consultation with a qualified legal professional. See the full [Terms of Use](docs/legal/terms.md) and [Legal Disclaimer](docs/legal/disclaimer.md).
 
