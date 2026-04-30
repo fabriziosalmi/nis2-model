@@ -2,7 +2,7 @@
 
 ## Automated Analysis Tool — Not Legal Advice
 
-The NIS2 Compliance Engine is a **software tool** that performs automated classification based on deterministic rules. It is **not** a law firm, legal advisor, or substitute for qualified legal counsel.
+The nis2-model is a **software tool** that performs automated classification based on deterministic rules. It is **not** a law firm, legal advisor, or substitute for qualified legal counsel.
 
 ### What this tool does
 

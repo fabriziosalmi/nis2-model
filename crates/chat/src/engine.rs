@@ -58,6 +58,12 @@ pub struct Session {
     visited_categories: HashSet<String>,
 }
 
+impl Default for Session {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Session {
     pub fn new() -> Self {
         Self {

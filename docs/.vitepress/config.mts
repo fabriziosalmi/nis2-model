@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: 'NIS2 Compliance Engine',
+  title: 'nis2-model',
   description: 'Interactive NIS2 compliance guidance engine — deterministic, zero-LLM, bilingual IT/EN',
   base: '/nis2-model/',
   lang: 'en-US',

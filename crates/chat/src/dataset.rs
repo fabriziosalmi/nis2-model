@@ -1056,7 +1056,15 @@ fn follow_ups_for(category: &str) -> Vec<String> {
             "What are the NIS2 obligations?".into(),
             "Does NIS2 apply to banking companies?".into(),
         ],
-        "general" | "classification" | _ => vec![
+        "general" | "classification" => vec![
+            "What are the NIS2 obligations?".into(),
+            "What are the NIS2 sanctions?".into(),
+            "What are the NIS2 incident reporting deadlines?".into(),
+            "Do we need a risk assessment?".into(),
+            "Is the board personally liable under NIS2?".into(),
+            "When does NIS2 come into effect?".into(),
+        ],
+        _ => vec![
             "What are the NIS2 obligations?".into(),
             "What are the NIS2 sanctions?".into(),
             "What are the NIS2 incident reporting deadlines?".into(),

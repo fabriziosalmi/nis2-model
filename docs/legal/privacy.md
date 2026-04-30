@@ -10,7 +10,7 @@ Fabrizio Salmi — [GitHub](https://github.com/fabriziosalmi)
 
 ### Client-Side Processing (No Server Transmission)
 
-The NIS2 Compliance Engine chatbot processes the following data **entirely in your browser**. No data is sent to any server operated by the project:
+The nis2-model chatbot processes the following data **entirely in your browser**. No data is sent to any server operated by the project:
 
 | Data | Purpose | Storage | Legal Basis (GDPR) |
 |------|---------|---------|-------------------|

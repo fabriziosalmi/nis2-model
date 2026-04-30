@@ -4,7 +4,7 @@
 
 ## 1. Nature of the Service
 
-The NIS2 Compliance Engine ("the Tool") is an open-source software that provides **automated, preliminary analysis** of potential NIS2 Directive applicability based on user-provided parameters.
+The nis2-model ("the Tool") is an open-source software that provides **automated, preliminary analysis** of potential NIS2 Directive applicability based on user-provided parameters.
 
 ## 2. Not Legal Advice
 
