@@ -227,19 +227,18 @@ const t = computed(() => getStrings(props.lang))
 /* ── GLOSSARY — CSS Grid ── */
 .section-glossary{padding:16px 24px;border-top:1px solid rgba(255,255,255,.06)}
 .gloss-grid{
-  display:grid;grid-template-columns:minmax(100px,max-content) 1fr;
-  gap:6px 16px;align-items:baseline;
+  display:flex;flex-direction:column;gap:10px;
 }
-.gloss-row{display:contents}
+.gloss-row{display:flex;align-items:flex-start;gap:12px}
 .gloss-term{
   font-weight:700;color:#93c5fd;white-space:nowrap;
   font-size:9px;text-transform:uppercase;letter-spacing:.1em;
-  padding:3px 10px;border-radius:4px;
+  padding:4px 10px;border-radius:4px;
   background:rgba(96,165,250,.08);
   border:1px solid rgba(96,165,250,.12);
-  justify-self:start;
+  flex-shrink:0;line-height:1.4;margin-top:1px;
 }
-.gloss-def{color:#94a3b8;font-size:12px;line-height:1.5}
+.gloss-def{color:#94a3b8;font-size:12px;line-height:1.5;flex:1;min-width:0}
 
 /* ── LOADING ── */
 .dots{display:flex;gap:6px;padding:16px 24px}
@@ -259,8 +258,7 @@ const t = computed(() => getStrings(props.lang))
   .cb-chat{padding:16px 16px 32px}
   .bubble,.msg-col{max-width:95%}
   .section-answer,.section-followups,.section-refs,.section-glossary{padding-left:16px;padding-right:16px}
-  .gloss-grid{grid-template-columns:1fr;gap:4px 0}
-  .gloss-row{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}
+  .gloss-row{flex-direction:column;gap:4px}
 }
 
 /* ══════════════════════════════════════════════
@@ -270,7 +268,7 @@ const t = computed(() => getStrings(props.lang))
 :root:not(.dark) .cb-chat::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.2)}
 
 :root:not(.dark) .bubble-user{background:#2563eb;color:#fff}
-:root:not(.dark) .bubble-assistant{border-color:rgba(0,0,0,.08)}
+:root:not(.dark) .bubble-assistant{border-color:rgba(0,0,0,.08);box-shadow:0 1px 4px rgba(0,0,0,.06)}
 :root:not(.dark) .cat-tab{color:#475569;border-color:rgba(0,0,0,.08);border-bottom-color:var(--vp-c-bg-soft)}
 
 :root:not(.dark) .msg-rich{color:#1e293b}
@@ -281,6 +279,8 @@ const t = computed(() => getStrings(props.lang))
 :root:not(.dark) .msg-rich :deep(.step-num){background:#2563eb;color:#fff}
 :root:not(.dark) .msg-rich :deep(.step-text){color:#1e293b}
 :root:not(.dark) .msg-rich :deep(.art-ref){color:#1d4ed8}
+
+:root:not(.dark) .section-label{color:#475569}
 
 :root:not(.dark) .section-followups{border-top-color:rgba(0,0,0,.08)}
 :root:not(.dark) .fup-btn{color:#475569}
@@ -300,4 +300,10 @@ const t = computed(() => getStrings(props.lang))
 
 :root:not(.dark) .dots span{background:#94a3b8}
 :root:not(.dark) .cursor-blink{color:#2563eb}
+
+/* Severity dot light mode contrast */
+:root:not(.dark) .sev-dot.critical{background:#dc2626;box-shadow:0 0 5px rgba(220,38,38,.4)}
+:root:not(.dark) .sev-dot.high{background:#d97706;box-shadow:0 0 5px rgba(217,119,6,.35)}
+:root:not(.dark) .sev-dot.medium{background:#7c3aed}
+:root:not(.dark) .sev-dot.info{background:#2563eb}
 </style>

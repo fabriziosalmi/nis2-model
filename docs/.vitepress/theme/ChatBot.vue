@@ -726,6 +726,13 @@ const citedArticles = computed(() => {
    LIGHT MODE OVERRIDES
    ══════════════════════════════════════════════ */
 
+/* Header */
+:root:not(.dark) .hd{border-bottom-color:rgba(0,0,0,.08);box-shadow:0 1px 3px rgba(0,0,0,.06)}
+
+/* Sidebar structural borders */
+:root:not(.dark) .side-l{border-right-color:rgba(0,0,0,.08);box-shadow:1px 0 3px rgba(0,0,0,.04)}
+:root:not(.dark) .side-r{border-left-color:rgba(0,0,0,.08);box-shadow:-1px 0 3px rgba(0,0,0,.04)}
+
 /* Sidebar areas */
 :root:not(.dark) .area{color:#475569}
 :root:not(.dark) .area:hover{background:rgba(0,0,0,.04);color:#1e293b}
@@ -733,9 +740,18 @@ const citedArticles = computed(() => {
 :root:not(.dark) .area-dot{background:rgba(0,0,0,.1)}
 :root:not(.dark) .area.on .area-dot{background:#2563eb;box-shadow:0 0 6px rgba(37,99,235,.35)}
 
+/* Sidebar footer */
+:root:not(.dark) .side-footer{border-top-color:rgba(0,0,0,.08)}
+:root:not(.dark) .side-link{color:#64748b}
+:root:not(.dark) .side-link:hover{color:#2563eb}
+
 /* Sidebar scrollbar */
 :root:not(.dark) .side::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1)}
 :root:not(.dark) .side::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.18)}
+
+/* Ring text */
+:root:not(.dark) .ring-pct{color:#1e293b}
+:root:not(.dark) .ring-cap{color:#64748b}
 
 /* Right panel — norm cards */
 :root:not(.dark) .norm-card{color:#475569}
@@ -757,6 +773,9 @@ const citedArticles = computed(() => {
 :root:not(.dark) .status-ok{background:rgba(5,150,105,.08);color:#059669}
 :root:not(.dark) .status-ok .status-dot{background:#059669;box-shadow:0 0 6px rgba(5,150,105,.35)}
 
+/* Side panel label */
+:root:not(.dark) .side-label{color:#475569}
+
 /* Doc section */
 :root:not(.dark) .doc-section{border-bottom-color:rgba(0,0,0,.06)}
 :root:not(.dark) .doc-title{color:#1e293b}
@@ -765,4 +784,12 @@ const citedArticles = computed(() => {
 
 /* Empty session */
 :root:not(.dark) .empty-session{color:#64748b}
+
+/* Header buttons */
+:root:not(.dark) .hd-toggle:hover{background:rgba(0,0,0,.05)}
+:root:not(.dark) .hd-cov{color:#64748b}
+:root:not(.dark) .lang-btn{border-color:rgba(0,0,0,.12);color:#475569}
+:root:not(.dark) .lang-btn:hover{border-color:#2563eb;color:#2563eb}
+:root:not(.dark) .export-btn{border-color:rgba(0,0,0,.12);color:#475569}
+:root:not(.dark) .export-btn:hover{border-color:#2563eb;color:#2563eb;background:rgba(37,99,235,.04)}
 </style>
