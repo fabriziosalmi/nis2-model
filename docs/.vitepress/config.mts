@@ -5,6 +5,7 @@ export default defineConfig({
   description: 'Interactive NIS2 compliance guidance engine — deterministic, zero-LLM, bilingual IT/EN',
   base: '/nis2-model/',
   lang: 'en-US',
+  appearance: 'dark',
 
   head: [
     ['meta', { name: 'theme-color', content: '#1a56db' }],

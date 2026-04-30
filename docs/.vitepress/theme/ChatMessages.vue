@@ -123,6 +123,7 @@ defineEmits(['followUp'])
 /* When tab is present, card gets square top-left to connect */
 .bubble-assistant.has-tab{
   border-top-left-radius:0;
+  border-radius:0 16px 16px 4px;
 }
 
 /* ── CATEGORY TAB — physical folder tab ── */
