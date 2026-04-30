@@ -777,6 +777,9 @@ pub fn build_dataset() -> Vec<CacheEntry> {
     for (q, a, cat) in crate::it::governance::entries() {
         entries.push(CacheEntry { question: q.to_string(), answer: a.to_string(), category: cat.to_string(), follow_ups: vec![], embedding: vec![] });
     }
+    for (q, a, cat) in crate::it::sectors::entries() {
+        entries.push(CacheEntry { question: q.to_string(), answer: a.to_string(), category: cat.to_string(), follow_ups: vec![], embedding: vec![] });
+    }
 
     // --- Scenario entries (panic questions EN+IT) ---
     for (q, a, cat) in crate::dataset_scenarios::scenario_entries() {
