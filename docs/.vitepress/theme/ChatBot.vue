@@ -21,7 +21,6 @@ const hasAccepted = ref(false)
 const showLeft = ref(true)
 const showRight = ref(true)
 const focusMode = ref(false)
-const focusMode = ref(false)
 const sideTab = ref('norm') // 'norm' or 'docs'
 
 // WASM Integration & Wizard State
