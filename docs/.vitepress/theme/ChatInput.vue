@@ -39,10 +39,10 @@ defineEmits(['update:input', 'send'])
   display:flex;gap:8px;max-width:720px;margin:0 auto;
 }
 .in-wrap input{
-  flex:1;padding:11px 18px;
+  flex:1;padding:12px 20px;
   border:1px solid var(--vp-c-divider);border-radius:22px;
   background:var(--vp-c-bg-soft);color:var(--vp-c-text-1);
-  font-size:14px;outline:none;
+  font-size:15px;outline:none;
   transition:border-color .2s,box-shadow .2s;
   letter-spacing:-.01em;
 }
@@ -62,7 +62,7 @@ defineEmits(['update:input', 'send'])
 .send:disabled{opacity:.25;cursor:not-allowed}
 .disclaimer{
   max-width:720px;margin:6px auto 0;
-  font-size:10px;color:var(--vp-c-text-3);
+  font-size:11px;color:var(--vp-c-text-3);
   opacity:.5;text-align:center;letter-spacing:.01em;
 }
 </style>

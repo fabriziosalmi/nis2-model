@@ -115,9 +115,9 @@ defineEmits(['followUp'])
 
 /* ── SECTION LABELS ── */
 .section-label{
-  font-size:9px;font-weight:700;text-transform:uppercase;
+  font-size:10.5px;font-weight:700;text-transform:uppercase;
   letter-spacing:.1em;color:var(--vp-c-text-3);
-  padding:0 2px 4px;opacity:.6;
+  padding:0 2px 5px;opacity:.6;
 }
 
 /* ── SECTION 1: META / CATEGORY ── */
@@ -125,23 +125,23 @@ defineEmits(['followUp'])
   padding:12px 18px 0;
   display:flex;align-items:center;gap:7px;flex-wrap:wrap;
 }
-.sev-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sev-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .sev-dot.critical{background:#ef4444;box-shadow:0 0 5px rgba(239,68,68,.4)}
 .sev-dot.high{background:#f59e0b;box-shadow:0 0 4px rgba(245,158,11,.3)}
 .sev-dot.medium{background:#6366f1}
 .sev-dot.info{background:var(--vp-c-brand-1)}
 .m-cat{
-  font-size:10px;padding:2px 9px;border-radius:4px;
+  font-size:11.5px;padding:2px 10px;border-radius:5px;
   font-weight:600;text-transform:uppercase;letter-spacing:.06em;
   background:rgba(59,130,246,.08);color:var(--vp-c-brand-1);
 }
 .m-deadline{
-  font-size:9.5px;color:var(--vp-c-text-3);
+  font-size:11px;color:var(--vp-c-text-3);
   font-weight:500;letter-spacing:.02em;
 }
 .meta-spacer{flex:1}
 .confidence-badge{
-  font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;
+  font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:4px;
   font-variant-numeric:tabular-nums;letter-spacing:.02em;
 }
 .conf-high{background:rgba(34,197,94,.08);color:rgba(34,197,94,.85)}
@@ -155,14 +155,14 @@ defineEmits(['followUp'])
 
 /* User text */
 .msg-txt{
-  font-size:14px;line-height:1.5;white-space:pre-wrap;
+  font-size:16px;line-height:1.5;white-space:pre-wrap;
   word-break:break-word;letter-spacing:-.01em;
 }
 .msg.user .msg-txt{color:#fff}
 
 /* Rich answer content */
 .msg-rich{
-  font-size:13.5px;line-height:1.7;
+  font-size:15px;line-height:1.7;
   color:var(--vp-c-text-1);word-break:break-word;
   letter-spacing:-.005em;
 }
@@ -173,10 +173,10 @@ defineEmits(['followUp'])
   padding-bottom:6px;
 }
 .msg-rich :deep(.ans-art){
-  font-size:11px;font-weight:700;letter-spacing:.04em;
+  font-size:12.5px;font-weight:700;letter-spacing:.04em;
   color:var(--vp-c-brand-1);
   background:rgba(59,130,246,.06);
-  padding:3px 10px;border-radius:6px;
+  padding:3px 11px;border-radius:6px;
   display:inline-block;
 }
 
@@ -205,21 +205,21 @@ defineEmits(['followUp'])
   background:rgba(59,130,246,.03);
 }
 .msg-rich :deep(.step-num){
-  width:22px;height:22px;border-radius:6px;
+  width:24px;height:24px;border-radius:6px;
   background:var(--vp-c-brand-1);color:#fff;
-  font-size:11px;font-weight:700;
+  font-size:12.5px;font-weight:700;
   display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;margin-top:1px;
+  flex-shrink:0;margin-top:2px;
 }
 .msg-rich :deep(.step-text){
-  flex:1;line-height:1.65;font-size:13.5px;
+  flex:1;line-height:1.65;font-size:15px;
   color:var(--vp-c-text-1);
 }
 
 /* Inline article refs */
 .msg-rich :deep(.art-ref){
   font-weight:600;color:var(--vp-c-brand-1);
-  font-size:12px;white-space:nowrap;
+  font-size:14px;white-space:nowrap;
 }
 
 /* Cursor */
@@ -237,10 +237,10 @@ defineEmits(['followUp'])
   display:flex;flex-direction:column;gap:1px;
 }
 .fup-btn{
-  text-align:left;padding:5px 8px;border:none;border-radius:6px;
+  text-align:left;padding:6px 10px;border:none;border-radius:6px;
   background:transparent;color:var(--vp-c-text-2);
-  font-size:12.5px;cursor:pointer;transition:all .15s;
-  display:flex;align-items:center;gap:6px;letter-spacing:-.01em;
+  font-size:14px;cursor:pointer;transition:all .15s;
+  display:flex;align-items:center;gap:7px;letter-spacing:-.01em;
 }
 .fup-btn:hover{background:rgba(59,130,246,.05);color:var(--vp-c-brand-1)}
 .fup-btn svg{opacity:.3;flex-shrink:0;transition:opacity .15s}
@@ -256,9 +256,9 @@ defineEmits(['followUp'])
   display:flex;flex-wrap:wrap;gap:5px;
 }
 .ref-link{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:3px 9px;border-radius:5px;
-  font-size:10.5px;font-weight:500;
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:5px;
+  font-size:12px;font-weight:500;
   color:var(--vp-c-text-3);text-decoration:none;
   background:rgba(59,130,246,.04);
   transition:all .12s;letter-spacing:-.01em;
@@ -268,7 +268,7 @@ defineEmits(['followUp'])
 .ref-link:hover svg{opacity:.7}
 .ref-cat{border-left:2px solid var(--vp-c-brand-1)}
 .std-chip{
-  font-size:9.5px;padding:3px 8px;border-radius:4px;
+  font-size:11px;padding:3px 9px;border-radius:4px;
   background:rgba(99,102,241,.06);color:var(--vp-c-text-3);
   font-weight:500;letter-spacing:.01em;white-space:nowrap;
 }
@@ -283,16 +283,16 @@ defineEmits(['followUp'])
 }
 .gloss-row{
   display:flex;align-items:baseline;gap:8px;
-  font-size:10.5px;line-height:1.45;
+  font-size:12px;line-height:1.5;
 }
 .gloss-term{
   font-weight:700;color:var(--vp-c-text-2);white-space:nowrap;
   letter-spacing:.03em;flex-shrink:0;
-  font-size:9.5px;
-  padding:1px 5px;border-radius:3px;
+  font-size:11px;
+  padding:2px 6px;border-radius:3px;
   background:rgba(59,130,246,.05);
 }
-.gloss-def{color:var(--vp-c-text-3);font-size:10.5px;}
+.gloss-def{color:var(--vp-c-text-3);font-size:12px;}
 
 /* ── LOADING DOTS ── */
 .dots{display:flex;gap:5px;padding:14px 18px}
