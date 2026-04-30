@@ -8,43 +8,41 @@ defineEmits(['followUp'])
   <slot name="welcome" />
 
   <div v-for="(m, i) in messages" :key="i" :class="['msg', m.role]">
-    <div class="bubble">
 
-      <!-- ── USER MESSAGE ── -->
-      <div v-if="m.role === 'user'" class="msg-txt">{{ m.text }}</div>
+    <!-- USER -->
+    <div v-if="m.role === 'user'" class="bubble bubble-user">
+      <div class="msg-txt">{{ m.text }}</div>
+    </div>
 
-      <!-- ── ASSISTANT MESSAGE ── -->
-      <template v-else>
+    <!-- ASSISTANT — column layout: tab + card -->
+    <div v-else class="msg-col">
+      <!-- Category tab (sits above bubble) -->
+      <div v-if="m.category && m.category !== 'miss'" class="cat-tab">
+        <span :class="['sev-dot', m.severity || 'info']"></span>
+        <span>{{ m.category }}</span>
+      </div>
 
-        <!-- Section 1: Category badge + confidence -->
-        <div v-if="m.category && m.category !== 'miss'" class="section-meta">
-          <span :class="['sev-dot', m.severity || 'info']"></span>
-          <span class="m-cat">{{ m.category }}</span>
-          <span v-if="m.deadline" class="m-deadline">{{ m.deadline }}</span>
-          <span class="meta-spacer"></span>
-          <span v-if="m.confidence && !m.typing" class="confidence-badge" :class="m.confidence >= 80 ? 'conf-high' : m.confidence >= 50 ? 'conf-med' : 'conf-low'">
-            {{ m.confidence }}% match
-          </span>
-        </div>
-
-        <!-- Section 2: Main answer -->
+      <!-- Card body -->
+      <div class="bubble bubble-assistant" :class="{ 'has-tab': m.category && m.category !== 'miss' }">
+        <!-- Main answer -->
         <div :class="['section-answer', { 'fade-up': !m.typing }]">
           <div class="msg-rich" v-html="m.typing ? m.displayHtml : m.html"></div>
           <span v-if="m.typing" class="cursor-blink">▋</span>
         </div>
 
-        <!-- Section 3: Follow-up suggestions -->
+        <!-- Follow-up suggestions -->
         <div v-if="m.followUps?.length && !m.typing" class="section-followups">
           <div class="section-label">Domande correlate</div>
           <div class="fups-list">
             <button v-for="f in m.followUps" :key="f" @click="$emit('followUp', f)" class="fup-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              <svg class="fup-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               <span>{{ f }}</span>
+              <svg class="fup-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </button>
           </div>
         </div>
 
-        <!-- Section 4: References & Standards -->
+        <!-- References & Standards -->
         <div v-if="!m.typing && (m.refs?.length || m.catLink || m.standards?.length)" class="section-refs">
           <div class="section-label">Riferimenti</div>
           <div class="refs-row">
@@ -60,7 +58,7 @@ defineEmits(['followUp'])
           </div>
         </div>
 
-        <!-- Section 5: Glossary -->
+        <!-- Glossary -->
         <div v-if="m.glossary?.length && !m.typing" class="section-glossary">
           <div class="section-label">Glossario</div>
           <div class="gloss-grid">
@@ -70,13 +68,13 @@ defineEmits(['followUp'])
             </div>
           </div>
         </div>
-
-      </template>
+      </div>
     </div>
+
   </div>
 
   <div v-if="isLoading" class="msg assistant">
-    <div class="bubble"><div class="dots"><span/><span/><span/></div></div>
+    <div class="msg-col"><div class="bubble bubble-assistant"><div class="dots"><span/><span/><span/></div></div></div>
   </div>
 </div>
 </template>
@@ -86,7 +84,6 @@ defineEmits(['followUp'])
    DESIGN SYSTEM — 8pt Grid · WCAG AAA · Gestalt
    ══════════════════════════════════════════════ */
 
-/* ── CHAT CONTAINER ── */
 .cb-chat{
   flex:1;overflow-y:auto;padding:24px 32px 40px;
   display:flex;flex-direction:column;gap:16px;
@@ -105,23 +102,47 @@ defineEmits(['followUp'])
 .msg.user{justify-content:flex-end}
 .msg.assistant{justify-content:flex-start}
 
-/* ── BUBBLE ── */
-.bubble{max-width:640px;animation:slideIn .2s ease-out;overflow:hidden}
+/* ── Column wrapper (tab + card) ── */
+.msg-col{display:flex;flex-direction:column;max-width:640px;animation:slideIn .2s ease-out}
 
-/* User bubble — institutional blue, asymmetric */
-.msg.user .bubble{
+/* ── BUBBLE ── */
+.bubble{overflow:hidden}
+.bubble-user{
+  max-width:640px;
   background:#1e40af;color:#e2e8f0;
   border-radius:16px 16px 4px 16px;
   padding:12px 20px;
+  animation:slideIn .2s ease-out;
 }
-
-/* Assistant bubble — elevated surface */
-.msg.assistant .bubble{
+.bubble-assistant{
   background:var(--vp-c-bg-soft);
   border:1px solid rgba(255,255,255,.06);
-  border-radius:16px 16px 16px 4px;
+  border-radius:16px;
   box-shadow:0 1px 3px rgba(0,0,0,.08);
 }
+/* When tab is present, card gets square top-left to connect */
+.bubble-assistant.has-tab{
+  border-top-left-radius:0;
+}
+
+/* ── CATEGORY TAB — physical folder tab ── */
+.cat-tab{
+  display:inline-flex;align-items:center;gap:6px;align-self:flex-start;
+  padding:5px 14px 5px 10px;
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:#94a3b8;
+  background:var(--vp-c-bg-soft);
+  border:1px solid rgba(255,255,255,.06);
+  border-bottom:1px solid var(--vp-c-bg-soft); /* hides card top border */
+  border-radius:8px 8px 0 0;
+  margin-bottom:-1px; /* overlap card top border */
+  position:relative;z-index:1;
+}
+.sev-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sev-dot.critical{background:#f87171;box-shadow:0 0 6px rgba(248,113,113,.5)}
+.sev-dot.high{background:#fbbf24;box-shadow:0 0 5px rgba(251,191,36,.4)}
+.sev-dot.medium{background:#a78bfa}
+.sev-dot.info{background:#60a5fa}
 
 /* ── SECTION LABELS ── */
 .section-label{
@@ -130,36 +151,10 @@ defineEmits(['followUp'])
   margin-bottom:8px;opacity:.55;
 }
 
-/* ── SECTION 1: META ── */
-.section-meta{padding:16px 24px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.sev-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.sev-dot.critical{background:#ef4444;box-shadow:0 0 6px rgba(239,68,68,.5)}
-.sev-dot.high{background:#f59e0b;box-shadow:0 0 5px rgba(245,158,11,.4)}
-.sev-dot.medium{background:#818cf8}
-.sev-dot.info{background:#60a5fa}
-.m-cat{
-  font-size:11px;padding:3px 10px;border-radius:6px;
-  font-weight:700;text-transform:uppercase;letter-spacing:.08em;
-  background:rgba(96,165,250,.1);color:#93c5fd;
-}
-.m-deadline{font-size:11px;color:var(--vp-c-text-3);font-weight:500}
-.meta-spacer{flex:1}
-.confidence-badge{
-  font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;
-  font-variant-numeric:tabular-nums;letter-spacing:.03em;
-}
-.conf-high{background:rgba(34,197,94,.1);color:#86efac}
-.conf-med{background:rgba(251,191,36,.1);color:#fcd34d}
-.conf-low{background:rgba(248,113,113,.1);color:#fca5a5}
-
-/* ── SECTION 2: MAIN ANSWER ── */
+/* ── MAIN ANSWER ── */
 .section-answer{padding:16px 24px}
-
-/* User text */
 .msg-txt{font-size:15px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
-.msg.user .msg-txt{color:#e2e8f0}
-
-/* Rich answer — WCAG AAA contrast */
+.msg.user .msg-txt,.bubble-user .msg-txt{color:#e2e8f0}
 .msg-rich{font-size:15px;line-height:1.72;color:#e2e8f0;word-break:break-word;max-width:640px}
 
 .msg-rich :deep(.ans-header){display:flex;align-items:center;gap:8px;padding-bottom:8px}
@@ -185,26 +180,26 @@ defineEmits(['followUp'])
 }
 .msg-rich :deep(.step-text){flex:1;line-height:1.68;font-size:15px;color:#e2e8f0}
 .msg-rich :deep(.art-ref){font-weight:600;color:#93c5fd;font-size:14px;white-space:nowrap}
-
-/* Cursor */
 .cursor-blink{animation:blink .8s infinite;color:#60a5fa;display:block;padding-top:4px}
 
-/* ── SECTION 3: FOLLOW-UPS ── */
+/* ── FOLLOW-UPS — full-width interactive ── */
 .section-followups{padding:16px 24px;border-top:1px solid rgba(255,255,255,.06)}
 .fups-list{display:flex;flex-direction:column;gap:2px}
 .fup-btn{
-  text-align:left;padding:8px 12px;border:none;border-radius:8px;
+  display:flex;align-items:center;gap:10px;width:100%;
+  text-align:left;padding:10px 12px;border:none;border-radius:8px;
   background:transparent;color:#94a3b8;
   font-size:14px;cursor:pointer;transition:all .15s ease-out;
-  display:flex;align-items:center;gap:8px;
 }
-.fup-btn:hover{background:rgba(255,255,255,.04);color:#e2e8f0}
-.fup-btn:active{background:rgba(255,255,255,.06)}
-.fup-btn svg{opacity:.4;flex-shrink:0;transition:all .15s ease-out}
-.fup-btn:hover svg{opacity:.7;transform:translateX(2px)}
-.fup-btn span{line-height:1.45}
+.fup-btn:hover{background:rgba(255,255,255,.05);color:#e2e8f0}
+.fup-btn:active{background:rgba(255,255,255,.07)}
+.fup-btn svg.fup-chevron{opacity:.3;flex-shrink:0;transition:all .15s ease-out}
+.fup-btn:hover svg.fup-chevron{opacity:.7;transform:translateX(2px)}
+.fup-btn span{flex:1;line-height:1.45}
+.fup-btn .fup-arrow{opacity:0;flex-shrink:0;transition:all .15s ease-out;margin-left:auto}
+.fup-btn:hover .fup-arrow{opacity:.4}
 
-/* ── SECTION 4: REFERENCES — Pill style, no borders ── */
+/* ── REFERENCES — Pill style ── */
 .section-refs{padding:16px 24px;border-top:1px solid rgba(255,255,255,.06)}
 .refs-row{display:flex;flex-wrap:wrap;gap:6px}
 .ref-link{
@@ -223,7 +218,7 @@ defineEmits(['followUp'])
   background:rgba(255,255,255,.05);color:#94a3b8;font-weight:500;white-space:nowrap;
 }
 
-/* ── SECTION 5: GLOSSARY — CSS Grid 2-column ── */
+/* ── GLOSSARY — CSS Grid ── */
 .section-glossary{padding:16px 24px;border-top:1px solid rgba(255,255,255,.06)}
 .gloss-grid{
   display:grid;grid-template-columns:minmax(100px,max-content) 1fr;
@@ -236,7 +231,7 @@ defineEmits(['followUp'])
 }
 .gloss-def{color:#94a3b8;font-size:12px;line-height:1.5}
 
-/* ── LOADING DOTS ── */
+/* ── LOADING ── */
 .dots{display:flex;gap:6px;padding:16px 24px}
 .dots span{width:6px;height:6px;border-radius:50%;background:#64748b;animation:bounce 1.2s infinite ease-in-out}
 .dots span:nth-child(2){animation-delay:.15s}
@@ -252,8 +247,8 @@ defineEmits(['followUp'])
 /* ── RESPONSIVE ── */
 @media(max-width:768px){
   .cb-chat{padding:16px 16px 32px}
-  .bubble{max-width:95%}
-  .section-answer,.section-followups,.section-refs,.section-glossary,.section-meta{padding-left:16px;padding-right:16px}
+  .bubble,.msg-col{max-width:95%}
+  .section-answer,.section-followups,.section-refs,.section-glossary{padding-left:16px;padding-right:16px}
   .gloss-grid{grid-template-columns:1fr;gap:4px 0}
   .gloss-row{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}
 }
