@@ -71,4 +71,21 @@ defineEmits(['update:input', 'send'])
   letter-spacing:.01em;line-height:1.4;
   padding:6px 0;
 }
+
+/* ── LIGHT MODE ── */
+:root:not(.dark) .cb-in{border-top-color:rgba(0,0,0,.08)}
+:root:not(.dark) .in-wrap input{
+  border-color:rgba(0,0,0,.12);
+  background:rgba(0,0,0,.03);
+  color:#1e293b;
+}
+:root:not(.dark) .in-wrap input:focus{
+  border-color:#2563eb;
+  box-shadow:0 0 0 3px rgba(37,99,235,.1);
+  background:#fff;
+}
+:root:not(.dark) .in-wrap input::placeholder{color:#94a3b8}
+:root:not(.dark) .send{background:rgba(0,0,0,.06);color:#94a3b8}
+:root:not(.dark) .send.active{background:#2563eb;color:#fff}
+:root:not(.dark) .disclaimer{color:#64748b}
 </style>

@@ -262,4 +262,42 @@ const t = computed(() => getStrings(props.lang))
   .gloss-grid{grid-template-columns:1fr;gap:4px 0}
   .gloss-row{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}
 }
+
+/* ══════════════════════════════════════════════
+   LIGHT MODE OVERRIDES
+   ══════════════════════════════════════════════ */
+:root:not(.dark) .cb-chat::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12)}
+:root:not(.dark) .cb-chat::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.2)}
+
+:root:not(.dark) .bubble-user{background:#2563eb;color:#fff}
+:root:not(.dark) .bubble-assistant{border-color:rgba(0,0,0,.08)}
+:root:not(.dark) .cat-tab{color:#475569;border-color:rgba(0,0,0,.08);border-bottom-color:var(--vp-c-bg-soft)}
+
+:root:not(.dark) .msg-rich{color:#1e293b}
+:root:not(.dark) .msg-rich :deep(.ans-art){color:#1d4ed8;background:rgba(37,99,235,.08)}
+:root:not(.dark) .msg-rich :deep(.ans-intro){color:#1e293b}
+:root:not(.dark) .msg-rich :deep(.ans-body){color:#1e293b}
+:root:not(.dark) .msg-rich :deep(.ans-step:hover){background:rgba(0,0,0,.03)}
+:root:not(.dark) .msg-rich :deep(.step-num){background:#2563eb;color:#fff}
+:root:not(.dark) .msg-rich :deep(.step-text){color:#1e293b}
+:root:not(.dark) .msg-rich :deep(.art-ref){color:#1d4ed8}
+
+:root:not(.dark) .section-followups{border-top-color:rgba(0,0,0,.08)}
+:root:not(.dark) .fup-btn{color:#475569}
+:root:not(.dark) .fup-btn:hover{background:rgba(0,0,0,.04);color:#1e293b}
+:root:not(.dark) .fup-btn:active{background:rgba(0,0,0,.06)}
+
+:root:not(.dark) .section-refs{border-top-color:rgba(0,0,0,.08)}
+:root:not(.dark) .ref-link{color:#475569;background:rgba(0,0,0,.05)}
+:root:not(.dark) .ref-link:hover{color:#1e293b;background:rgba(0,0,0,.08)}
+:root:not(.dark) .ref-link:active{background:rgba(0,0,0,.1)}
+:root:not(.dark) .ref-cat{border-left-color:#2563eb}
+:root:not(.dark) .std-chip{background:rgba(0,0,0,.05);color:#475569}
+
+:root:not(.dark) .section-glossary{border-top-color:rgba(0,0,0,.08)}
+:root:not(.dark) .gloss-term{color:#1d4ed8;background:rgba(37,99,235,.06);border-color:rgba(37,99,235,.12)}
+:root:not(.dark) .gloss-def{color:#334155}
+
+:root:not(.dark) .dots span{background:#94a3b8}
+:root:not(.dark) .cursor-blink{color:#2563eb}
 </style>

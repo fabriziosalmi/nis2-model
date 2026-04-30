@@ -721,4 +721,48 @@ const citedArticles = computed(() => {
 
 @media(max-width:960px){.side{display:none}.hd-toggle{display:none}.focus-btn{display:none}}
 @media(max-width:640px){.w-grid{grid-template-columns:1fr}.hd-sub{display:none}}
+
+/* ══════════════════════════════════════════════
+   LIGHT MODE OVERRIDES
+   ══════════════════════════════════════════════ */
+
+/* Sidebar areas */
+:root:not(.dark) .area{color:#475569}
+:root:not(.dark) .area:hover{background:rgba(0,0,0,.04);color:#1e293b}
+:root:not(.dark) .area.on{color:#1e293b;font-weight:600}
+:root:not(.dark) .area-dot{background:rgba(0,0,0,.1)}
+:root:not(.dark) .area.on .area-dot{background:#2563eb;box-shadow:0 0 6px rgba(37,99,235,.35)}
+
+/* Sidebar scrollbar */
+:root:not(.dark) .side::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1)}
+:root:not(.dark) .side::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.18)}
+
+/* Right panel — norm cards */
+:root:not(.dark) .norm-card{color:#475569}
+:root:not(.dark) .norm-card:hover{background:rgba(0,0,0,.04);color:#1e293b}
+:root:not(.dark) .norm-card svg{color:#2563eb}
+:root:not(.dark) .norm-title{color:#1e293b}
+:root:not(.dark) .norm-sub{color:#64748b}
+
+/* Right panel — artifact cards */
+:root:not(.dark) .artifact-card{background:rgba(16,185,129,.06);color:#475569}
+:root:not(.dark) .artifact-card:hover{background:rgba(16,185,129,.1);color:#1e293b}
+:root:not(.dark) .artifact-card svg{color:#059669}
+
+/* Status badges */
+:root:not(.dark) .status-none{background:rgba(100,116,139,.08);color:#475569}
+:root:not(.dark) .status-none .status-dot{background:#64748b}
+:root:not(.dark) .status-eval{background:rgba(217,119,6,.08);color:#b45309}
+:root:not(.dark) .status-eval .status-dot{background:#d97706;box-shadow:0 0 6px rgba(217,119,6,.35)}
+:root:not(.dark) .status-ok{background:rgba(5,150,105,.08);color:#059669}
+:root:not(.dark) .status-ok .status-dot{background:#059669;box-shadow:0 0 6px rgba(5,150,105,.35)}
+
+/* Doc section */
+:root:not(.dark) .doc-section{border-bottom-color:rgba(0,0,0,.06)}
+:root:not(.dark) .doc-title{color:#1e293b}
+:root:not(.dark) .doc-ref{background:rgba(0,0,0,.05);color:#475569}
+:root:not(.dark) .doc-conf{background:rgba(5,150,105,.08);color:#059669}
+
+/* Empty session */
+:root:not(.dark) .empty-session{color:#64748b}
 </style>
