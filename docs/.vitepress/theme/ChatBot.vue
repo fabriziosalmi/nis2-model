@@ -86,6 +86,11 @@ function exploreSuggestions(uiLang, limit = 4) {
 
 function search(query) {
   const t0 = performance.now()
+  
+  // Auto-detect query language and sync UI
+  if (isItalian(query) && lang.value !== 'it') lang.value = 'it';
+  else if (!isItalian(query) && /[a-z]/i.test(query) && lang.value === 'it') lang.value = 'en';
+  
   const uiLang = lang.value
 
   // --- REAL-TIME TOOLING: Dynamic Applicability Assessment ---
