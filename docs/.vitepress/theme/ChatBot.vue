@@ -88,6 +88,58 @@ function search(query) {
   const t0 = performance.now()
   const uiLang = lang.value
 
+  // --- REAL-TIME TOOLING: Dynamic Applicability Assessment ---
+  const employeesMatch = query.match(/(\d+)\s*(dipendent[ei]|employees?|persone|lavoratori)/i);
+  const revenueMatch = query.match(/(\d+)\s*(milion[ei]|million|mln)/i);
+  
+  if (employeesMatch || revenueMatch) {
+    const emp = employeesMatch ? parseInt(employeesMatch[1], 10) : 0;
+    const rev = revenueMatch ? parseInt(revenueMatch[1], 10) : 0;
+    
+    let answer = '';
+    let category = 'applicability';
+    let severity = 'info';
+    
+    if (emp >= 250 || rev >= 50) {
+      answer = uiLang === 'it' 
+        ? `Analisi in tempo reale: con **${emp || '>250'} dipendenti** e/o **${rev || '>50'} milioni di fatturato**, la tua azienda è una grande impresa e rientra al 100% nella **NIS2 come Soggetto Essenziale** (se in Allegato I). Devi conformarti all'Art. 21 (Gestione Rischi) e Art. 23 (Notifiche Incidenti in 24h). Sanzioni massime: 10M EUR o 2% del fatturato mondiale.`
+        : `Real-time analysis: with **${emp || '>250'} employees** and/or **${rev || '>50'} million revenue**, your company is a large enterprise and definitely falls under **NIS2 as an Essential Entity** (if in Annex I). You must comply with Art. 21 (Risk Management) and Art. 23 (24h Incident Reporting). Max fines: 10M EUR or 2% of global turnover.`;
+      severity = 'danger';
+    } else if (emp >= 50 || rev >= 10) {
+      answer = uiLang === 'it'
+        ? `Analisi in tempo reale: avendo almeno **50 dipendenti** o **10 milioni di fatturato** (hai indicato ${emp ? emp+' dipendenti' : ''}${emp&&rev?' e ':''}${rev ? rev+' milioni' : ''}), superi la soglia e rientri nella **NIS2 come Soggetto Importante** (Allegato II). La vigilanza sarà ex-post, ma hai gli stessi obblighi di sicurezza. Sanzioni: fino a 7M EUR o 1.4% del fatturato.`
+        : `Real-time analysis: by meeting the threshold of **50 employees** or **10 million revenue** (you indicated ${emp ? emp+' employees' : ''}${emp&&rev?' and ':''}${rev ? rev+' million' : ''}), you fall under **NIS2 as an Important Entity** (Annex II). You have the same mandatory security obligations. Fines: up to 7M EUR or 1.4% turnover.`;
+      severity = 'warning';
+    } else {
+      answer = uiLang === 'it'
+        ? `Analisi in tempo reale: con **${emp || '<50'} dipendenti** e/o **${rev || '<10'} milioni di fatturato**, sei classificato come micro o piccola impresa. In generale (Art. 2), **sei esentato dagli obblighi diretti della NIS2**, a meno che tu non gestisca servizi critici (es. TLD, trust services) o sia l'unico fornitore di un servizio chiave. Attenzione però alla supply chain: i tuoi grandi clienti potrebbero imposti standard di sicurezza contrattuali.`
+        : `Real-time analysis: with **${emp || '<50'} employees** and/or **${rev || '<10'} million revenue**, you are a micro or small enterprise. Generally (Art. 2), **you are exempt from direct NIS2 obligations**, unless you manage critical services (e.g. TLD, trust services). Watch out for the supply chain, though: larger clients may enforce strict security clauses on you.`;
+      severity = 'info';
+    }
+    
+    visitedCategories.value = new Set([...visitedCategories.value, category])
+    stats.value.hits++
+    
+    const fUps = filterAsked([
+      uiLang === 'it' ? "Cos'è un soggetto essenziale nella NIS2?" : "What is an essential entity under NIS2?",
+      uiLang === 'it' ? "Cosa dice la direttiva sulla supply chain?" : "What does the directive say about supply chain?",
+      uiLang === 'it' ? "Quali sono le sanzioni NIS2?" : "What are the NIS2 sanctions?"
+    ]);
+    
+    return {
+      hit: true, answer, html: formatAnswer(answer),
+      category: getCategoryName(category, uiLang), 
+      followUps: dedup(fUps), 
+      elapsed: performance.now() - t0,
+      refs: extractArticles(answer),
+      catLink: getCategoryLink(category, uiLang),
+      severity, deadline: '', standards: [],
+      glossary: findTerms(answer).map(t => ({ term: t.term.toUpperCase(), def: uiLang === 'it' ? t.it : t.en })),
+      confidence: 100, source: category,
+    }
+  }
+  // --- END REAL-TIME TOOLING ---
+
   // Filter dataset by UI language first, fallback to full dataset
   const langDataset = dataset.value.filter(d =>
     uiLang === 'it' ? isItalian(d.q) : !isItalian(d.q)
