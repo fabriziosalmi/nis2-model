@@ -11,7 +11,7 @@ export const translations = {
     welcomeSub: 'risposte pre-calcolate · IT/EN · Art. 20, 21, 23, 34',
     welcomeBadge: 'Database aggiornato',
     emptySession: 'I nodi della tua indagine appariranno qui.',
-    disclaimer: 'Le risposte non sostituiscono una consulenza legale. Rif: D.Lgs. 138/2024',
+    disclaimer: '⚠️ Classificazione automatizzata — non costituisce consulenza legale. Consultare un avvocato qualificato. Rif: D.Lgs. 138/2024',
     miss: 'Domanda non trovata. Prova a riformulare o usa uno dei suggerimenti.',
     coverageLabel: 'Copertura',
     session: 'Sessione',
@@ -42,6 +42,11 @@ export const translations = {
       asset_management: 'Gestione asset',
       development: 'Sviluppo sicuro',
     },
+    sectionLabels: {
+      followUps: 'Domande correlate',
+      references: 'Riferimenti',
+      glossary: 'Glossario',
+    },
     suggestions: [
       'La mia azienda rientra nella NIS2?',
       'Da dove iniziare con NIS2?',
@@ -66,7 +71,7 @@ export const translations = {
     welcomeSub: 'pre-computed answers · IT/EN · Art. 20, 21, 23, 34',
     welcomeBadge: 'Database updated',
     emptySession: 'Your investigation nodes will appear here.',
-    disclaimer: 'Responses do not replace formal legal counsel. Ref: Directive (EU) 2022/2555',
+    disclaimer: '⚠️ Automated classification — not legal advice. Consult a qualified attorney. Ref: Directive (EU) 2022/2555',
     miss: 'Question not found. Try rephrasing or use a suggestion below.',
     coverageLabel: 'Coverage',
     session: 'Session',
@@ -96,6 +101,11 @@ export const translations = {
       sanctions: 'Sanctions',
       asset_management: 'Asset Management',
       development: 'Secure Development',
+    },
+    sectionLabels: {
+      followUps: 'Related questions',
+      references: 'References',
+      glossary: 'Glossary',
     },
     suggestions: [
       'Does NIS2 apply to my company?',

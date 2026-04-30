@@ -17,6 +17,7 @@ const askedQuestions = ref(new Set())
 const totalMs = ref(0)
 const ready = ref(false)
 const loadProgress = ref(0)
+const hasAccepted = ref(false)
 const showLeft = ref(true)
 const showRight = ref(true)
 const focusMode = ref(false)
@@ -105,20 +106,23 @@ function search(query) {
     let category = 'applicability';
     let severity = 'info';
     
+    const sectorNote = uiLang === 'it'
+      ? '\n\n⚠️ **Nota:** questa classificazione preliminare dipende dal settore di appartenenza (Allegato I/II), non indicato nella domanda. Verificare con un consulente qualificato.'
+      : '\n\n⚠️ **Note:** this preliminary classification depends on your sector (Annex I/II), not specified in your question. Verify with a qualified advisor.';
     if (emp >= 250 || rev >= 50) {
       answer = uiLang === 'it' 
-        ? `Analisi in tempo reale: con **${emp || '>250'} dipendenti** e/o **${rev || '>50'} milioni di fatturato**, la tua azienda è una grande impresa e rientra al 100% nella **NIS2 come Soggetto Essenziale** (se in Allegato I). Devi conformarti all'Art. 21 (Gestione Rischi) e Art. 23 (Notifiche Incidenti in 24h). Sanzioni massime: 10M EUR o 2% del fatturato mondiale.`
-        : `Real-time analysis: with **${emp || '>250'} employees** and/or **${rev || '>50'} million revenue**, your company is a large enterprise and definitely falls under **NIS2 as an Essential Entity** (if in Annex I). You must comply with Art. 21 (Risk Management) and Art. 23 (24h Incident Reporting). Max fines: 10M EUR or 2% of global turnover.`;
+        ? `Classificazione automatizzata: con **${emp || '>250'} dipendenti** e/o **${rev || '>50'} milioni di fatturato**, il motore classifica l'azienda come grande impresa, potenzialmente rientrante nella **NIS2 come Soggetto Essenziale** (se il settore rientra nell'Allegato I). Art. 21 (Gestione Rischi) e Art. 23 (Notifiche Incidenti in 24h). Sanzioni massime: 10M EUR o 2% del fatturato mondiale.${sectorNote}`
+        : `Automated classification: with **${emp || '>250'} employees** and/or **${rev || '>50'} million revenue**, the engine classifies your company as a large enterprise, potentially falling under **NIS2 as an Essential Entity** (if sector is in Annex I). Art. 21 (Risk Management) and Art. 23 (24h Incident Reporting). Max fines: 10M EUR or 2% of global turnover.${sectorNote}`;
       severity = 'danger';
     } else if (emp >= 50 || rev >= 10) {
       answer = uiLang === 'it'
-        ? `Analisi in tempo reale: avendo almeno **50 dipendenti** o **10 milioni di fatturato** (hai indicato ${emp ? emp+' dipendenti' : ''}${emp&&rev?' e ':''}${rev ? rev+' milioni' : ''}), superi la soglia e rientri nella **NIS2 come Soggetto Importante** (Allegato II). La vigilanza sarà ex-post, ma hai gli stessi obblighi di sicurezza. Sanzioni: fino a 7M EUR o 1.4% del fatturato.`
-        : `Real-time analysis: by meeting the threshold of **50 employees** or **10 million revenue** (you indicated ${emp ? emp+' employees' : ''}${emp&&rev?' and ':''}${rev ? rev+' million' : ''}), you fall under **NIS2 as an Important Entity** (Annex II). You have the same mandatory security obligations. Fines: up to 7M EUR or 1.4% turnover.`;
+        ? `Classificazione automatizzata: con almeno **50 dipendenti** o **10 milioni di fatturato** (indicato: ${emp ? emp+' dipendenti' : ''}${emp&&rev?' e ':''}${rev ? rev+' milioni' : ''}), il motore classifica il soggetto come potenzialmente rientrante nella **NIS2 come Soggetto Importante** (se il settore rientra nell'Allegato II). Sanzioni: fino a 7M EUR o 1.4% del fatturato.${sectorNote}`
+        : `Automated classification: by meeting the threshold of **50 employees** or **10 million revenue** (indicated: ${emp ? emp+' employees' : ''}${emp&&rev?' and ':''}${rev ? rev+' million' : ''}), the engine classifies the entity as potentially falling under **NIS2 as an Important Entity** (if sector is in Annex II). Fines: up to 7M EUR or 1.4% turnover.${sectorNote}`;
       severity = 'warning';
     } else {
       answer = uiLang === 'it'
-        ? `Analisi in tempo reale: con **${emp || '<50'} dipendenti** e/o **${rev || '<10'} milioni di fatturato**, sei classificato come micro o piccola impresa. In generale (Art. 2), **sei esentato dagli obblighi diretti della NIS2**, a meno che tu non gestisca servizi critici (es. TLD, trust services) o sia l'unico fornitore di un servizio chiave. Attenzione però alla supply chain: i tuoi grandi clienti potrebbero imposti standard di sicurezza contrattuali.`
-        : `Real-time analysis: with **${emp || '<50'} employees** and/or **${rev || '<10'} million revenue**, you are a micro or small enterprise. Generally (Art. 2), **you are exempt from direct NIS2 obligations**, unless you manage critical services (e.g. TLD, trust services). Watch out for the supply chain, though: larger clients may enforce strict security clauses on you.`;
+        ? `Classificazione automatizzata: con **${emp || '<50'} dipendenti** e/o **${rev || '<10'} milioni di fatturato**, il motore classifica il soggetto come micro o piccola impresa. In generale (Art. 2), il soggetto non rientra negli obblighi diretti della NIS2, salvo eccezioni per servizi critici (es. TLD, trust services) o se unico fornitore di un servizio chiave (Art. 2(2)). Attenzione alla supply chain.${sectorNote}`
+        : `Automated classification: with **${emp || '<50'} employees** and/or **${rev || '<10'} million revenue**, the engine classifies the entity as a micro or small enterprise. Generally (Art. 2), it does not fall under direct NIS2 obligations, unless managing critical services (e.g. TLD, trust services) or acting as sole provider (Art. 2(2)). Watch out for supply chain requirements.${sectorNote}`;
       severity = 'info';
     }
     
@@ -301,8 +305,8 @@ function exportReport() {
   }
   md += `---\n\n`
   md += isIt
-    ? `*Generato da NIS2 Compliance Engine. Le risposte non sostituiscono una consulenza legale. Rif: D.Lgs. 138/2024*`
-    : `*Generated by NIS2 Compliance Engine. Responses do not replace formal legal counsel. Ref: Directive (EU) 2022/2555*`
+    ? `**⚠️ AVVISO LEGALE:** Questo report è generato automaticamente da un motore di analisi software. Non costituisce consulenza legale. Per una valutazione vincolante, consultare un avvocato qualificato. Rif: D.Lgs. 138/2024 / Direttiva (UE) 2022/2555.`
+    : `**⚠️ LEGAL NOTICE:** This report is automatically generated by a software analysis engine. It does not constitute legal advice. For a binding assessment, consult a qualified attorney. Ref: Directive (EU) 2022/2555.`
   const blob = new Blob([md], { type: 'text/markdown' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -332,6 +336,27 @@ const citedArticles = computed(() => {
     <svg class="loader-shield" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     <div class="loader-text">{{ t.loading }}</div>
     <div class="loader-bar"><div class="loader-fill" :style="{width: loadProgress+'%'}"></div></div>
+  </div>
+</div>
+
+<!-- Consent interstitial -->
+<div v-else-if="!hasAccepted" class="consent">
+  <div class="consent-card">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <h2 class="consent-title">{{ lang === 'it' ? 'Avviso Legale' : 'Legal Notice' }}</h2>
+    <p class="consent-text">
+      {{ lang === 'it'
+        ? 'Questo strumento fornisce classificazioni automatizzate basate su un sottoinsieme della Direttiva NIS2 (UE 2022/2555). Non costituisce consulenza legale. Consultare un avvocato qualificato per determinare gli obblighi applicabili.'
+        : 'This tool provides automated classifications based on a subset of the NIS2 Directive (EU 2022/2555). It does not constitute legal advice. Consult a qualified attorney to determine applicable obligations.' }}
+    </p>
+    <div class="consent-links">
+      <a href="/nis2-model/legal/terms" target="_blank">{{ lang === 'it' ? 'Termini di utilizzo' : 'Terms of Use' }}</a>
+      <span>·</span>
+      <a href="/nis2-model/legal/privacy" target="_blank">{{ lang === 'it' ? 'Privacy Policy' : 'Privacy Policy' }}</a>
+    </div>
+    <button class="consent-btn" @click="hasAccepted = true">
+      {{ lang === 'it' ? 'Ho compreso — Procedi' : 'I Understand — Proceed' }}
+    </button>
   </div>
 </div>
 
@@ -400,7 +425,7 @@ const citedArticles = computed(() => {
 
     <!-- Center — shared axis container -->
     <div class="center">
-      <ChatMessages ref="chatEl" :messages="messages" :isLoading="isLoading" @followUp="sendMessage">
+      <ChatMessages ref="chatEl" :messages="messages" :isLoading="isLoading" :lang="lang" @followUp="sendMessage">
         <template #welcome>
           <div v-if="messages.length === 0" class="welcome">
             <svg class="w-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -476,6 +501,24 @@ const citedArticles = computed(() => {
 .loader-text{font-size:13px;color:var(--vp-c-text-3);margin-bottom:14px;letter-spacing:.01em}
 .loader-bar{width:160px;height:2px;background:var(--vp-c-divider);border-radius:1px;overflow:hidden;margin:0 auto}
 .loader-fill{height:100%;background:var(--vp-c-brand-1);border-radius:1px;transition:width .3s}
+
+/* Consent interstitial */
+.consent{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--vp-c-bg);z-index:999}
+.consent-card{max-width:480px;padding:40px 32px;text-align:center;animation:fadeUp .5s ease}
+.consent-card svg{color:var(--vp-c-brand-1);opacity:.4;margin-bottom:16px}
+.consent-title{font-size:20px;font-weight:700;margin:0 0 12px;letter-spacing:-.02em}
+.consent-text{font-size:14px;color:var(--vp-c-text-2);line-height:1.65;margin:0 0 20px}
+.consent-links{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:24px;font-size:13px}
+.consent-links a{color:var(--vp-c-brand-1);text-decoration:none}
+.consent-links a:hover{text-decoration:underline}
+.consent-links span{color:var(--vp-c-text-3)}
+.consent-btn{
+  padding:10px 28px;border:none;border-radius:8px;
+  background:#2563eb;color:#fff;font-size:14px;font-weight:600;
+  cursor:pointer;transition:all .15s;
+}
+.consent-btn:hover{background:#1d4ed8;transform:scale(1.02)}
+.consent-btn:active{transform:scale(.98)}
 
 /* Header — 3 column centered */
 .hd{

@@ -32,9 +32,29 @@ const CAT_LINKS = {
   },
 }
 
+// Escape HTML entities to prevent XSS via v-html injection.
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
+// Convert **bold** markdown to <strong> tags (applied after escaping).
+function convertBold(text) {
+  return text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+}
+
 export function formatAnswer(text) {
+  // SECURITY: escape HTML entities first to prevent XSS
+  let safe = escapeHtml(text)
+  // Convert markdown bold after escaping
+  safe = convertBold(safe)
+
   let header = ''
-  let body = text
+  let body = safe
   const artHeaderMatch = body.match(/^(Art\.\s*\d+(?:\([^)]+\))*(?:\s*\+\s*Art\.\s*\d+(?:\([^)]+\))*)*)\s*:\s*/)
   if (artHeaderMatch) {
     header = artHeaderMatch[1]

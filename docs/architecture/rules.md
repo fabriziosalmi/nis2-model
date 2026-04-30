@@ -1,6 +1,6 @@
 # Rule Engine
 
-**Crate**: `nis2-rules` | **Files**: `engine.rs`, `obligations.rs`, `schema.rs`, `validation.rs`, `adapters.rs` | **Tests**: 20
+**Crate**: `nis2-rules` | **Files**: `engine.rs`, `obligations.rs`, `schema.rs`, `validation.rs`, `adapters.rs` | **Tests**: 32
 
 ## What it does
 
@@ -42,9 +42,11 @@ All types derive `schemars::JsonSchema`. Runtime validation uses `jsonschema`:
 
 Provides an `IdentityAdapter` for Extism WASM plugin integration. Currently a passthrough that validates JSON structure.
 
-## Tests (20)
+## Tests (32)
 
 Engine tests: `large_energy_company_is_essential`, `medium_food_company_is_important`, `small_unrelated_company_is_out_of_scope`, `digital_infra_always_in_scope`, `in_scope_entity_has_16_obligations`, `out_of_scope_has_no_obligations`, `all_obligations_are_pending_initially`, `sanction_essential_uses_floor`, `sanction_essential_uses_two_percent`, `incident_reporting_deadlines_correct`, `output_is_valid_json`
+
+Edge case tests: `exactly_50_employees_meets_threshold`, `exactly_49_employees_below_threshold`, `exactly_10m_revenue_meets_threshold`, `revenue_9_99m_below_threshold`, `small_annex_ii_is_out_of_scope`, `annex_i_below_threshold_non_special_is_out_of_scope`, `zero_employees_with_high_revenue_meets_threshold`, `public_administration_always_in_scope`, `ict_service_management_always_in_scope`, `sector_is_case_sensitive`, `sanction_important_uses_1_4_percent`, `sanction_important_uses_floor`
 
 Obligation tests: `art21_has_ten_obligations`, `all_obligation_ids_are_unique`, `all_obligations_start_pending`
 

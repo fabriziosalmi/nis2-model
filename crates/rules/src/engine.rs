@@ -225,4 +225,89 @@ mod tests {
         assert!(json.contains("\"applicable\": true"));
         assert!(json.contains("Art. 21(2)(j)"));
     }
+
+    // ---- Edge case tests (Round 2) ----
+
+    #[test]
+    fn exactly_50_employees_meets_threshold() {
+        let result = evaluate(&test_profile("food", 50, 5.0));
+        assert!(result.applicable, "50 employees should meet threshold");
+        assert_eq!(result.category, EntityCategory::Important);
+    }
+
+    #[test]
+    fn exactly_49_employees_below_threshold() {
+        let result = evaluate(&test_profile("food", 49, 5.0));
+        assert!(!result.applicable, "49 employees + 5M rev should not meet threshold");
+    }
+
+    #[test]
+    fn exactly_10m_revenue_meets_threshold() {
+        let result = evaluate(&test_profile("food", 10, 10.0));
+        assert!(result.applicable, "10M revenue should meet threshold");
+        assert_eq!(result.category, EntityCategory::Important);
+    }
+
+    #[test]
+    fn revenue_9_99m_below_threshold() {
+        let result = evaluate(&test_profile("food", 10, 9.99));
+        assert!(!result.applicable, "9.99M revenue + 10 emp should not meet threshold");
+    }
+
+    #[test]
+    fn small_annex_ii_is_out_of_scope() {
+        let result = evaluate(&test_profile("chemicals", 30, 5.0));
+        assert!(!result.applicable, "Small Annex II entity should be out of scope");
+        assert_eq!(result.category, EntityCategory::OutOfScope);
+    }
+
+    #[test]
+    fn annex_i_below_threshold_non_special_is_out_of_scope() {
+        // energy is Annex I but NOT in is_always_in_scope
+        let result = evaluate(&test_profile("energy", 10, 1.0));
+        assert!(!result.applicable, "Small energy company should be out of scope");
+    }
+
+    #[test]
+    fn zero_employees_with_high_revenue_meets_threshold() {
+        // A holding company with 0 employees but high revenue
+        let result = evaluate(&test_profile("banking", 0, 500.0));
+        assert!(result.applicable, "0 employees but 500M revenue should meet threshold");
+        assert_eq!(result.category, EntityCategory::Essential);
+    }
+
+    #[test]
+    fn public_administration_always_in_scope() {
+        let result = evaluate(&test_profile("public_administration", 3, 0.1));
+        assert!(result.applicable, "public_administration should always be in scope");
+        assert_eq!(result.category, EntityCategory::Essential);
+    }
+
+    #[test]
+    fn ict_service_management_always_in_scope() {
+        let result = evaluate(&test_profile("ict_service_management_b2b", 2, 0.05));
+        assert!(result.applicable, "ict_service_management_b2b should always be in scope");
+        assert_eq!(result.category, EntityCategory::Essential);
+    }
+
+    #[test]
+    fn sector_is_case_sensitive() {
+        // Engine expects lowercase — uppercase sector should be OutOfScope
+        let result = evaluate(&test_profile("Energy", 500, 100.0));
+        assert!(!result.applicable, "Uppercase 'Energy' should not match (API normalizes, engine does not)");
+    }
+
+    #[test]
+    fn sanction_important_uses_1_4_percent() {
+        let result = evaluate(&test_profile("food", 200, 1_000.0));
+        // 1.4% of €1B = €14M > €7M floor
+        assert_eq!(result.max_sanction_eur, Some(14_000_000.0));
+    }
+
+    #[test]
+    fn sanction_important_uses_floor() {
+        let result = evaluate(&test_profile("food", 60, 20.0));
+        // 1.4% of €20M = €280K < €7M floor → floor applies
+        assert_eq!(result.max_sanction_eur, Some(7_000_000.0));
+    }
 }

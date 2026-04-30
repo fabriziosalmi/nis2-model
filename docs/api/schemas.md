@@ -15,6 +15,8 @@ All input/output types derive `schemars::JsonSchema` for automatic schema genera
 | `services` | Vec\<String\> | Yes |
 | `member_states` | Vec\<String\> | Yes |
 
+> **Note:** The API normalizes `sector` to lowercase and trims whitespace. The rule engine performs case-sensitive matching against known sector codes.
+
 ## ComplianceStatus (output of `engine::evaluate`)
 
 | Field | Type | Description |
@@ -24,6 +26,17 @@ All input/output types derive `schemars::JsonSchema` for automatic schema genera
 | `obligations` | Vec\<Obligation\> | 16 items when in scope, 0 when out |
 | `max_sanction_eur` | Option\<f64\> | None when out of scope |
 | `incident_reporting` | Option\<IncidentReporting\> | None when out of scope |
+
+## ApplicabilityResponse (API /api/v1/applicability)
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `applicable` | bool | Whether NIS2 applies |
+| `category` | String | Essential, Important, or OutOfScope |
+| `sector` | String | Normalized sector code |
+| `employees` | u32 | Input employee count |
+| `disclaimer` | String | Legal disclaimer text |
+| `sector_warning` | String or null | Warning when sector is unrecognized |
 
 ## Obligation
 

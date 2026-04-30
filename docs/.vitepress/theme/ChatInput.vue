@@ -67,7 +67,8 @@ defineEmits(['update:input', 'send'])
 .send:focus-visible{outline:2px solid #60a5fa;outline-offset:2px}
 .disclaimer{
   max-width:640px;margin:8px 0 0;
-  font-size:11px;color:#64748b;
-  opacity:.6;letter-spacing:.01em;
+  font-size:12.5px;color:#94a3b8;
+  letter-spacing:.01em;line-height:1.4;
+  padding:6px 0;
 }
 </style>

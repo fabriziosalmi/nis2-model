@@ -1,6 +1,11 @@
 <script setup>
-defineProps({ messages: Array, isLoading: Boolean })
+import { computed } from 'vue'
+import { getStrings } from './i18n.js'
+
+const props = defineProps({ messages: Array, isLoading: Boolean, lang: { type: String, default: 'en' } })
 defineEmits(['followUp'])
+
+const t = computed(() => getStrings(props.lang))
 </script>
 
 <template>
@@ -32,7 +37,7 @@ defineEmits(['followUp'])
 
         <!-- Follow-up suggestions -->
         <div v-if="m.followUps?.length && !m.typing" class="section-followups">
-          <div class="section-label">Domande correlate</div>
+          <div class="section-label">{{ t.sectionLabels?.followUps || 'Related questions' }}</div>
           <div class="fups-list">
             <button v-for="f in m.followUps" :key="f" @click="$emit('followUp', f)" class="fup-btn">
               <svg class="fup-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -44,7 +49,7 @@ defineEmits(['followUp'])
 
         <!-- References & Standards -->
         <div v-if="!m.typing && (m.refs?.length || m.catLink || m.standards?.length)" class="section-refs">
-          <div class="section-label">Riferimenti</div>
+          <div class="section-label">{{ t.sectionLabels?.references || 'References' }}</div>
           <div class="refs-row">
             <a v-for="r in (m.refs || [])" :key="r.num" :href="r.url" target="_blank" class="ref-link">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
@@ -60,7 +65,7 @@ defineEmits(['followUp'])
 
         <!-- Glossary -->
         <div v-if="m.glossary?.length && !m.typing" class="section-glossary">
-          <div class="section-label">Glossario</div>
+          <div class="section-label">{{ t.sectionLabels?.glossary || 'Glossary' }}</div>
           <div class="gloss-grid">
             <div class="gloss-row" v-for="g in m.glossary" :key="g.term">
               <span class="gloss-term">{{ g.term }}</span>

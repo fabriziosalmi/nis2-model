@@ -1,6 +1,6 @@
 # System Overview
 
-The engine is a Cargo workspace with 6 crates organized as a unidirectional pipeline.
+The engine is a Cargo workspace with 7 crates organized as a unidirectional pipeline.
 
 ## Crates
 
@@ -12,6 +12,7 @@ The engine is a Cargo workspace with 6 crates organized as a unidirectional pipe
 | `nis2-mcp-server` | `protocol.rs`, `tools.rs`, `server.rs` | 13 | MCP JSON-RPC 2.0 server over stdio |
 | `nis2-slm` | `prompt.rs`, `grammar.rs`, `inference.rs`, `report.rs` | 18 | Prompt construction, GBNF grammar, template report generation |
 | `nis2-api` | `handlers.rs`, `routes.rs` | 6 | Axum REST API, benchmark binary |
+| `nis2-chat` | `engine.rs`, `cache.rs`, `dataset*.rs` | 20 | Semantic cache, BM25 search, session tracking, multilingual Q&A |
 
 ## Data flow
 
@@ -35,3 +36,4 @@ CompanyProfile -> rules (evaluate) -> ComplianceStatus -> slm (report)
 | `mcp-server` | mcp-server | MCP JSON-RPC server |
 | `api-server` | api | Axum HTTP server |
 | `bench` | api | Benchmark suite |
+| `chat` | chat | Interactive CLI chatbot |

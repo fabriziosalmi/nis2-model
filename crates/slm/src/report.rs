@@ -13,6 +13,11 @@ use nis2_rules::schema::{ComplianceStatus, EntityCategory};
 pub fn generate_report(company_name: &str, status: &ComplianceStatus) -> String {
     let mut report = String::with_capacity(4096);
 
+    // Legal disclaimer banner
+    report.push_str("> **⚠️ AVVISO:** Questo report è generato automaticamente da un motore di analisi software.\n");
+    report.push_str("> Non costituisce consulenza legale. Per una valutazione vincolante, consultare un avvocato qualificato.\n\n");
+    report.push_str("---\n\n");
+
     // Section 1: Scope
     report.push_str("## Ambito di applicazione\n\n");
     report.push_str(&generate_scope_section(company_name, status));
@@ -41,9 +46,10 @@ pub fn generate_report(company_name: &str, status: &ComplianceStatus) -> String 
 fn generate_scope_section(company_name: &str, status: &ComplianceStatus) -> String {
     if !status.applicable {
         return format!(
-            "Sulla base dei dati forniti, risulta che l'azienda \"{}\" \
-             non rientra nell'ambito di applicazione della Direttiva (UE) 2022/2555 (NIS2). \
-             Pertanto, gli obblighi previsti dalla direttiva non sono applicabili al soggetto in esame.\n",
+            "Sulla base dei parametri forniti, il motore di analisi classifica l'azienda \"{}\" \
+             come non rientrante nell'ambito di applicazione della Direttiva (UE) 2022/2555 (NIS2) \
+             per i criteri di settore e dimensione valutati. Questa classificazione automatizzata \
+             non esclude l'applicabilità in virtù di eccezioni previste dall'Art. 2(2) della direttiva.\n",
             company_name
         );
     }
@@ -55,10 +61,10 @@ fn generate_scope_section(company_name: &str, status: &ComplianceStatus) -> Stri
     };
 
     format!(
-        "Sulla base dei dati forniti, risulta che l'azienda \"{}\" \
-         rientra nell'ambito di applicazione della Direttiva (UE) 2022/2555 (NIS2), \
-         in qualità di {}. Il soggetto è pertanto tenuto al rispetto degli obblighi \
-         di cui agli articoli 20, 21 e 23 della direttiva.\n",
+        "Sulla base dei parametri forniti, il motore di analisi classifica l'azienda \"{}\" \
+         come rientrante nell'ambito di applicazione della Direttiva (UE) 2022/2555 (NIS2), \
+         in qualità di {}. La classificazione implica obblighi ai sensi degli \
+         articoli 20, 21 e 23 della direttiva.\n",
         company_name, category_text
     )
 }
@@ -158,6 +164,8 @@ mod tests {
     #[test]
     fn essential_report_has_all_sections() {
         let report = generate_report("Acme Energia S.p.A.", &essential_status());
+        assert!(report.contains("⚠️ AVVISO"));
+        assert!(report.contains("Non costituisce consulenza legale"));
         assert!(report.contains("## Ambito di applicazione"));
         assert!(report.contains("## Obblighi rilevanti"));
         assert!(report.contains("## Sanzioni potenziali"));
@@ -198,7 +206,8 @@ mod tests {
     #[test]
     fn out_of_scope_report_states_non_applicability() {
         let report = generate_report("Piccolo Negozio", &out_of_scope_status());
-        assert!(report.contains("non rientra nell'ambito di applicazione"));
+        assert!(report.contains("come non rientrante nell'ambito di applicazione"));
+        assert!(report.contains("Art. 2(2)"));
         assert!(!report.contains("## Segnalazione incidenti"));
     }
 
@@ -217,6 +226,6 @@ mod tests {
     #[test]
     fn report_uses_deterministic_formula() {
         let report = generate_report("Test", &essential_status());
-        assert!(report.contains("Sulla base dei dati forniti, risulta che"));
+        assert!(report.contains("Sulla base dei parametri forniti, il motore di analisi classifica"));
     }
 }

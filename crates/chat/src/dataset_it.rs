@@ -200,9 +200,6 @@ pub fn italian_entries() -> Vec<(&'static str, &'static str, &'static str)> {
         ("We use the same root password everywhere",
          "Art. 21(2)(i): shared root accounts violate individual accountability. Each administrator must have unique credentials. Root/admin access must use MFA per Art. 21(2)(j). Immediate remediation: rotate all shared credentials, deploy PAM.",
          "access_control"),
-        ("Should we use SSH keys instead of passwords?",
-         "Art. 21(2)(j) mandates strong authentication. SSH key-based auth is a recognized implementation. Password-only access to critical systems is insufficient. Use Ed25519 keys, protect with passphrase, rotate annually.",
-         "access_control"),
         ("Our data is not encrypted, is that a problem?",
          "Art. 21(2)(h) requires cryptography policies. Unencrypted data at rest is a compliance gap. Implement AES-256 for storage, TLS 1.2+ for transit. Prioritize: databases, backups, removable media.",
          "encryption"),
@@ -359,9 +356,6 @@ pub fn italian_entries() -> Vec<(&'static str, &'static str, &'static str)> {
         ("Serve una VPN?",
          "Art. 21(2)(j) richiede comunicazioni protette. VPN o tunnel cifrati equivalenti sono standard per l'accesso remoto a risorse interne. Le policy di split tunneling vanno valutate per rischio.",
          "remote_work"),
-        ("Serve una policy BYOD?",
-         "Art. 21(2)(a) analisi rischi e Art. 21(2)(i) gestione asset richiedono policy per dispositivi personali che accedono a sistemi aziendali. MDM (Mobile Device Management) e' un controllo comune.",
-         "remote_work"),
 
         // Cloud
         ("NIS2 si applica al cloud?",
@@ -439,9 +433,6 @@ pub fn italian_entries() -> Vec<(&'static str, &'static str, &'static str)> {
         // Business continuity keywords
         ("Servono i backup?",
          "Art. 21(2)(c) richiede esplicitamente la gestione dei backup e il disaster recovery. Backup regolari e testati con copie offsite/offline sono il minimo. Regola 3-2-1.",
-         "business_continuity"),
-        ("Serve un piano di disaster recovery?",
-         "Art. 21(2)(c) richiede continuita operativa incluso disaster recovery. RTO/RPO devono essere definiti, piani documentati e recovery testato regolarmente. Almeno annuale per test completo.",
          "business_continuity"),
 
         // Network keywords

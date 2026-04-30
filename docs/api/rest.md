@@ -21,7 +21,9 @@ Accepts a full `CompanyProfile` JSON body. Returns the complete `ComplianceStatu
 
 ### POST /api/v1/applicability
 
-Accepts `{ "sector", "employees", "annual_revenue_eur_m" }`. Returns `{ "applicable", "category", "sector", "employees" }`.
+Accepts `{ "sector", "employees", "annual_revenue_eur_m" }`. The `sector` field is normalized to lowercase.
+
+Returns `{ "applicable", "category", "sector", "employees", "disclaimer", "sector_warning" }`. The `sector_warning` field is present only when the sector code is not recognized (returns `null` otherwise).
 
 ### POST /api/v1/sanctions
 
@@ -38,3 +40,14 @@ Accepts a full `ReportRequest` with `name`, `sector`, `employees`, `annual_reven
 ## Tests (6)
 
 `health_check`, `evaluate_energy_company`, `applicability_check`, `sanctions_check`, `obligations_returns_16`, `report_generation`
+
+## Security
+
+- **CORS**: Restricted by default (same-origin). Set `CORS_ORIGIN` env var to allow a specific external origin.
+- **Headers**: API responses include `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`.
+- **Input**: Sector codes are normalized (lowercase, trimmed). Unrecognized sectors return `OutOfScope` with a warning.
+- **Auth**: Not included — deployers should add authentication (API key or JWT) before production exposure.
+
+## Legal
+
+All responses include a `disclaimer` field. API outputs are automated classifications and do not constitute legal advice.

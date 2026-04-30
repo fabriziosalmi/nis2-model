@@ -12,6 +12,9 @@ export default defineConfig({
     ['meta', { name: 'og:type', content: 'website' }],
     ['meta', { name: 'og:title', content: 'nis2-model' }],
     ['meta', { name: 'og:description', content: 'Reference implementation for NIS2/DORA compliance logic in Rust' }],
+    ['meta', { 'http-equiv': 'X-Content-Type-Options', content: 'nosniff' }],
+    ['meta', { 'http-equiv': 'X-Frame-Options', content: 'DENY' }],
+    ['meta', { name: 'referrer', content: 'strict-origin-when-cross-origin' }],
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
   ],
 
@@ -67,6 +70,9 @@ export default defineConfig({
           { text: 'Obligations (Art. 21)', link: '/legal/obligations' },
           { text: 'Sanctions (Art. 34)', link: '/legal/sanctions' },
           { text: 'Incident Reporting (Art. 23)', link: '/legal/incidents' },
+          { text: 'Legal Disclaimer', link: '/legal/disclaimer' },
+          { text: 'Terms of Use', link: '/legal/terms' },
+          { text: 'Privacy Policy', link: '/legal/privacy' },
         ]
       }
     ],
@@ -77,7 +83,7 @@ export default defineConfig({
 
     footer: {
       message: 'Released under the EUPL-1.2 License.',
-      copyright: '2025 Fabrizio Salmi'
+      copyright: '2025–2026 Fabrizio Salmi'
     },
 
     search: {

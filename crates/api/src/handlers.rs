@@ -4,10 +4,36 @@ use axum::http::StatusCode;
 use axum::Json;
 use serde::{Deserialize, Serialize};
 
-use nis2_rules::engine;
+use nis2_rules::engine::{self, ANNEX_I_SECTORS, ANNEX_II_SECTORS};
 use nis2_rules::schema::{CompanyProfile, ComplianceStatus};
 use nis2_slm::inference::{InferenceBackend, TemplateBackend};
 use nis2_slm::prompt::{self, InferenceParams};
+
+/// Legal disclaimer appended to all API responses.
+const DISCLAIMER: &str = "Classificazione automatizzata — non costituisce consulenza legale. \
+    Consultare un avvocato qualificato per una valutazione vincolante.";
+
+/// Normalize sector input: lowercase, trimmed.
+fn normalize_sector(s: &str) -> String {
+    s.trim().to_lowercase().replace(' ', "_")
+}
+
+/// Check if a sector code is recognized.
+fn is_known_sector(sector: &str) -> bool {
+    ANNEX_I_SECTORS.contains(&sector) || ANNEX_II_SECTORS.contains(&sector)
+}
+
+/// Build a helpful error message for unrecognized sectors.
+fn unknown_sector_hint(sector: &str) -> String {
+    let all: Vec<&str> = ANNEX_I_SECTORS.iter().chain(ANNEX_II_SECTORS.iter()).copied().collect();
+    format!(
+        "Settore '{}' non riconosciuto. Il motore classifica il soggetto come OutOfScope \
+         per settori sconosciuti. Settori validi: {}. \
+         Verificare con un consulente se il settore è corretto.",
+        sector,
+        all.join(", ")
+    )
+}
 
 /// Health check response.
 #[derive(Serialize, Deserialize)]
@@ -52,15 +78,20 @@ pub struct ApplicabilityResponse {
     pub category: String,
     pub sector: String,
     pub employees: u32,
+    pub disclaimer: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sector_warning: Option<String>,
 }
 
 /// POST /api/v1/applicability
 pub async fn applicability(
     Json(req): Json<ApplicabilityRequest>,
 ) -> Json<ApplicabilityResponse> {
+    let sector = normalize_sector(&req.sector);
+    let warning = if !is_known_sector(&sector) { Some(unknown_sector_hint(&sector)) } else { None };
     let profile = CompanyProfile {
         name: "N/A".into(),
-        sector: req.sector.clone(),
+        sector: sector.clone(),
         sub_sector: None,
         employees: req.employees,
         annual_revenue_eur_m: req.annual_revenue_eur_m,
@@ -72,8 +103,10 @@ pub async fn applicability(
     Json(ApplicabilityResponse {
         applicable: status.applicable,
         category: format!("{:?}", status.category),
-        sector: req.sector,
+        sector,
         employees: req.employees,
+        disclaimer: DISCLAIMER.into(),
+        sector_warning: warning,
     })
 }
 
@@ -89,9 +122,10 @@ pub struct SanctionResponse {
 pub async fn sanctions(
     Json(req): Json<ApplicabilityRequest>,
 ) -> Json<SanctionResponse> {
+    let sector = normalize_sector(&req.sector);
     let profile = CompanyProfile {
         name: "N/A".into(),
-        sector: req.sector,
+        sector,
         sub_sector: None,
         employees: req.employees,
         annual_revenue_eur_m: req.annual_revenue_eur_m,
@@ -119,9 +153,10 @@ pub struct ObligationItem {
 pub async fn obligations(
     Json(req): Json<ApplicabilityRequest>,
 ) -> Json<Vec<ObligationItem>> {
+    let sector = normalize_sector(&req.sector);
     let profile = CompanyProfile {
         name: "N/A".into(),
-        sector: req.sector,
+        sector,
         sub_sector: None,
         employees: req.employees,
         annual_revenue_eur_m: req.annual_revenue_eur_m,

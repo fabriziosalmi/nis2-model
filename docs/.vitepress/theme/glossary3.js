@@ -27,7 +27,6 @@ const G3 = {
 
 // === ADVANCED SECURITY CONCEPTS ===
 'security by design':{it:'Principio di integrazione della sicurezza fin dalla fase di progettazione, non aggiunta a posteriori. Richiesto implicitamente da Art. 21(2)(e).',en:'Principle of integrating security from the design phase, not added afterwards. Implicitly required by Art. 21(2)(e).'},
-'defense in depth':{it:'Strategia di difesa a più livelli sovrapposti: perimetro, rete, host, applicazione, dati. Se un livello fallisce, gli altri compensano.',en:'Multi-layer defense strategy: perimeter, network, host, application, data. If one layer fails, others compensate.'},
 'security orchestration':{it:'Automazione e coordinamento dei processi di sicurezza tramite piattaforme SOAR per ridurre tempi di risposta e errori umani.',en:'Automation and coordination of security processes via SOAR platforms to reduce response times and human errors.'},
 'threat intelligence':{it:'Raccolta e analisi di informazioni su minacce informatiche per prevenzione proattiva. Feed IoC, rapporti settoriali, sharing ISAC.',en:'Collection and analysis of cyber threat information for proactive prevention. IoC feeds, sector reports, ISAC sharing.'},
 'security posture':{it:'Stato complessivo della sicurezza di un\'organizzazione: controlli implementati, vulnerabilità note, capacità di rilevamento e risposta.',en:'Overall security state of an organization: implemented controls, known vulnerabilities, detection and response capabilities.'},
