@@ -320,5 +320,66 @@ La NIS2 non nomina esplicitamente l'EDR, ma richiede 'sicurezza delle reti e dei
 - **Gestione Segreti:** Non hardcodare MAI password o chiavi API nel codice sorgente (usare Azure Key Vault o HashiCorp Vault).",
             "development_impl"
         ),
+        (
+            "Come gestire i log in cloud per la NIS2 senza costi esorbitanti?",
+            "L'archiviazione dei log a lungo termine (spesso 1+ anno) è richiesta per l'investigazione degli incidenti (Art. 21(2)(b)). I costi sui SIEM cloud possono esplodere.
+
+**Soluzioni pratiche di contenimento costi:**
+- **Tiering dello Storage:** Tieni i log attivi (ultimi 30 giorni) su un SIEM \"hot\" per le ricerche veloci e gli alert.
+- **Cold Storage:** Esporta automaticamente i log più vecchi su soluzioni a bassissimo costo come AWS S3 Glacier Deep Archive, Azure Archive Storage o Google Cloud Coldline. Se c'è un incidente passato, puoi \"scongelarli\".
+- **Filtro del Rumore:** Non mandare log di debug o eventi di rete superflui al SIEM. Filtra alla fonte usando tool come Logstash o Fluentd.",
+            "detection_impl"
+        ),
+        (
+            "Cosa fare in caso di attacco DDoS? Quali sono i requisiti?",
+            "Un attacco Distributed Denial of Service mira a interrompere la continuità operativa (Art. 21(2)(c)).
+
+**Architettura Resiliente (Soluzioni Tecniche):**
+- **WAF e CDN:** Nascondi l'IP pubblico del tuo server dietro una CDN (Cloudflare, Akamai, AWS CloudFront) che assorbe automaticamente gli attacchi volumetrici.
+- **Rate Limiting:** Implementa limiti rigidi di richieste per IP sul Web Application Firewall (WAF).
+- **Piano di Emergenza:** Definisci a priori con l'ISP la possibilità di applicare un 'Blackhole Routing' per far cadere il traffico anomalo a monte prima che saturi la tua banda locale.",
+            "network_security_impl"
+        ),
+        (
+            "Microservizi e Kubernetes: come mettere in sicurezza i container?",
+            "La sicurezza delle reti (Art. 21(2)(e)) si estende agli ambienti cloud-native. Un cluster Kubernetes mal configurato è un invito a nozze.
+
+**Pratiche Essenziali:**
+- **Image Scanning:** Non permettere il deploy di immagini container se contengono vulnerabilità CVE critiche (usa Trivy o Clair in CI/CD).
+- **Network Policies:** Implementa regole di rete interne a Kubernetes (Zero Trust per Pod). Un pod di frontend non deve poter parlare con un pod di amministrazione.
+- **RBAC e Secrets:** Non far girare mai i container come utente 'root' (Privileged Pods) e non passare password come variabili d'ambiente in chiaro (usa Kubernetes Secrets o Vault integrato).",
+            "development_impl"
+        ),
+        (
+            "Autenticazione senza password (Passwordless): va bene per la NIS2?",
+            "Non solo va bene, ma è considerata la massima espressione di sicurezza per il controllo degli accessi (Art. 21(2)(j)).
+
+Il phishing è la prima causa di compromissione. L'approccio passwordless (es. Windows Hello for Business, Apple FaceID integrato con FIDO2/Passkeys, YubiKey) elimina completamente le password rubabili.
+- Vantaggio: Azzeri le chiamate all'helpdesk per 'password dimenticata'.
+- Vantaggio NIS2: Sei blindato contro il credential stuffing. È l'implementazione MFA definitiva.",
+            "access_control_impl"
+        ),
+        (
+            "Come isolare la rete OT (Operational Technology) dalla rete IT aziendale?",
+            "Nel settore manifatturiero, trasporti o energia, la convergenza IT/OT è il rischio più grande. Se un ransomware colpisce il server mail, non deve fermare la catena di montaggio.
+
+**Architettura di Sicurezza (Modello Purdue):**
+1. **Air Gap logico:** Le reti OT devono risiedere su switch fisici separati o VLAN rigorosamente isolate.
+2. **DMZ Industriale:** L'IT non può comunicare direttamente con l'OT. Bisogna usare un jump server o una DMZ intermedia dove solo protocolli specifici (es. OPC UA) e ispezionati possono passare.
+3. **Patching Indiretto:** Le macchine industriali non devono mai avere accesso diretto a Internet per scaricare gli aggiornamenti.",
+            "network_security_impl"
+        ),
+        (
+            "Gestione dei dispositivi mobili (MDM): cosa richiede la NIS2 per gli smartphone aziendali?",
+            "I dispositivi mobili sono endpoint a tutti gli effetti. Un furto dello smartphone del CEO espone dati critici e credenziali (Art. 21).
+
+**Obblighi Tecnici (MDM/UEM):**
+- Registrare tutti i dispositivi aziendali in un Mobile Device Management (es. Microsoft Intune, VMware Workspace ONE).
+- Obbligare il blocco schermo con PIN a 6 cifre o biometria.
+- Imporre la crittografia del dispositivo.
+- Abilitare la separazione logica (Work Profile) su Android/iOS per tenere isolati i dati aziendali da quelli personali (BYOD).
+- Capacità di **Wipe Remoto** in caso di furto o smarrimento.",
+            "endpoint_security_impl"
+        )
     ]
 }

@@ -187,5 +187,50 @@ Tuttavia, deve esistere una figura che fa da ponte tra l'operatività tecnica e 
             "Documentazione richiesta da Art. 20, 21, 23: (1) Policy di sicurezza — documento approvato dal CDA che definisce ambito, principi, ruoli e responsabilita della sicurezza. Allineato a ISO 27001. (2) Registro dei rischi — catalogo di tutti i rischi identificati con: probabilita, impatto, misure di mitigazione, rischio residuo, responsabile, data revisione. (3) Piani operativi — piano di risposta incidenti, piano di continuita operativa, piano di disaster recovery, piano di gestione crisi. Tutti documentati, approvati, testati. (4) Policy specifiche Art. 21 — controllo accessi, crittografia, supply chain, vulnerability management, change management, BYOD, classificazione dati, backup. (5) Registri — registro incidenti (timeline, impatto, azioni), registro notifiche CSIRT, registro audit e pentest, registro formazione CDA e dipendenti. (6) Contratti — clausole di sicurezza con fornitori, accordi di condivisione informazioni (Art. 29), SLA con KPI di sicurezza. (7) Evidenze — verbali riunioni comitato sicurezza, verbali approvazione CDA, certificati di formazione, report di audit, risultati pentest, log di revisione accessi. Conservare per almeno 5 anni.",
             "documentation"
         ),
+        (
+            "Come calcolare e giustificare il budget di cybersecurity per il board in ottica NIS2?",
+            "Spesso il management considera la sicurezza un costo puro. La NIS2 cambia il paradigma (Art. 20): l'organo di vertice è responsabile.
+
+**Strategia di giustificazione (CISO/IT Manager):**
+1. **Analisi del Rischio Finanziario (FAIR):** Quantifica il rischio in Euro. Un fermo di 3 giorni quanto costa in mancato fatturato? E se si aggiunge la multa NIS2 (fino a 10M o 2% del fatturato)?
+2. **Comparazione vs Costo di Mitigazione:** 'Spendere 50.000€ l'anno per EDR, Backup e MFA riduce l'esposizione di rischio da 5 Milioni a 100.000€'.
+3. **Responsabilità Personale:** Ricordare educatamente al CDA che l'Art. 20 prevede sanzioni personali e sospensioni dall'incarico per negligenza. Di solito sblocca i budget molto velocemente.",
+            "governance_impl"
+        ),
+        (
+            "L'assicurazione Cyber (Cyber Insurance) sostituisce le misure della NIS2?",
+            "Assolutamente no. Trasferire il rischio tramite una polizza assicurativa non elimina l'obbligo legale di applicare le misure (Art. 21).
+
+Anzi, oggi le assicurazioni **pretendono** la conformità de facto (MFA su tutto, EDR, backup testati regolarmente) prima ancora di emettere la polizza. Se si verifica un incidente e l'assicurazione scopre che hai dichiarato il falso sui questionari di sicurezza (es. non avevi l'MFA sulla VPN), non paga il riscatto o i danni e annulla la polizza.",
+            "risk_management"
+        ),
+        (
+            "Come gestire il turn-over dei dipendenti per evitare rischi insider o data exfiltration?",
+            "Il processo di off-boarding è fondamentale per la sicurezza (Art. 21(2)(i)). Molti incidenti nascono da ex-dipendenti arrabbiati con credenziali ancora attive.
+
+**Procedure Operative Standard:**
+1. Sospensione immediata (entro 1 ora dall'uscita) degli account Active Directory, Google Workspace, VPN.
+2. Recupero documentato di tutti i dispositivi fisici (laptop, token RSA, smartphone, badge fisici).
+3. Reset delle password condivise (es. account generici di amministrazione IT) a cui la persona aveva accesso.
+L'automazione (Identity Lifecycle Management) che disabilita l'utente quando viene flaggato come 'Dismesso' nel software HR è il traguardo ideale.",
+            "governance_impl"
+        ),
+        (
+            "Auditing interno vs esterno: quante volte all'anno va fatto per essere in regola?",
+            "La NIS2 richiede la 'valutazione dell'efficacia' (Art. 21(2)(f)). Non bastano controlli autoreferenziali.
+
+**Programma Consigliato:**
+- **Auditing Interno:** Continuo o trimestrale. Il team IT verifica lo stato dei backup, le metriche di patch (SLA) e gli account orfani.
+- **Auditing Esterno (Indipendente):** Almeno annuale. Assumere una terza parte per eseguire un Penetration Test completo e un assessment ISO 27001/NIS2 garantisce che l'organo di vertice abbia una visione non viziata dello stato della sicurezza (evita l'effetto 'L'oste che dice che il vino è buono').",
+            "governance_impl"
+        ),
+        (
+            "Responsabilità dell'RSPP rispetto al CISO: come si intersecano sicurezza fisica e cyber?",
+            "Un attacco cyber a un sistema OT industriale può fermare i robot e causare danni fisici ai lavoratori. Questo unisce le responsabilità del CISO (Cyber) e dell'RSPP (Sicurezza sul Lavoro).
+
+Inoltre, la 'Sicurezza fisica e ambientale' (Art. 21(2)(e)) richiede che i server e i cavi di rete siano protetti da furti, incendi o manomissioni.
+**Azione Pratica:** Istruire la guardia giurata/receptionist a non far entrare nessuno in sala macchine (tailgating) e mettere sistemi di videosorveglianza e controllo accessi sui rack IT. Un cavo staccato a mano è un incidente NIS2 tanto quanto un ransomware.",
+            "governance_impl"
+        )
     ]
 }
