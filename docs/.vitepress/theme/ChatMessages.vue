@@ -226,8 +226,12 @@ defineEmits(['followUp'])
 }
 .gloss-row{display:contents}
 .gloss-term{
-  font-weight:700;color:#93c5fd;white-space:nowrap;font-size:10px;
-  padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.08);justify-self:start;
+  font-weight:700;color:#93c5fd;white-space:nowrap;
+  font-size:9px;text-transform:uppercase;letter-spacing:.1em;
+  padding:3px 10px;border-radius:4px;
+  background:rgba(96,165,250,.08);
+  border:1px solid rgba(96,165,250,.12);
+  justify-self:start;
 }
 .gloss-def{color:#94a3b8;font-size:12px;line-height:1.5}
 

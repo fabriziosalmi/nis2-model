@@ -341,7 +341,7 @@ const citedArticles = computed(() => {
       </div>
     </aside>
 
-    <!-- Center -->
+    <!-- Center — shared axis container -->
     <div class="center">
       <ChatMessages ref="chatEl" :messages="messages" :isLoading="isLoading" @followUp="sendMessage">
         <template #welcome>
@@ -362,22 +362,18 @@ const citedArticles = computed(() => {
       <ChatInput v-model:input="input" :disabled="isLoading || !stats.entries" :placeholder="t.placeholder" :disclaimer="t.disclaimer" @send="sendMessage()" />
     </div>
 
-    <!-- Right sidebar: Widget Dashboard -->
+    <!-- Right sidebar: Command Dashboard -->
     <aside v-if="showRight && !focusMode" class="side side-r">
-      <!-- Tab switcher -->
-      <div class="side-tabs">
-        <button :class="['side-tab', { active: sideTab === 'norm' }]" @click="sideTab = 'norm'">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-          {{ lang === 'it' ? 'Normativa' : 'Legislation' }}
-        </button>
-        <button :class="['side-tab', { active: sideTab === 'docs' }]" @click="sideTab = 'docs'">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          {{ lang === 'it' ? 'Artefatti' : 'Artifacts' }}
-        </button>
+      <!-- Status badge -->
+      <div class="side-label">{{ lang === 'it' ? 'Stato Conformità' : 'Compliance Status' }}</div>
+      <div :class="['status-badge', coverage.pct >= 70 ? 'status-ok' : coverage.pct > 0 ? 'status-eval' : 'status-none']">
+        <span class="status-dot"></span>
+        {{ coverage.pct >= 70 ? (lang === 'it' ? 'IN REGOLA' : 'COMPLIANT') : coverage.pct > 0 ? (lang === 'it' ? 'IN VALUTAZIONE' : 'EVALUATING') : (lang === 'it' ? 'NON VALUTATO' : 'NOT ASSESSED') }}
       </div>
 
-      <!-- TAB 1: Normativa Citata -->
-      <div v-if="sideTab === 'norm'" class="side-panel">
+      <!-- Normativa identificata -->
+      <div class="side-label" style="margin-top:16px">{{ lang === 'it' ? 'Norme Identificate' : 'Identified Legislation' }}</div>
+      <div class="side-panel">
         <template v-if="citedArticles.length">
           <a v-for="art in citedArticles" :key="art.num" :href="art.url" target="_blank" class="norm-card">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
@@ -389,36 +385,19 @@ const citedArticles = computed(() => {
           </a>
         </template>
         <div v-else class="empty-session">
-          {{ lang === 'it' ? 'Gli articoli citati appariranno qui.' : 'Cited articles will appear here.' }}
+          {{ lang === 'it' ? 'Le norme appariranno qui durante la conversazione.' : 'Legislation will appear here as you converse.' }}
         </div>
       </div>
 
-      <!-- TAB 2: Artefatti Sessione -->
-      <div v-if="sideTab === 'docs'" class="side-panel">
-        <template v-if="complianceDoc.length">
-          <button class="artifact-card" @click="exportReport">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            <div class="norm-info">
-              <span class="norm-title">{{ lang === 'it' ? 'Report Assessment' : 'Assessment Report' }}</span>
-              <span class="norm-sub">{{ complianceDoc.length }} {{ lang === 'it' ? 'sezioni' : 'sections' }} · {{ coverage.pct }}% {{ lang === 'it' ? 'copertura' : 'coverage' }}</span>
-            </div>
-            <svg class="norm-ext" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          </button>
-          <div class="doc-section" v-for="(s, i) in complianceDoc" :key="i">
-            <div class="doc-head">
-              <span :class="['sev-dot-sm', s.severity]"></span>
-              <span class="doc-title">{{ s.title }}</span>
-              <span class="doc-conf">{{ s.confidence }}%</span>
-            </div>
-            <div class="doc-refs" v-if="s.refs.length">
-              <span v-for="r in s.refs" :key="r" class="doc-ref">{{ r }}</span>
-            </div>
-          </div>
-        </template>
-        <div v-else class="empty-session">
-          {{ lang === 'it' ? 'Gli artefatti si genereranno durante la conversazione.' : 'Artifacts will generate as you converse.' }}
+      <!-- Artefatti -->
+      <div v-if="complianceDoc.length" class="side-label" style="margin-top:16px">{{ lang === 'it' ? 'Azioni' : 'Actions' }}</div>
+      <button v-if="complianceDoc.length" class="artifact-card" @click="exportReport">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <div class="norm-info">
+          <span class="norm-title">{{ lang === 'it' ? 'Scarica Report' : 'Download Report' }}</span>
+          <span class="norm-sub">{{ complianceDoc.length }} {{ lang === 'it' ? 'sezioni' : 'sections' }} · Markdown</span>
         </div>
-      </div>
+      </button>
     </aside>
   </div>
 </div>
@@ -504,12 +483,12 @@ const citedArticles = computed(() => {
 .areas{display:flex;flex-direction:column;gap:0;flex:1;overflow-y:auto;min-height:0}
 .area{
   display:flex;align-items:center;gap:8px;padding:6px 8px;
-  font-size:13px;color:#94a3b8;transition:all .15s ease-out;
+  font-size:13px;color:#64748b;transition:all .15s ease-out;
   border-radius:6px;cursor:default;
 }
-.area:hover{background:rgba(255,255,255,.04)}
-.area.on{color:#e2e8f0;font-weight:500}
-.area-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.12);flex-shrink:0;transition:all .3s}
+.area:hover{background:rgba(255,255,255,.04);color:#94a3b8}
+.area.on{color:#ffffff;font-weight:500}
+.area-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.1);flex-shrink:0;transition:all .3s}
 .area.on .area-dot{background:#60a5fa;box-shadow:0 0 6px rgba(96,165,250,.4)}
 
 /* Footer links */
@@ -535,22 +514,20 @@ const citedArticles = computed(() => {
 .export-btn:hover{border-color:var(--vp-c-brand-1);color:var(--vp-c-brand-1);background:rgba(59,130,246,.04)}
 .export-btn svg{flex-shrink:0}
 
-/* ── Sidebar Tabs ── */
-.side-tabs{
-  display:flex;gap:2px;margin-bottom:12px;
-  background:rgba(255,255,255,.04);border-radius:8px;padding:2px;
+/* ── Status Badge ── */
+.status-badge{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;border-radius:8px;
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  margin-bottom:12px;
 }
-.side-tab{
-  flex:1;display:flex;align-items:center;justify-content:center;gap:5px;
-  padding:6px 4px;border:none;border-radius:6px;
-  background:transparent;color:#64748b;
-  font-size:10px;font-weight:600;text-transform:uppercase;
-  letter-spacing:.08em;cursor:pointer;transition:all .15s ease-out;
-}
-.side-tab:hover{color:#94a3b8}
-.side-tab.active{background:rgba(255,255,255,.08);color:#e2e8f0;box-shadow:0 1px 2px rgba(0,0,0,.1)}
-.side-tab svg{flex-shrink:0;opacity:.6}
-.side-tab.active svg{opacity:.9}
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.status-none{background:rgba(100,116,139,.1);color:#64748b}
+.status-none .status-dot{background:#64748b}
+.status-eval{background:rgba(251,191,36,.08);color:#fbbf24}
+.status-eval .status-dot{background:#fbbf24;box-shadow:0 0 6px rgba(251,191,36,.4)}
+.status-ok{background:rgba(16,185,129,.08);color:#34d399}
+.status-ok .status-dot{background:#34d399;box-shadow:0 0 6px rgba(16,185,129,.4)}
 
 /* ── Side Panel (content area) ── */
 .side-panel{display:flex;flex-direction:column;gap:4px;flex:1;overflow-y:auto;min-height:0}

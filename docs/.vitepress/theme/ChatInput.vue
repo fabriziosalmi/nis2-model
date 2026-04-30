@@ -38,7 +38,7 @@ defineEmits(['update:input', 'send'])
   border-top:1px solid rgba(255,255,255,.06);
 }
 .in-wrap{
-  display:flex;gap:8px;max-width:640px;margin:0 auto;
+  display:flex;gap:8px;max-width:640px;
 }
 .in-wrap input{
   flex:1;padding:12px 20px;
@@ -66,8 +66,8 @@ defineEmits(['update:input', 'send'])
 .send:disabled{opacity:.3;cursor:not-allowed}
 .send:focus-visible{outline:2px solid #60a5fa;outline-offset:2px}
 .disclaimer{
-  max-width:640px;margin:8px auto 0;
+  max-width:640px;margin:8px 0 0;
   font-size:11px;color:#64748b;
-  opacity:.6;text-align:center;letter-spacing:.01em;
+  opacity:.6;letter-spacing:.01em;
 }
 </style>
