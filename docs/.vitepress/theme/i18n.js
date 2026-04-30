@@ -3,7 +3,7 @@
 
 export const translations = {
   it: {
-    title: 'NIS2 Compliance Engine',
+    title: 'nis2-model',
     sub: 'Deterministico · Zero LLM',
     placeholder: 'Descrivi la tua azienda, chiedi un articolo o verifica un requisito...',
     loading: 'Caricamento knowledge base...',
@@ -83,7 +83,7 @@ export const translations = {
     },
   },
   en: {
-    title: 'NIS2 Compliance Engine',
+    title: 'nis2-model',
     sub: 'Deterministic · Zero LLM',
     placeholder: 'Describe your organization, ask about an article, or verify a requirement...',
     loading: 'Loading knowledge base...',

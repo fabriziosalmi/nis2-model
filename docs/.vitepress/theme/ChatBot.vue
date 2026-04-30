@@ -523,7 +523,7 @@ const citedArticles = computed(() => {
 /* Header — 3 column centered */
 .hd{
   display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
-  padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;
+  padding:12px 16px;border-bottom:1px solid var(--vp-c-divider);flex-shrink:0;
   background:var(--vp-c-bg);
   box-shadow:0 1px 2px rgba(0,0,0,.05);
   position:relative;z-index:10;
@@ -562,13 +562,13 @@ const citedArticles = computed(() => {
 }
 .side::-webkit-scrollbar{width:6px}
 .side::-webkit-scrollbar-track{background:transparent}
-.side::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:8px}
-.side::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.15)}
-.side-l{border-right:1px solid rgba(255,255,255,.06);box-shadow:2px 0 4px rgba(0,0,0,.03)}
-.side-r{border-left:1px solid rgba(255,255,255,.06);box-shadow:-2px 0 4px rgba(0,0,0,.03)}
+.side::-webkit-scrollbar-thumb{background:var(--vp-c-divider);border-radius:8px}
+.side::-webkit-scrollbar-thumb:hover{background:var(--vp-c-text-3)}
+.side-l{border-right:1px solid var(--vp-c-divider);box-shadow:2px 0 4px rgba(0,0,0,.03)}
+.side-r{border-left:1px solid var(--vp-c-divider);box-shadow:-2px 0 4px rgba(0,0,0,.03)}
 .side-label{
   font-size:10px;font-weight:700;text-transform:uppercase;
-  letter-spacing:.12em;color:var(--vp-c-text-3);margin-bottom:8px;opacity:.55;
+  letter-spacing:.12em;color:var(--vp-c-text-2);margin-bottom:8px;opacity:.7;
 }
 
 /* Coverage ring */
@@ -583,13 +583,13 @@ const citedArticles = computed(() => {
 .areas{display:flex;flex-direction:column;gap:0;flex:1;overflow-y:auto;min-height:0}
 .area{
   display:flex;align-items:center;gap:8px;padding:6px 8px;
-  font-size:13px;color:#64748b;transition:all .15s ease-out;
+  font-size:13px;color:var(--vp-c-text-3);transition:all .15s ease-out;
   border-radius:6px;cursor:default;
 }
-.area:hover{background:rgba(255,255,255,.04);color:#94a3b8}
-.area.on{color:#ffffff;font-weight:500}
-.area-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.1);flex-shrink:0;transition:all .3s}
-.area.on .area-dot{background:#60a5fa;box-shadow:0 0 6px rgba(96,165,250,.4)}
+.area:hover{background:var(--vp-c-bg-alt);color:var(--vp-c-text-2)}
+.area.on{color:var(--vp-c-text-1);font-weight:500}
+.area-dot{width:6px;height:6px;border-radius:50%;background:var(--vp-c-divider);flex-shrink:0;transition:all .3s}
+.area.on .area-dot{background:var(--vp-c-brand-1);box-shadow:0 0 6px rgba(59,130,246,.4)}
 
 /* Footer links */
 .side-footer{padding-top:10px;border-top:1px solid var(--vp-c-divider);display:flex;flex-direction:column;gap:5px;margin-top:6px}
@@ -622,12 +622,12 @@ const citedArticles = computed(() => {
   margin-bottom:12px;
 }
 .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.status-none{background:rgba(100,116,139,.1);color:#64748b}
-.status-none .status-dot{background:#64748b}
-.status-eval{background:rgba(251,191,36,.08);color:#fbbf24}
-.status-eval .status-dot{background:#fbbf24;box-shadow:0 0 6px rgba(251,191,36,.4)}
-.status-ok{background:rgba(16,185,129,.08);color:#34d399}
-.status-ok .status-dot{background:#34d399;box-shadow:0 0 6px rgba(16,185,129,.4)}
+.status-none{background:rgba(100,116,139,.1);color:var(--vp-c-text-3)}
+.status-none .status-dot{background:var(--vp-c-text-3)}
+.status-eval{background:rgba(234,179,8,.08);color:#ca8a04}
+.status-eval .status-dot{background:#eab308;box-shadow:0 0 6px rgba(234,179,8,.4)}
+.status-ok{background:rgba(16,185,129,.08);color:#10b981}
+.status-ok .status-dot{background:#10b981;box-shadow:0 0 6px rgba(16,185,129,.4)}
 
 /* ── Side Panel (content area) ── */
 .side-panel{display:flex;flex-direction:column;gap:4px;flex:1;overflow-y:auto;min-height:0}
@@ -636,15 +636,15 @@ const citedArticles = computed(() => {
 .norm-card{
   display:flex;align-items:center;gap:8px;
   padding:8px 10px;border-radius:8px;
-  text-decoration:none;color:#94a3b8;
+  text-decoration:none;color:var(--vp-c-text-2);
   transition:all .15s ease-out;cursor:pointer;
 }
-.norm-card:hover{background:rgba(255,255,255,.05);color:#e2e8f0}
-.norm-card svg{flex-shrink:0;color:#60a5fa;opacity:.6}
+.norm-card:hover{background:var(--vp-c-bg-alt);color:var(--vp-c-text-1)}
+.norm-card svg{flex-shrink:0;color:var(--vp-c-brand-1);opacity:.6}
 .norm-card:hover svg{opacity:.9}
 .norm-info{display:flex;flex-direction:column;flex:1;min-width:0}
-.norm-title{font-size:12px;font-weight:600;color:#e2e8f0;line-height:1.3}
-.norm-sub{font-size:10px;color:#64748b;line-height:1.3;margin-top:1px}
+.norm-title{font-size:12px;font-weight:600;color:var(--vp-c-text-1);line-height:1.3}
+.norm-sub{font-size:10px;color:var(--vp-c-text-3);line-height:1.3;margin-top:1px}
 .norm-ext{opacity:0;transition:opacity .15s ease-out}
 .norm-card:hover .norm-ext{opacity:.4}
 
@@ -652,39 +652,39 @@ const citedArticles = computed(() => {
 .artifact-card{
   display:flex;align-items:center;gap:8px;
   padding:10px 10px;border-radius:8px;border:none;
-  background:rgba(16,185,129,.06);color:#94a3b8;
+  background:rgba(16,185,129,.06);color:var(--vp-c-text-2);
   cursor:pointer;transition:all .15s ease-out;text-align:left;
   margin-bottom:8px;
 }
-.artifact-card:hover{background:rgba(16,185,129,.1);color:#e2e8f0}
-.artifact-card svg{flex-shrink:0;color:#34d399;opacity:.7}
+.artifact-card:hover{background:rgba(16,185,129,.1);color:var(--vp-c-text-1)}
+.artifact-card svg{flex-shrink:0;color:#10b981;opacity:.7}
 .artifact-card:hover svg{opacity:1}
 .artifact-card .norm-ext{opacity:0}
 .artifact-card:hover .norm-ext{opacity:.4}
 
 /* ── Doc Section (compact) ── */
 .doc-section{
-  padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);
+  padding:8px 0;border-bottom:1px solid var(--vp-c-divider);
   animation:fadeUp .3s ease;
 }
 .doc-section:last-child{border-bottom:none}
 .doc-head{display:flex;align-items:center;gap:6px;margin-bottom:2px}
-.doc-title{font-size:11px;font-weight:600;color:#cbd5e1;flex:1}
+.doc-title{font-size:11px;font-weight:600;color:var(--vp-c-text-1);flex:1}
 .doc-conf{
   font-size:9px;font-weight:700;padding:2px 6px;border-radius:9999px;
-  background:rgba(16,185,129,.1);color:#34d399;
+  background:rgba(16,185,129,.1);color:#10b981;
   font-variant-numeric:tabular-nums;
 }
 .doc-refs{display:flex;flex-wrap:wrap;gap:3px}
-.doc-ref{font-size:9px;padding:2px 6px;border-radius:9999px;background:rgba(255,255,255,.05);color:#64748b}
+.doc-ref{font-size:9px;padding:2px 6px;border-radius:9999px;background:var(--vp-c-bg-alt);color:var(--vp-c-text-3)}
 .sev-dot-sm{width:5px;height:5px;border-radius:50%;flex-shrink:0}
-.sev-dot-sm.critical{background:#f87171}
-.sev-dot-sm.high{background:#fbbf24}
-.sev-dot-sm.medium{background:#a78bfa}
-.sev-dot-sm.info{background:#60a5fa}
+.sev-dot-sm.critical{background:#ef4444}
+.sev-dot-sm.high{background:#f59e0b}
+.sev-dot-sm.medium{background:#8b5cf6}
+.sev-dot-sm.info{background:var(--vp-c-brand-1)}
 
 .empty-session{
-  font-size:12px;color:#64748b;opacity:.6;
+  font-size:12px;color:var(--vp-c-text-3);opacity:.6;
   padding:16px 4px;line-height:1.5;font-style:italic;text-align:center;
 }
 
@@ -722,74 +722,6 @@ const citedArticles = computed(() => {
 @media(max-width:960px){.side{display:none}.hd-toggle{display:none}.focus-btn{display:none}}
 @media(max-width:640px){.w-grid{grid-template-columns:1fr}.hd-sub{display:none}}
 
-/* ══════════════════════════════════════════════
-   LIGHT MODE OVERRIDES
-   ══════════════════════════════════════════════ */
-
-/* Header */
-:root:not(.dark) .hd{border-bottom-color:rgba(0,0,0,.08);box-shadow:0 1px 3px rgba(0,0,0,.06)}
-
-/* Sidebar structural borders */
-:root:not(.dark) .side-l{border-right-color:rgba(0,0,0,.08);box-shadow:1px 0 3px rgba(0,0,0,.04)}
-:root:not(.dark) .side-r{border-left-color:rgba(0,0,0,.08);box-shadow:-1px 0 3px rgba(0,0,0,.04)}
-
-/* Sidebar areas */
-:root:not(.dark) .area{color:#475569}
-:root:not(.dark) .area:hover{background:rgba(0,0,0,.04);color:#1e293b}
-:root:not(.dark) .area.on{color:#1e293b;font-weight:600}
-:root:not(.dark) .area-dot{background:rgba(0,0,0,.1)}
-:root:not(.dark) .area.on .area-dot{background:#2563eb;box-shadow:0 0 6px rgba(37,99,235,.35)}
-
-/* Sidebar footer */
-:root:not(.dark) .side-footer{border-top-color:rgba(0,0,0,.08)}
-:root:not(.dark) .side-link{color:#64748b}
-:root:not(.dark) .side-link:hover{color:#2563eb}
-
-/* Sidebar scrollbar */
-:root:not(.dark) .side::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1)}
-:root:not(.dark) .side::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.18)}
-
-/* Ring text */
-:root:not(.dark) .ring-pct{color:#1e293b}
-:root:not(.dark) .ring-cap{color:#64748b}
-
-/* Right panel — norm cards */
-:root:not(.dark) .norm-card{color:#475569}
-:root:not(.dark) .norm-card:hover{background:rgba(0,0,0,.04);color:#1e293b}
-:root:not(.dark) .norm-card svg{color:#2563eb}
-:root:not(.dark) .norm-title{color:#1e293b}
-:root:not(.dark) .norm-sub{color:#64748b}
-
-/* Right panel — artifact cards */
-:root:not(.dark) .artifact-card{background:rgba(16,185,129,.06);color:#475569}
-:root:not(.dark) .artifact-card:hover{background:rgba(16,185,129,.1);color:#1e293b}
-:root:not(.dark) .artifact-card svg{color:#059669}
-
-/* Status badges */
-:root:not(.dark) .status-none{background:rgba(100,116,139,.08);color:#475569}
-:root:not(.dark) .status-none .status-dot{background:#64748b}
-:root:not(.dark) .status-eval{background:rgba(217,119,6,.08);color:#b45309}
-:root:not(.dark) .status-eval .status-dot{background:#d97706;box-shadow:0 0 6px rgba(217,119,6,.35)}
-:root:not(.dark) .status-ok{background:rgba(5,150,105,.08);color:#059669}
-:root:not(.dark) .status-ok .status-dot{background:#059669;box-shadow:0 0 6px rgba(5,150,105,.35)}
-
-/* Side panel label */
-:root:not(.dark) .side-label{color:#475569}
-
-/* Doc section */
-:root:not(.dark) .doc-section{border-bottom-color:rgba(0,0,0,.06)}
-:root:not(.dark) .doc-title{color:#1e293b}
-:root:not(.dark) .doc-ref{background:rgba(0,0,0,.05);color:#475569}
-:root:not(.dark) .doc-conf{background:rgba(5,150,105,.08);color:#059669}
-
-/* Empty session */
-:root:not(.dark) .empty-session{color:#64748b}
-
-/* Header buttons */
-:root:not(.dark) .hd-toggle:hover{background:rgba(0,0,0,.05)}
-:root:not(.dark) .hd-cov{color:#64748b}
-:root:not(.dark) .lang-btn{border-color:rgba(0,0,0,.12);color:#475569}
-:root:not(.dark) .lang-btn:hover{border-color:#2563eb;color:#2563eb}
-:root:not(.dark) .export-btn{border-color:rgba(0,0,0,.12);color:#475569}
-:root:not(.dark) .export-btn:hover{border-color:#2563eb;color:#2563eb;background:rgba(37,99,235,.04)}
+/* No separate light-mode overrides needed — all colors use
+   VitePress CSS custom properties that auto-adapt to theme. */
 </style>

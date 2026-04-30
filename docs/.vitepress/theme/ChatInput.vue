@@ -36,57 +36,40 @@ defineEmits(['update:input', 'send'])
   font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Inter',system-ui,sans-serif;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
-  border-top:1px solid rgba(255,255,255,.06);
+  border-top:1px solid var(--vp-c-divider);
 }
 .in-wrap{
   display:flex;gap:8px;max-width:640px;
 }
 .in-wrap input{
   flex:1;padding:12px 20px;
-  border:1px solid rgba(255,255,255,.08);border-radius:24px;
-  background:rgba(255,255,255,.04);color:#e2e8f0;
+  border:1px solid var(--vp-c-divider);border-radius:24px;
+  background:var(--vp-c-bg-soft);color:var(--vp-c-text-1);
   font-size:15px;outline:none;
   transition:border-color .2s ease-out,box-shadow .2s ease-out,background .2s ease-out;
 }
 .in-wrap input:focus{
-  border-color:#2563eb;
+  border-color:var(--vp-c-brand-1);
   box-shadow:0 0 0 3px rgba(37,99,235,.12);
-  background:rgba(255,255,255,.06);
+  background:var(--vp-c-bg);
 }
-.in-wrap input::placeholder{color:#64748b;opacity:1}
+.in-wrap input::placeholder{color:var(--vp-c-text-3);opacity:1}
 /* Send button — 6 states */
 .send{
   width:44px;height:44px;border:none;border-radius:50%;
-  background:rgba(255,255,255,.08);color:#64748b;
+  background:var(--vp-c-bg-alt);color:var(--vp-c-text-3);
   cursor:pointer;display:flex;align-items:center;justify-content:center;
   transition:all .2s ease-out;flex-shrink:0;
 }
-.send.active{background:#2563eb;color:#fff}
+.send.active{background:var(--vp-c-brand-1);color:#fff}
 .send:hover:not(:disabled){transform:scale(1.06)}
 .send:active:not(:disabled){transform:scale(.95)}
 .send:disabled{opacity:.3;cursor:not-allowed}
-.send:focus-visible{outline:2px solid #60a5fa;outline-offset:2px}
+.send:focus-visible{outline:2px solid var(--vp-c-brand-1);outline-offset:2px}
 .disclaimer{
   max-width:640px;margin:8px 0 0;
-  font-size:12.5px;color:#94a3b8;
+  font-size:12.5px;color:var(--vp-c-text-2);
   letter-spacing:.01em;line-height:1.4;
   padding:6px 0;
 }
-
-/* ── LIGHT MODE ── */
-:root:not(.dark) .cb-in{border-top-color:rgba(0,0,0,.08)}
-:root:not(.dark) .in-wrap input{
-  border-color:rgba(0,0,0,.12);
-  background:rgba(0,0,0,.03);
-  color:#1e293b;
-}
-:root:not(.dark) .in-wrap input:focus{
-  border-color:#2563eb;
-  box-shadow:0 0 0 3px rgba(37,99,235,.1);
-  background:#fff;
-}
-:root:not(.dark) .in-wrap input::placeholder{color:#94a3b8}
-:root:not(.dark) .send{background:rgba(0,0,0,.06);color:#94a3b8}
-:root:not(.dark) .send.active{background:#2563eb;color:#fff}
-:root:not(.dark) .disclaimer{color:#64748b}
 </style>
