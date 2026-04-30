@@ -374,15 +374,15 @@ const citedArticles = computed(() => {
       <div class="hd-title">{{ t.title }}</div>
     </div>
     <div class="hd-right">
-      <button v-if="complianceDoc.length" class="export-btn" @click="exportReport" title="Export Report">
+      <button v-if="complianceDoc.length" class="export-btn" @click="exportReport" :title="t.tooltips?.exportReport">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         <span>Report</span>
       </button>
-      <button class="focus-btn" @click="focusMode = !focusMode" :class="{ active: focusMode }" title="Focus mode [F]">
+      <button class="focus-btn" @click="focusMode = !focusMode" :class="{ active: focusMode }" :title="t.tooltips?.focusMode">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
       </button>
-      <button class="lang-btn" @click="lang = lang === 'it' ? 'en' : 'it'">{{ lang.toUpperCase() }}</button>
-      <button v-if="!focusMode" class="hd-toggle" @click="showRight = !showRight" :title="t.session">
+      <button class="lang-btn" @click="lang = lang === 'it' ? 'en' : 'it'" :title="t.tooltips?.langToggle">{{ lang.toUpperCase() }}</button>
+      <button v-if="!focusMode" class="hd-toggle" @click="showRight = !showRight" :title="t.tooltips?.rightPanel">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
       </button>
     </div>
@@ -391,7 +391,7 @@ const citedArticles = computed(() => {
   <div class="body">
     <!-- Left sidebar -->
     <aside v-if="showLeft" class="side side-l">
-      <div class="ring-row">
+      <div class="ring-row" :title="t.tooltips?.coverage">
         <svg class="ring" viewBox="0 0 64 64" width="56" height="56">
           <circle cx="32" cy="32" :r="ringR" fill="none" stroke="var(--vp-c-divider)" stroke-width="3"/>
           <circle cx="32" cy="32" :r="ringR" fill="none" stroke="var(--vp-c-brand-1)" stroke-width="3"
@@ -405,18 +405,18 @@ const citedArticles = computed(() => {
       </div>
 
       <div class="areas">
-        <div v-for="a in areaStatus" :key="a.id" :class="['area', { on: a.visited }]">
+        <div v-for="a in areaStatus" :key="a.id" :class="['area', { on: a.visited }]" :title="a.visited ? t.tooltips?.areaVisited : t.tooltips?.areaNotVisited">
           <span class="area-dot"></span>
           <span>{{ a.name }}</span>
         </div>
       </div>
 
       <div class="side-footer">
-        <a href="https://github.com/fabriziosalmi/nis2-public" target="_blank" class="side-link">
+        <a href="https://github.com/fabriziosalmi/nis2-public" target="_blank" class="side-link" :title="t.tooltips?.linkProject">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
           {{ t.linkProject }}
         </a>
-        <a href="https://github.com/fabriziosalmi/nis2-model" target="_blank" class="side-link">
+        <a href="https://github.com/fabriziosalmi/nis2-model" target="_blank" class="side-link" :title="t.tooltips?.linkEngine">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
           {{ t.linkEngine }}
         </a>
@@ -441,14 +441,14 @@ const citedArticles = computed(() => {
           </div>
         </template>
       </ChatMessages>
-      <ChatInput v-model:input="input" :disabled="isLoading || !stats.entries" :placeholder="t.placeholder" :disclaimer="t.disclaimer" @send="sendMessage()" />
+      <ChatInput v-model:input="input" :disabled="isLoading || !stats.entries" :placeholder="t.placeholder" :disclaimer="t.disclaimer" :sendTooltip="t.tooltips?.sendBtn" @send="sendMessage()" />
     </div>
 
     <!-- Right sidebar: Command Dashboard -->
     <aside v-if="showRight && !focusMode" class="side side-r">
       <!-- Status badge -->
       <div class="side-label">{{ lang === 'it' ? 'Stato Conformità' : 'Compliance Status' }}</div>
-      <div :class="['status-badge', coverage.pct >= 70 ? 'status-ok' : coverage.pct > 0 ? 'status-eval' : 'status-none']">
+      <div :class="['status-badge', coverage.pct >= 70 ? 'status-ok' : coverage.pct > 0 ? 'status-eval' : 'status-none']" :title="coverage.pct >= 70 ? t.tooltips?.statusOk : coverage.pct > 0 ? t.tooltips?.statusEval : t.tooltips?.statusNone">
         <span class="status-dot"></span>
         {{ coverage.pct >= 70 ? (lang === 'it' ? 'IN REGOLA' : 'COMPLIANT') : coverage.pct > 0 ? (lang === 'it' ? 'IN VALUTAZIONE' : 'EVALUATING') : (lang === 'it' ? 'NON VALUTATO' : 'NOT ASSESSED') }}
       </div>
@@ -457,7 +457,7 @@ const citedArticles = computed(() => {
       <div class="side-label" style="margin-top:16px">{{ lang === 'it' ? 'Norme Identificate' : 'Identified Legislation' }}</div>
       <div class="side-panel">
         <template v-if="citedArticles.length">
-          <a v-for="art in citedArticles" :key="art.num" :href="art.url" target="_blank" class="norm-card">
+          <a v-for="art in citedArticles" :key="art.num" :href="art.url" target="_blank" class="norm-card" :title="t.tooltips?.normCard + ' — Art. ' + art.num">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
             <div class="norm-info">
               <span class="norm-title">Art. {{ art.num }}</span>
@@ -473,7 +473,7 @@ const citedArticles = computed(() => {
 
       <!-- Artefatti -->
       <div v-if="complianceDoc.length" class="side-label" style="margin-top:16px">{{ lang === 'it' ? 'Azioni' : 'Actions' }}</div>
-      <button v-if="complianceDoc.length" class="artifact-card" @click="exportReport">
+      <button v-if="complianceDoc.length" class="artifact-card" @click="exportReport" :title="t.tooltips?.artifactCard">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         <div class="norm-info">
           <span class="norm-title">{{ lang === 'it' ? 'Scarica Report' : 'Download Report' }}</span>
