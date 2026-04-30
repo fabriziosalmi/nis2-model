@@ -209,9 +209,10 @@ const G = {
 }
 
 import G2 from './glossary2.js'
+import G3 from './glossary3.js'
 
-// Merge both glossaries
-const ALL = { ...G, ...G2 }
+// Merge all glossaries
+const ALL = { ...G, ...G2, ...G3 }
 
 // Build lookup index (lowercase keys for matching, longest first to avoid partial matches)
 const KEYS = Object.keys(ALL).sort((a, b) => b.length - a.length)
