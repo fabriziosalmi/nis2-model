@@ -57,7 +57,7 @@ const LANGS: &[Lang] = &[
         essential_q: "Cos'e' un soggetto essenziale nella NIS2?",
         important_q: "Cos'e' un soggetto importante nella NIS2?",
         sanction_q: "Quali sono le sanzioni NIS2?",
-        obligation_q: "Quali sono gli obblighi NIS2?",
+        obligation_q: "Quali sono i principali doveri imposti dalla NIS2?",
         incident_q: "Quali sono le scadenze di segnalazione incidenti NIS2?",
         scope_q: "La NIS2 si applica alla mia azienda?",
         mfa_q: "La NIS2 richiede l'autenticazione multi-fattore?",
@@ -170,7 +170,31 @@ fn tmpl(s: &str, sector: &str, annex: &str, cat: &str) -> String {
 const ESSENTIAL_A: &str = "An essential entity (Art. 3(1)) operates in an Annex I sector (energy, transport, banking, financial market infrastructure, health, drinking water, waste water, digital infrastructure, ICT B2B, public administration, space) and meets the size threshold. Digital infrastructure is essential regardless of size.";
 const IMPORTANT_A: &str = "An important entity (Art. 3(2)) operates in an Annex II sector (postal/courier, waste management, chemicals, food, manufacturing, digital providers, research) and meets the size threshold (50+ employees or 10M+ EUR).";
 const SANCTION_A: &str = "Art. 34: Essential = max(10M EUR, 2% worldwide turnover). Important = max(7M EUR, 1.4% worldwide turnover).";
-const OBLIGATION_A: &str = "16 obligations: Art. 20 (2 governance), Art. 21(2)(a-j) (10 cybersecurity measures), Art. 23 (4 incident reporting: CSIRT notification, 24h, 72h, 30d).";
+const OBLIGATION_A: &str = "The NIS2 Directive introduces **16 primary obligations** structured across 3 critical domains:
+
+### 1. Governance (Art. 20)
+*   **Approval & Oversight:** Management bodies must explicitly approve cybersecurity risk management measures and oversee their implementation.
+*   **Mandatory Training:** Members of the management body are required to undergo regular cybersecurity training to understand and assess risks.
+
+### 2. Cybersecurity Risk Management (Art. 21)
+Entities must implement minimum security measures, including:
+*   **Risk Analysis:** Continuous risk assessment and information system security policies.
+*   **Incident Handling:** Procedures for prevention, detection, and response to incidents.
+*   **Business Continuity:** Backup management, disaster recovery, and crisis management.
+*   **Supply Chain Security:** Evaluating the security of direct suppliers and service providers.
+*   **System Security:** Secure acquisition, development, and maintenance of systems, including vulnerability handling.
+*   **Effectiveness Assessment:** Regular audits and testing of cybersecurity measures.
+*   **Cyber Hygiene:** Basic cyber hygiene practices and continuous training for all staff.
+*   **Cryptography:** Policies and procedures regarding the use of cryptography and encryption.
+*   **Access Control:** Human resources security, access control policies, and asset management.
+*   **Secure Communications:** Mandatory use of multi-factor authentication (MFA) and secured voice/video communications.
+
+### 3. Incident Reporting (Art. 23)
+Strict timelines for notifying the national CSIRT of any significant incident:
+*   **24h Early Warning:** Initial notification of the incident and potential cross-border impact.
+*   **72h Full Notification:** Comprehensive update, initial assessment of severity, and indicators of compromise.
+*   **Intermediate Report:** Provided upon request by the CSIRT.
+*   **30-Day Final Report:** Detailed report including root cause, mitigation measures applied, and ongoing impact.";
 const INCIDENT_A: &str = "Art. 23(4): (a) early warning within 24h, (b) full notification within 72h, (d) final report within 30 days.";
 const SCOPE_A: &str = "NIS2 applies to entities in Annex I (11 sectors) or Annex II (7 sectors) with 50+ employees or 10M+ EUR revenue. Digital infrastructure, ICT B2B, and public administration are in scope regardless of size.";
 const MFA_A: &str = "Art. 21(2)(j) requires use of multi-factor or continuous authentication solutions, secured voice/video/text communications, and protected emergency communication systems where appropriate.";

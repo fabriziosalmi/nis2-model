@@ -10,8 +10,12 @@
 //! - [`validation`] — Runtime JSON Schema validation
 //! - [`adapters`] — Extism WASM plugin adapters
 
+#[cfg(not(target_arch = "wasm32"))]
 pub mod adapters;
 pub mod engine;
 pub mod obligations;
 pub mod schema;
 pub mod validation;
+
+#[cfg(target_arch = "wasm32")]
+pub mod wasm;

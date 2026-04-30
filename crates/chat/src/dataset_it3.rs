@@ -2,6 +2,35 @@
 
 pub fn italian_deep() -> Vec<(&'static str, &'static str, &'static str)> {
     vec![
+        // === OBLIGATIONS DEEP ===
+        ("Quali sono gli obblighi NIS2?",
+         "La Direttiva NIS2 introduce **16 obblighi principali** strutturati in 3 domini critici:
+
+### 1. Governance (Art. 20)
+*   **Approvazione e Supervisione:** Gli organi direttivi devono approvare formalmente le misure di gestione dei rischi di sicurezza e supervisionarne l'attuazione (con responsabilita' personale).
+*   **Formazione Obbligatoria:** I membri degli organi direttivi devono seguire regolarmente corsi di formazione sulla cybersecurity per comprendere e valutare i rischi.
+
+### 2. Misure di Sicurezza (Art. 21)
+Le entita' devono implementare misure minime, tra cui:
+*   **Analisi dei Rischi:** Valutazione continua e politiche di sicurezza dei sistemi informatici.
+*   **Gestione degli Incidenti:** Procedure per prevenzione, rilevamento e risposta agli attacchi.
+*   **Continuita' Operativa:** Gestione dei backup, disaster recovery e gestione delle crisi.
+*   **Supply Chain Security:** Valutazione della sicurezza dei fornitori diretti e partner.
+*   **Sicurezza dei Sistemi:** Sicurezza nello sviluppo, acquisizione e manutenzione, inclusa la gestione delle vulnerabilita'.
+*   **Valutazione dell'Efficacia:** Audit regolari e test delle misure adottate.
+*   **Igiene Informatica:** Pratiche di cyber hygiene di base e formazione continua per tutto il personale.
+*   **Crittografia:** Politiche sull'uso della crittografia e cifratura dei dati.
+*   **Controllo Accessi:** Sicurezza delle risorse umane, politiche di accesso rigide e gestione degli asset.
+*   **Comunicazioni Sicure:** Uso obbligatorio di autenticazione a piu' fattori (MFA) e sistemi di comunicazione sicuri.
+
+### 3. Segnalazione Incidenti (Art. 23)
+Tempistiche rigorose per notificare il CSIRT nazionale di qualsiasi incidente significativo:
+*   **Preallarme 24h:** Notifica iniziale dell'incidente e potenziale impatto transfrontaliero.
+*   **Notifica 72h:** Aggiornamento completo, valutazione della severita' e indicatori di compromissione.
+*   **Relazione Intermedia:** Su specifica richiesta del CSIRT.
+*   **Relazione Finale a 30 Giorni:** Report dettagliato con root cause, misure di mitigazione adottate e impatto residuo.",
+         "general"),
+
         // === INCIDENT RESPONSE DEEP ===
         ("Quali sono le tempistiche esatte per la notifica degli incidenti?",
          "Art. 23 NIS2 stabilisce tre fasi obbligatorie: (1) Preallarme entro 24 ore dalla conoscenza dell'incidente significativo — deve indicare se l'incidente e' sospettato di essere causato da atti illeciti o malevoli e se ha o puo' avere impatto transfrontaliero. (2) Notifica completa entro 72 ore — deve includere aggiornamento delle informazioni del preallarme, valutazione iniziale della severita e dell'impatto, e indicatori di compromissione se disponibili. (3) Relazione finale entro 30 giorni — deve contenere descrizione dettagliata dell'incidente, tipo di minaccia o causa radice, misure di mitigazione applicate, impatto transfrontaliero se applicabile. Per incidenti in corso, la relazione finale diventa una relazione intermedia con obbligo di relazione finale entro un mese dalla gestione.",

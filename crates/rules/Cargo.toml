@@ -6,6 +6,9 @@ edition.workspace = true
 license.workspace = true
 authors.workspace = true
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
 serde.workspace = true
 serde_json.workspace = true
@@ -14,5 +17,9 @@ thiserror.workspace = true
 tracing.workspace = true
 schemars.workspace = true
 jsonschema.workspace = true
-extism.workspace = true
-nis2-vectordb.workspace = true
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+extism = { workspace = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+getrandom = { version = "0.3", features = ["wasm_js"] }

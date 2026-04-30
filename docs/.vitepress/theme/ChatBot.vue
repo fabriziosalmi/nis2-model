@@ -21,7 +21,13 @@ const hasAccepted = ref(false)
 const showLeft = ref(true)
 const showRight = ref(true)
 const focusMode = ref(false)
+const focusMode = ref(false)
 const sideTab = ref('norm') // 'norm' or 'docs'
+
+// WASM Integration & Wizard State
+const wizardState = ref(null)
+const wizardProfile = ref({ sector: '', employees: 0, revenue: 0 })
+let wasmEngine = null
 
 const lang = ref('en')
 onMounted(() => {
@@ -94,60 +100,8 @@ function search(query) {
   
   const uiLang = lang.value
 
-  // --- REAL-TIME TOOLING: Dynamic Applicability Assessment ---
-  const employeesMatch = query.match(/(\d+)\s*(dipendent[ei]|employees?|persone|lavoratori)/i);
-  const revenueMatch = query.match(/(\d+)\s*(milion[ei]|million|mln)/i);
-  
-  if (employeesMatch || revenueMatch) {
-    const emp = employeesMatch ? parseInt(employeesMatch[1], 10) : 0;
-    const rev = revenueMatch ? parseInt(revenueMatch[1], 10) : 0;
-    
-    let answer = '';
-    let category = 'applicability';
-    let severity = 'info';
-    
-    const sectorNote = uiLang === 'it'
-      ? '\n\n⚠️ **Nota:** questa classificazione preliminare dipende dal settore di appartenenza (Allegato I/II), non indicato nella domanda. Verificare con un consulente qualificato.'
-      : '\n\n⚠️ **Note:** this preliminary classification depends on your sector (Annex I/II), not specified in your question. Verify with a qualified advisor.';
-    if (emp >= 250 || rev >= 50) {
-      answer = uiLang === 'it' 
-        ? `Classificazione automatizzata: con **${emp || '>250'} dipendenti** e/o **${rev || '>50'} milioni di fatturato**, il motore classifica l'azienda come grande impresa, potenzialmente rientrante nella **NIS2 come Soggetto Essenziale** (se il settore rientra nell'Allegato I). Art. 21 (Gestione Rischi) e Art. 23 (Notifiche Incidenti in 24h). Sanzioni massime: 10M EUR o 2% del fatturato mondiale.${sectorNote}`
-        : `Automated classification: with **${emp || '>250'} employees** and/or **${rev || '>50'} million revenue**, the engine classifies your company as a large enterprise, potentially falling under **NIS2 as an Essential Entity** (if sector is in Annex I). Art. 21 (Risk Management) and Art. 23 (24h Incident Reporting). Max fines: 10M EUR or 2% of global turnover.${sectorNote}`;
-      severity = 'danger';
-    } else if (emp >= 50 || rev >= 10) {
-      answer = uiLang === 'it'
-        ? `Classificazione automatizzata: con almeno **50 dipendenti** o **10 milioni di fatturato** (indicato: ${emp ? emp+' dipendenti' : ''}${emp&&rev?' e ':''}${rev ? rev+' milioni' : ''}), il motore classifica il soggetto come potenzialmente rientrante nella **NIS2 come Soggetto Importante** (se il settore rientra nell'Allegato II). Sanzioni: fino a 7M EUR o 1.4% del fatturato.${sectorNote}`
-        : `Automated classification: by meeting the threshold of **50 employees** or **10 million revenue** (indicated: ${emp ? emp+' employees' : ''}${emp&&rev?' and ':''}${rev ? rev+' million' : ''}), the engine classifies the entity as potentially falling under **NIS2 as an Important Entity** (if sector is in Annex II). Fines: up to 7M EUR or 1.4% turnover.${sectorNote}`;
-      severity = 'warning';
-    } else {
-      answer = uiLang === 'it'
-        ? `Classificazione automatizzata: con **${emp || '<50'} dipendenti** e/o **${rev || '<10'} milioni di fatturato**, il motore classifica il soggetto come micro o piccola impresa. In generale (Art. 2), il soggetto non rientra negli obblighi diretti della NIS2, salvo eccezioni per servizi critici (es. TLD, trust services) o se unico fornitore di un servizio chiave (Art. 2(2)). Attenzione alla supply chain.${sectorNote}`
-        : `Automated classification: with **${emp || '<50'} employees** and/or **${rev || '<10'} million revenue**, the engine classifies the entity as a micro or small enterprise. Generally (Art. 2), it does not fall under direct NIS2 obligations, unless managing critical services (e.g. TLD, trust services) or acting as sole provider (Art. 2(2)). Watch out for supply chain requirements.${sectorNote}`;
-      severity = 'info';
-    }
-    
-    visitedCategories.value = new Set([...visitedCategories.value, category])
-    stats.value.hits++
-    
-    const fUps = filterAsked([
-      uiLang === 'it' ? "Cos'è un soggetto essenziale nella NIS2?" : "What is an essential entity under NIS2?",
-      uiLang === 'it' ? "Cosa dice la direttiva sulla supply chain?" : "What does the directive say about supply chain?",
-      uiLang === 'it' ? "Quali sono le sanzioni NIS2?" : "What are the NIS2 sanctions?"
-    ]);
-    
-    return {
-      hit: true, answer, html: formatAnswer(answer),
-      category: getCategoryName(category, uiLang), 
-      followUps: dedup(fUps), 
-      elapsed: performance.now() - t0,
-      refs: extractArticles(answer),
-      catLink: getCategoryLink(category, uiLang),
-      severity, deadline: '', standards: [],
-      glossary: findTerms(answer).map(t => ({ term: t.term.toUpperCase(), def: uiLang === 'it' ? t.it : t.en })),
-      confidence: 100, source: category,
-    }
-  }
-  // --- END REAL-TIME TOOLING ---
+  // --- LEGACY REAL-TIME TOOLING REMOVED ---
+  // The logic is now handled by the interactive WASM Wizard
 
   // Filter dataset by UI language first, fallback to full dataset
   const langDataset = dataset.value.filter(d =>
@@ -197,6 +151,117 @@ async function sendMessage(text) {
   const query = (text || input.value).trim()
   if (!query || isLoading.value) return
   input.value = ''
+  
+  // Handle Wizard State Machine
+  if (wizardState.value) {
+    messages.value.push({ role: 'user', text: query })
+    isLoading.value = true
+    await nextTick(); scrollBottom()
+    await new Promise(r => setTimeout(r, 400))
+    
+    if (wizardState.value === 'sector') {
+      let s = query.toLowerCase()
+      let sectorId = 'other'
+      if (s.includes('energ')) sectorId = 'energy'
+      else if (s.includes('trasport') || s.includes('transport')) sectorId = 'transport'
+      else if (s.includes('banc') || s.includes('bank') || s.includes('finanz') || s.includes('financ')) sectorId = 'banking'
+      else if (s.includes('salut') || s.includes('health') || s.includes('ospedal') || s.includes('sanit')) sectorId = 'health'
+      else if (s.includes('digital') || s.includes('cloud') || s.includes('ict') || s.includes('it ')) sectorId = 'digital_infrastructure'
+      else if (s.includes('pubblic') || s.includes('public') || s.includes('pa')) sectorId = 'public_administration'
+      else if (s.includes('aliment') || s.includes('food')) sectorId = 'food'
+      else if (s.includes('manifattur') || s.includes('manufactur') || s.includes('produzion')) sectorId = 'manufacturing'
+      else if (s.includes('chimic') || s.includes('chemical')) sectorId = 'chemicals'
+      
+      wizardProfile.value.sector = sectorId
+      wizardState.value = 'employees'
+      const txt = lang.value==='it' ? "Ottimo. Quanti **dipendenti** ha la tua azienda?" : "Great. How many **employees** do you have?"
+      messages.value.push({ role:'assistant', text: txt, html: formatAnswer(txt), typing: false, displayHtml: formatAnswer(txt) })
+    }
+    else if (wizardState.value === 'employees') {
+      const match = query.match(/\d+/)
+      wizardProfile.value.employees = match ? parseInt(match[0], 10) : 0
+      wizardState.value = 'revenue'
+      const txt = lang.value==='it' ? "E qual è il **fatturato** annuo (in milioni di euro)?" : "And what is the annual **revenue** (in millions of euros)?"
+      messages.value.push({ role:'assistant', text: txt, html: formatAnswer(txt), typing: false, displayHtml: formatAnswer(txt) })
+    }
+    else if (wizardState.value === 'revenue') {
+      const match = query.match(/\d+/)
+      wizardProfile.value.revenue = match ? parseInt(match[0], 10) : 0
+      wizardState.value = null // reset wizard
+      
+      // Run WASM engine
+      if (wasmEngine) {
+        const payload = JSON.stringify({
+          name: "Company",
+          sector: wizardProfile.value.sector,
+          employees: wizardProfile.value.employees,
+          annual_revenue_eur_m: wizardProfile.value.revenue,
+          balance_sheet_eur_m: 0.0,
+          services: [],
+          member_states: ["IT"]
+        })
+        
+        try {
+          const resStr = wasmEngine.evaluate_profile_json(payload)
+          const res = JSON.parse(resStr)
+          let ans = ""
+          let severity = "info"
+          
+          if (res.applicable) {
+             ans = lang.value === 'it' 
+               ? `**Risultato Assessment (Motore WASM):**\nLa tua azienda ricade nella Direttiva NIS2 ed è classificata come **Soggetto ${res.category === 'Essential' ? 'Essenziale' : 'Importante'}**.\n\n` +
+                 `- **Sanzione max potenziale:** €${(res.max_sanction_eur / 1000000).toFixed(1)} Milioni\n` +
+                 `- **Obblighi assegnati:** ${res.obligations.length} requisiti di sicurezza\n` +
+                 `- **Notifica incidenti:** Early warning entro ${res.incident_reporting.early_warning_hours}h.\n\n` +
+                 `*Nota: Calcolo effettuato localmente nel browser a latenza zero tramite Rust WebAssembly.*`
+               : `**Assessment Result (WASM Engine):**\nYour company falls under the NIS2 Directive and is classified as an **${res.category} Entity**.\n\n` +
+                 `- **Max potential fine:** €${(res.max_sanction_eur / 1000000).toFixed(1)} Million\n` +
+                 `- **Assigned obligations:** ${res.obligations.length} security requirements\n` +
+                 `- **Incident reporting:** Early warning within ${res.incident_reporting.early_warning_hours}h.\n\n` +
+                 `*Note: Computed locally in browser at zero latency via Rust WebAssembly.*`
+             severity = res.category === 'Essential' ? 'danger' : 'warning'
+          } else {
+             ans = lang.value === 'it'
+               ? `**Risultato Assessment (Motore WASM):**\nSulla base dei dati forniti, la tua azienda **NON** sembra rientrare direttamente negli obblighi NIS2 (Categoria: ${res.category}).\n\nTuttavia, fai attenzione ai requisiti della supply chain se fornisci servizi IT a soggetti essenziali o importanti.\n\n*Nota: Calcolo effettuato localmente nel browser tramite Rust WebAssembly.*`
+               : `**Assessment Result (WASM Engine):**\nBased on the data, your company **does NOT** appear to fall directly under NIS2 obligations (Category: ${res.category}).\n\nHowever, be mindful of supply chain requirements if you provide IT services to essential or important entities.\n\n*Note: Computed locally in browser via Rust WebAssembly.*`
+             severity = 'info'
+          }
+          
+          messages.value.push({ role:'assistant', text: ans, html: formatAnswer(ans), category: 'Applicability', followUps: [], severity, typing: false, displayHtml: formatAnswer(ans) })
+        } catch (err) {
+          console.error("WASM Evaluation error:", err)
+          const errTxt = lang.value === 'it' ? "Errore durante l'elaborazione WASM." : "Error during WASM evaluation."
+          messages.value.push({ role:'assistant', text: errTxt, html: formatAnswer(errTxt), category: 'Error', followUps: [], typing: false, displayHtml: formatAnswer(errTxt) })
+        }
+      } else {
+         const errTxt = lang.value === 'it' ? "Motore WASM non caricato. Impossibile eseguire l'assessment." : "WASM engine not loaded. Cannot perform assessment."
+         messages.value.push({ role:'assistant', text: errTxt, html: formatAnswer(errTxt), category: 'Error', followUps: [], typing: false, displayHtml: formatAnswer(errTxt) })
+      }
+    }
+    
+    isLoading.value = false
+    await nextTick(); scrollBottom()
+    return
+  }
+
+  // Intercept Intent to Start Wizard
+  if (query.match(/(valuta|soggetto|assess|am i subject|rientro)/i) && query.match(/(azienda|nis2|company|compliance)/i)) {
+    messages.value.push({ role: 'user', text: query })
+    isLoading.value = true
+    await nextTick(); scrollBottom()
+    await new Promise(r => setTimeout(r, 400))
+    
+    wizardState.value = 'sector'
+    const txt = lang.value === 'it' 
+      ? "Certo! Attiviamo l'**Assessment Guidato**. Per iniziare, in quale **settore** opera la tua azienda (es. energia, trasporti, sanità, digitale)?" 
+      : "Sure! Let's start the **Guided Assessment**. To begin, what **sector** does your company operate in (e.g. energy, health, digital, transport)?"
+    messages.value.push({ role:'assistant', text: txt, html: formatAnswer(txt), typing: false, displayHtml: formatAnswer(txt) })
+    
+    isLoading.value = false
+    await nextTick(); scrollBottom()
+    return
+  }
+
   askedQuestions.value = new Set([...askedQuestions.value, query.toLowerCase()])
   messages.value.push({ role: 'user', text: query })
   isLoading.value = true
@@ -255,6 +320,17 @@ onMounted(async () => {
   try {
     loadProgress.value = 20
     const base = import.meta.env.BASE_URL || '/'
+    
+    // Load WASM dynamically
+    try {
+      const mod = await import(/* @vite-ignore */ `${base}wasm/nis2_rules.js`)
+      await mod.default(`${base}wasm/nis2_rules_bg.wasm`)
+      wasmEngine = mod
+      console.log('Rust WASM engine loaded successfully')
+    } catch (we) {
+      console.error('WASM load failed:', we)
+    }
+    
     const res = await fetch(`${base}dataset.json`)
     loadProgress.value = 60
     dataset.value = await res.json()

@@ -11,7 +11,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.0.6"
+version = "0.0.7"
 edition = "2024"
 license = "EUPL-1.2"
 authors = ["Fabrizio Salmi"]
@@ -48,7 +48,7 @@ tower-http = { version = "0.6", features = ["cors", "trace"] }
 
 # JSON Schema
 schemars = "0.8"
-jsonschema = "0.28"
+jsonschema = { version = "0.28", default-features = false }
 
 # WASM Plugin Host
 extism = "1"

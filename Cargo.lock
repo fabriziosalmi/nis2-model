@@ -3505,7 +3505,6 @@ dependencies = [
  "percent-encoding",
  "referencing",
  "regex-syntax",
- "reqwest",
  "serde",
  "serde_json",
  "uuid-simd",
@@ -4604,7 +4603,7 @@ checksum = "650eef8c711430f1a879fdd01d4745a7deea475becfb90269c06775983bbf086"
 
 [[package]]
 name = "nis2-api"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "anyhow",
  "axum",
@@ -4623,7 +4622,7 @@ dependencies = [
 
 [[package]]
 name = "nis2-chat"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "anyhow",
  "nis2-rules",
@@ -4635,7 +4634,7 @@ dependencies = [
 
 [[package]]
 name = "nis2-ingestion"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "anyhow",
  "serde",
@@ -4647,7 +4646,7 @@ dependencies = [
 
 [[package]]
 name = "nis2-mcp-server"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "anyhow",
  "futures",
@@ -4662,22 +4661,23 @@ dependencies = [
 
 [[package]]
 name = "nis2-rules"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "anyhow",
  "extism",
+ "getrandom 0.3.4",
  "jsonschema",
- "nis2-vectordb",
  "schemars 0.8.22",
  "serde",
  "serde_json",
  "thiserror 2.0.18",
  "tracing",
+ "wasm-bindgen",
 ]
 
 [[package]]
 name = "nis2-slm"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "anyhow",
  "nis2-rules",
@@ -4689,7 +4689,7 @@ dependencies = [
 
 [[package]]
 name = "nis2-vectordb"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "anyhow",
  "arrow-array",
@@ -5788,7 +5788,6 @@ dependencies = [
  "base64 0.22.1",
  "bytes",
  "encoding_rs",
- "futures-channel",
  "futures-core",
  "futures-util",
  "h2",
