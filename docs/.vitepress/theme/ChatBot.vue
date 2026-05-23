@@ -309,7 +309,12 @@ async function sendMessage(text) {
 
 function scrollBottom() {
   const el = chatEl.value?.$el || chatEl.value
-  if (el) el.scrollTop = el.scrollHeight
+  if (el) {
+    el.scrollTop = el.scrollHeight
+    setTimeout(() => {
+      el.scrollTop = el.scrollHeight
+    }, 50)
+  }
 }
 
 // Keyboard shortcuts
@@ -635,7 +640,12 @@ const citedArticles = computed(() => {
 
 /* Layout */
 .app{
-  display:flex;flex-direction:column;height:100vh;max-height:100vh;overflow:hidden;
+  display:flex;flex-direction:column;
+  height:100vh;
+  height:100dvh;
+  max-height:100vh;
+  max-height:100dvh;
+  overflow:hidden;
   background:var(--vp-c-bg);
 }
 .body{display:flex;flex:1;overflow:hidden}

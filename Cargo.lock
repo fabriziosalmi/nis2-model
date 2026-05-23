@@ -4603,7 +4603,7 @@ checksum = "650eef8c711430f1a879fdd01d4745a7deea475becfb90269c06775983bbf086"
 
 [[package]]
 name = "nis2-api"
-version = "0.0.15"
+version = "0.0.16"
 dependencies = [
  "anyhow",
  "axum",
@@ -4622,7 +4622,7 @@ dependencies = [
 
 [[package]]
 name = "nis2-chat"
-version = "0.0.15"
+version = "0.0.16"
 dependencies = [
  "anyhow",
  "nis2-rules",
@@ -4634,7 +4634,7 @@ dependencies = [
 
 [[package]]
 name = "nis2-ingestion"
-version = "0.0.15"
+version = "0.0.16"
 dependencies = [
  "anyhow",
  "serde",
@@ -4646,7 +4646,7 @@ dependencies = [
 
 [[package]]
 name = "nis2-mcp-server"
-version = "0.0.15"
+version = "0.0.16"
 dependencies = [
  "anyhow",
  "futures",
@@ -4661,7 +4661,7 @@ dependencies = [
 
 [[package]]
 name = "nis2-rules"
-version = "0.0.15"
+version = "0.0.16"
 dependencies = [
  "anyhow",
  "extism",
@@ -4677,7 +4677,7 @@ dependencies = [
 
 [[package]]
 name = "nis2-slm"
-version = "0.0.15"
+version = "0.0.16"
 dependencies = [
  "anyhow",
  "nis2-rules",
@@ -4689,7 +4689,7 @@ dependencies = [
 
 [[package]]
 name = "nis2-vectordb"
-version = "0.0.15"
+version = "0.0.16"
 dependencies = [
  "anyhow",
  "arrow-array",
