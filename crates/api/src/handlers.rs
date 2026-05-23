@@ -35,13 +35,19 @@ fn unknown_sector_hint(sector: &str) -> String {
     )
 }
 
+static START_TIME: std::sync::OnceLock<std::time::Instant> = std::sync::OnceLock::new();
+
+fn get_uptime() -> u64 {
+    START_TIME.get_or_init(std::time::Instant::now).elapsed().as_secs()
+}
+
 /// Health check response.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct HealthResponse {
     pub status: String,
     pub version: String,
-    pub tests_passing: u32,
-    pub crates: u32,
+    pub uptime_seconds: u64,
+    pub workspace_crates: u32,
 }
 
 /// GET /api/v1/health
@@ -49,8 +55,8 @@ pub async fn health() -> Json<HealthResponse> {
     Json(HealthResponse {
         status: "ok".into(),
         version: env!("CARGO_PKG_VERSION").into(),
-        tests_passing: 61,
-        crates: 6,
+        uptime_seconds: get_uptime(),
+        workspace_crates: 7,
     })
 }
 
@@ -242,6 +248,11 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(resp.status(), 200);
+        let bytes = axum::body::to_bytes(resp.into_body(), usize::MAX).await.unwrap();
+        let health: HealthResponse = serde_json::from_slice(&bytes).unwrap();
+        assert_eq!(health.status, "ok");
+        assert_eq!(health.workspace_crates, 7);
+        assert!(health.uptime_seconds < 10);
     }
 
     #[tokio::test]

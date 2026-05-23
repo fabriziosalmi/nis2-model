@@ -49,8 +49,14 @@ const MEDIUM_ENTERPRISE_REVENUE_EUR_M: f64 = 10.0;
 pub fn evaluate(profile: &CompanyProfile) -> ComplianceStatus {
     let in_annex_i = ANNEX_I_SECTORS.contains(&profile.sector.as_str());
     let in_annex_ii = ANNEX_II_SECTORS.contains(&profile.sector.as_str());
+    
+    // An enterprise exceeds the small enterprise threshold if:
+    // - Headcount is >= 50
+    // - OR BOTH Turnover AND Balance Sheet are >= 10M
+    let meets_financial_threshold = profile.annual_revenue_eur_m >= MEDIUM_ENTERPRISE_REVENUE_EUR_M
+        && profile.balance_sheet_eur_m >= MEDIUM_ENTERPRISE_REVENUE_EUR_M;
     let meets_size_threshold = profile.employees >= MEDIUM_ENTERPRISE_EMPLOYEES
-        || profile.annual_revenue_eur_m >= MEDIUM_ENTERPRISE_REVENUE_EUR_M;
+        || meets_financial_threshold;
 
     let (applicable, category) = match (in_annex_i, in_annex_ii, meets_size_threshold) {
         (true, _, true) => (true, EntityCategory::Essential),
@@ -69,13 +75,34 @@ pub fn evaluate(profile: &CompanyProfile) -> ComplianceStatus {
             obligations: Vec::new(),
             max_sanction_eur: None,
             incident_reporting: None,
+            transposition_notes: Vec::new(),
         };
     }
 
     // Build full obligation set for in-scope entities
     let obligations = build_obligations();
 
-    let max_sanction_eur = Some(calculate_max_sanction(&category, profile.annual_revenue_eur_m));
+    let mut max_sanction_eur = Some(calculate_max_sanction(&category, profile.annual_revenue_eur_m));
+    let mut transposition_notes = Vec::new();
+
+    // Check Italian transposition (D.Lgs. 138/2024)
+    if profile.member_states.contains(&"IT".to_string()) {
+        transposition_notes.push(
+            "L'Italia ha recepito la direttiva con il D.Lgs. 138/2024. Le autorità nazionali competenti \
+             (in particolare ACN - Agenzia per la Cybersicurezza Nazionale) definiscono termini, \
+             registri specifici e adempimenti per i soggetti essenziali e importanti.".to_string()
+        );
+
+        if profile.sector == "public_administration" {
+            // Public administrations in Italy are exempt from administrative fines under D.Lgs. 138/2024
+            max_sanction_eur = Some(0.0);
+            transposition_notes.push(
+                "Nota per la PA: ai sensi del D.Lgs. 138/2024 (Art. 38/39), le amministrazioni pubbliche \
+                 italiane sono escluse dall'applicazione delle sanzioni amministrative pecuniarie, \
+                 ferma restando la responsabilità disciplinare e dirigenziale e l'obbligo di conformità.".to_string()
+            );
+        }
+    }
 
     // Art. 23(4) incident reporting deadlines — same for all in-scope entities
     let incident_reporting = Some(IncidentReporting {
@@ -90,6 +117,7 @@ pub fn evaluate(profile: &CompanyProfile) -> ComplianceStatus {
         obligations,
         max_sanction_eur,
         incident_reporting,
+        transposition_notes,
     }
 }
 
@@ -309,5 +337,44 @@ mod tests {
         let result = evaluate(&test_profile("food", 60, 20.0));
         // 1.4% of €20M = €280K < €7M floor → floor applies
         assert_eq!(result.max_sanction_eur, Some(7_000_000.0));
+    }
+
+    #[test]
+    fn financial_thresholds_require_both() {
+        // Employees = 10 (< 50)
+        // Revenue = 12.0 (>= 10.0)
+        // Balance sheet = 8.0 (< 10.0)
+        // Legally a small enterprise, so OutOfScope
+        let profile = CompanyProfile {
+            name: "Test Small S.r.l.".into(),
+            sector: "food".into(),
+            sub_sector: None,
+            employees: 10,
+            annual_revenue_eur_m: 12.0,
+            balance_sheet_eur_m: 8.0,
+            services: Vec::new(),
+            member_states: vec!["IT".into()],
+        };
+        let result = evaluate(&profile);
+        assert!(!result.applicable, "Must be OutOfScope if balance sheet is below 10M, even if revenue is above 10M");
+    }
+
+    #[test]
+    fn italian_public_administration_has_zero_sanction_and_notes() {
+        let profile = CompanyProfile {
+            name: "Comune di Prova".into(),
+            sector: "public_administration".into(),
+            sub_sector: None,
+            employees: 150,
+            annual_revenue_eur_m: 0.0,
+            balance_sheet_eur_m: 0.0,
+            services: Vec::new(),
+            member_states: vec!["IT".into()],
+        };
+        let result = evaluate(&profile);
+        assert!(result.applicable);
+        assert_eq!(result.max_sanction_eur, Some(0.0));
+        assert!(!result.transposition_notes.is_empty());
+        assert!(result.transposition_notes[1].contains("escluse dall'applicazione delle sanzioni"));
     }
 }

@@ -126,6 +126,7 @@ pub fn list_tools() -> Vec<ToolDefinition> {
 fn quick_profile(params: &serde_json::Value) -> Result<CompanyProfile, String> {
     let settore = params.get("settore")
         .and_then(|v| v.as_str())
+        .map(|s| s.trim().to_lowercase().replace(' ', "_"))
         .ok_or("Campo 'settore' mancante o non valido")?;
     let dipendenti = params.get("dipendenti")
         .and_then(|v| v.as_u64())
@@ -136,7 +137,7 @@ fn quick_profile(params: &serde_json::Value) -> Result<CompanyProfile, String> {
 
     Ok(CompanyProfile {
         name: "N/A".into(),
-        sector: settore.into(),
+        sector: settore,
         sub_sector: None,
         employees: dipendenti,
         annual_revenue_eur_m: fatturato,
@@ -153,6 +154,7 @@ fn full_profile(params: &serde_json::Value) -> Result<CompanyProfile, String> {
         .ok_or("Campo 'nome' mancante")?;
     let settore = params.get("settore")
         .and_then(|v| v.as_str())
+        .map(|s| s.trim().to_lowercase().replace(' ', "_"))
         .ok_or("Campo 'settore' mancante")?;
     let sotto_settore = params.get("sotto_settore")
         .and_then(|v| v.as_str())
@@ -175,7 +177,7 @@ fn full_profile(params: &serde_json::Value) -> Result<CompanyProfile, String> {
 
     Ok(CompanyProfile {
         name: nome.into(),
-        sector: settore.into(),
+        sector: settore,
         sub_sector: sotto_settore,
         employees: dipendenti,
         annual_revenue_eur_m: fatturato,
@@ -336,5 +338,20 @@ mod tests {
     fn missing_params_returns_error() {
         let result = call_tool("verifica_applicabilita", &json!({}));
         assert_eq!(result.is_error, Some(true));
+    }
+
+    #[test]
+    fn verifica_applicabilita_normalization() {
+        let params = json!({"settore": "  Energy ", "dipendenti": 500, "fatturato_mln_eur": 100.0});
+        let result = call_tool("verifica_applicabilita", &params);
+        let text = &result.content[0].text;
+        assert!(text.contains("Applicabile: SÌ"));
+        assert!(text.contains("Essential"));
+
+        let params2 = json!({"settore": "digital infrastructure", "dipendenti": 10, "fatturato_mln_eur": 1.0});
+        let result2 = call_tool("verifica_applicabilita", &params2);
+        let text2 = &result2.content[0].text;
+        assert!(text2.contains("Applicabile: SÌ"));
+        assert!(text2.contains("Essential"));
     }
 }

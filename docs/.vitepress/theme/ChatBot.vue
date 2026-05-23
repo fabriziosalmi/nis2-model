@@ -32,6 +32,10 @@ const lang = ref('en')
 onMounted(() => {
   const nav = navigator.language || navigator.userLanguage || 'en'
   if (nav.startsWith('it')) lang.value = 'it'
+  if (typeof window !== 'undefined' && window.innerWidth < 960) {
+    showLeft.value = false
+    showRight.value = false
+  }
 })
 
 const t = computed(() => getStrings(lang.value))
@@ -164,12 +168,22 @@ async function sendMessage(text) {
       if (s.includes('energ')) sectorId = 'energy'
       else if (s.includes('trasport') || s.includes('transport')) sectorId = 'transport'
       else if (s.includes('banc') || s.includes('bank') || s.includes('finanz') || s.includes('financ')) sectorId = 'banking'
-      else if (s.includes('salut') || s.includes('health') || s.includes('ospedal') || s.includes('sanit')) sectorId = 'health'
+      else if (s.includes('mercato') || s.includes('market') || s.includes('borsa') || s.includes('clearing') || s.includes('trading')) sectorId = 'financial_market_infrastructure'
+      else if (s.includes('salut') || s.includes('health') || s.includes('ospedal') || s.includes('sanit') || s.includes('farmac')) sectorId = 'health'
+      else if (s.includes('reflu') || s.includes('waste water') || s.includes('fogn') || s.includes('depura')) sectorId = 'waste_water'
+      else if (s.includes('potabil') || s.includes('drinking') || s.includes('acqued') || s.includes('acqua') || s.includes('water')) sectorId = 'drinking_water'
+      else if (s.includes('datacent') || s.includes('hosting') || s.includes('dns') || s.includes('telecom') || s.includes('connettiv')) sectorId = 'digital_infrastructure'
       else if (s.includes('digital') || s.includes('cloud') || s.includes('ict') || s.includes('it ')) sectorId = 'digital_infrastructure'
-      else if (s.includes('pubblic') || s.includes('public') || s.includes('pa')) sectorId = 'public_administration'
-      else if (s.includes('aliment') || s.includes('food')) sectorId = 'food'
-      else if (s.includes('manifattur') || s.includes('manufactur') || s.includes('produzion')) sectorId = 'manufacturing'
+      else if (s.includes('msp') || s.includes('mssp') || s.includes('b2b') || s.includes('consulenza it') || s.includes('it consulting') || s.includes('gestiti') || s.includes('managed')) sectorId = 'ict_service_management_b2b'
+      else if (s.includes('pubblic') || s.includes('public') || s.includes('pa') || s.includes('comun') || s.includes('provinc') || s.includes('region') || s.includes('minister')) sectorId = 'public_administration'
+      else if (s.includes('spazio') || s.includes('space') || s.includes('aerospaz') || s.includes('aerospace') || s.includes('satellit')) sectorId = 'space'
+      else if (s.includes('posta') || s.includes('postal') || s.includes('corrier') || s.includes('courier') || s.includes('spedizion') || s.includes('shipping')) sectorId = 'postal_courier'
+      else if (s.includes('rifiut') || s.includes('waste') || s.includes('immondiz') || s.includes('spazzatur')) sectorId = 'waste_management'
       else if (s.includes('chimic') || s.includes('chemical')) sectorId = 'chemicals'
+      else if (s.includes('aliment') || s.includes('food')) sectorId = 'food'
+      else if (s.includes('ricerca') || s.includes('research') || s.includes('universit') || s.includes('laborator')) sectorId = 'research'
+      else if (s.includes('motore di ricerca') || s.includes('search engine') || s.includes('marketplace') || s.includes('e-commerce') || s.includes('social') || s.includes('piattaforma digitale') || s.includes('online provider')) sectorId = 'digital_providers'
+      else if (s.includes('manifattur') || s.includes('manufactur') || s.includes('produzion') || s.includes('fabbric')) sectorId = 'manufacturing'
       
       wizardProfile.value.sector = sectorId
       wizardState.value = 'employees'
@@ -184,8 +198,9 @@ async function sendMessage(text) {
       messages.value.push({ role:'assistant', text: txt, html: formatAnswer(txt), typing: false, displayHtml: formatAnswer(txt) })
     }
     else if (wizardState.value === 'revenue') {
-      const match = query.match(/\d+/)
-      wizardProfile.value.revenue = match ? parseInt(match[0], 10) : 0
+      const normalizedQuery = query.replace(',', '.')
+      const match = normalizedQuery.match(/\d+(?:\.\d+)?/)
+      wizardProfile.value.revenue = match ? parseFloat(match[0]) : 0.0
       wizardState.value = null // reset wizard
       
       // Run WASM engine
@@ -195,7 +210,7 @@ async function sendMessage(text) {
           sector: wizardProfile.value.sector,
           employees: wizardProfile.value.employees,
           annual_revenue_eur_m: wizardProfile.value.revenue,
-          balance_sheet_eur_m: 0.0,
+          balance_sheet_eur_m: wizardProfile.value.revenue,
           services: [],
           member_states: ["IT"]
         })
@@ -252,9 +267,12 @@ async function sendMessage(text) {
     
     wizardState.value = 'sector'
     const txt = lang.value === 'it' 
-      ? "Certo! Attiviamo l'**Assessment Guidato**. Per iniziare, in quale **settore** opera la tua azienda (es. energia, trasporti, sanità, digitale)?" 
-      : "Sure! Let's start the **Guided Assessment**. To begin, what **sector** does your company operate in (e.g. energy, health, digital, transport)?"
-    messages.value.push({ role:'assistant', text: txt, html: formatAnswer(txt), typing: false, displayHtml: formatAnswer(txt) })
+      ? "Certo! Attiviamo l'**Assessment Guidato**. Per iniziare, in quale **settore** opera la tua azienda?" 
+      : "Sure! Let's start the **Guided Assessment**. To begin, what **sector** does your company operate in?"
+    const options = lang.value === 'it'
+      ? ['Energia', 'Trasporti', 'Banche', 'Sanità', 'Servizi Digitali', 'Pubblica Amministrazione', 'Alimentare', 'Manifattura', 'Chimica', 'Spazio', 'Servizi Postali', 'Gestione Rifiuti', 'Ricerca']
+      : ['Energy', 'Transport', 'Banking', 'Health', 'Digital Services', 'Public Administration', 'Food', 'Manufacturing', 'Chemicals', 'Space', 'Postal Services', 'Waste Management', 'Research']
+    messages.value.push({ role:'assistant', text: txt, html: formatAnswer(txt), typing: false, displayHtml: formatAnswer(txt), options })
     
     isLoading.value = false
     await nextTick(); scrollBottom()
@@ -787,7 +805,31 @@ const citedArticles = computed(() => {
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:.7}}
 
-@media(max-width:960px){.side{display:none}.hd-toggle{display:none}.focus-btn{display:none}}
+@media(max-width:960px){
+  .body {
+    position: relative;
+  }
+  .side {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+    width: 240px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    background: var(--vp-c-bg);
+  }
+  .side-l {
+    left: 0;
+    border-right: 1px solid var(--vp-c-divider);
+  }
+  .side-r {
+    right: 0;
+    border-left: 1px solid var(--vp-c-divider);
+  }
+  .focus-btn {
+    display: none;
+  }
+}
 @media(max-width:640px){.w-grid{grid-template-columns:1fr}.hd-sub{display:none}}
 
 /* No separate light-mode overrides needed — all colors use

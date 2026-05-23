@@ -35,6 +35,15 @@ const t = computed(() => getStrings(props.lang))
           <span v-if="m.typing" class="cursor-blink">▋</span>
         </div>
 
+        <!-- Options grid (for wizard quick select) -->
+        <div v-if="m.options?.length && !m.typing" class="section-options">
+          <div class="options-grid">
+            <button v-for="opt in m.options" :key="opt" @click="$emit('followUp', opt)" class="opt-btn">
+              {{ opt }}
+            </button>
+          </div>
+        </div>
+
         <!-- Follow-up suggestions -->
         <div v-if="m.followUps?.length && !m.typing" class="section-followups">
           <div class="section-label">{{ t.sectionLabels?.followUps || 'Related questions' }}</div>
@@ -256,6 +265,33 @@ const t = computed(() => getStrings(props.lang))
 @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
 @keyframes fadeBlur{from{opacity:0;filter:blur(2px);transform:translateY(8px)}to{opacity:1;filter:blur(0);transform:translateY(0)}}
 .fade-up{animation:fadeBlur .35s ease-out}
+
+/* ── OPTIONS ── */
+.section-options{
+  padding:12px 24px;
+  border-top:1px solid var(--vp-c-divider);
+  background:rgba(59,130,246,.02);
+}
+.options-grid{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.opt-btn{
+  padding:6px 14px;
+  border:1px solid var(--vp-c-divider);
+  border-radius:16px;
+  background:var(--vp-c-bg-soft);
+  color:var(--vp-c-text-1);
+  font-size:13px;
+  cursor:pointer;
+  transition:all .15s ease-out;
+}
+.opt-btn:hover{
+  border-color:var(--vp-c-brand-1);
+  background:var(--vp-c-brand-soft);
+  color:var(--vp-c-brand-1);
+}
 
 /* ── RESPONSIVE ── */
 @media(max-width:768px){

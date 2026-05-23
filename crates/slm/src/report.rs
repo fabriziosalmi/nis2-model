@@ -40,6 +40,15 @@ pub fn generate_report(company_name: &str, status: &ComplianceStatus) -> String 
         report.push('\n');
     }
 
+    // Section 5: Transposition notes
+    if !status.transposition_notes.is_empty() {
+        report.push_str("## Note di recepimento nazionale\n\n");
+        for note in &status.transposition_notes {
+            report.push_str(&format!("- {}\n", note));
+        }
+        report.push('\n');
+    }
+
     report
 }
 
@@ -92,6 +101,9 @@ fn generate_obligations_section(status: &ComplianceStatus) -> String {
 
 fn generate_sanctions_section(status: &ComplianceStatus) -> String {
     match status.max_sanction_eur {
+        Some(sanction) if sanction == 0.0 => {
+            "Soggetto escluso dall'applicazione di sanzioni amministrative pecuniarie ai sensi delle norme di recepimento nazionali (ad es. per le Pubbliche Amministrazioni in Italia).\n".to_string()
+        }
         Some(sanction) => {
             let (article, percentage) = match status.category {
                 EntityCategory::Essential => ("Art. 34(4)", "il 2%"),

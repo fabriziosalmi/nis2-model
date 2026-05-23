@@ -9,10 +9,25 @@ export function tokenize(t) {
 }
 
 export function isItalian(text) {
+  const low = text.toLowerCase()
+  
+  // English stop words indicating the query is in English
+  const englishStopWords = [
+    ' the ', ' of ', ' and ', ' to ', ' in ', ' is ', ' you ', ' that ', ' it ', 
+    ' he ', ' was ', ' for ', ' on ', ' are ', ' as ', ' with ', ' they ', ' how ',
+    ' what ', ' does ', ' do ', ' we ', ' our ', ' my ', ' should ', ' have ', ' get '
+  ]
+  
+  // Pad with spaces to match whole words
+  const padded = ' ' + low.replace(/[^a-z]/g, ' ') + ' '
+  if (englishStopWords.some(w => padded.includes(w))) {
+    return false
+  }
+
   const markers = [
     'serve','cosa','come','quali','siamo','nostri','possiamo','rientra',
     'dobbiamo','quanto','azienda','cifrat','incidente','fornitor',
-    'sicurezza','backup','audit','formazione','obblig','sanzioni',
+    'sicurezza','formazione','obblig','sanzioni',
     'continuita','crittografia','rischi','gestione','entita','allegato',
     'della','delle','nella','nelle','degli','sono','essere','questo',
     'questa','ogni','deve','devo','fare','perch','anche','ancora',
@@ -21,7 +36,6 @@ export function isItalian(text) {
     'misure','procedur','preoccup','hackerato','compromess',
     'violazione','segnalazione','adeguarsi','rispetto',
   ]
-  const low = text.toLowerCase()
   return markers.some(w => low.includes(w)) || /[àèéìòù]/.test(low)
 }
 

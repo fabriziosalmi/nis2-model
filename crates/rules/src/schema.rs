@@ -79,6 +79,9 @@ pub struct ComplianceStatus {
     pub max_sanction_eur: Option<f64>,
     /// Incident reporting deadlines (if applicable).
     pub incident_reporting: Option<IncidentReporting>,
+    /// Transposition-specific notes and warnings.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub transposition_notes: Vec<String>,
 }
 
 /// Art. 23 NIS2 — Incident reporting deadlines.
