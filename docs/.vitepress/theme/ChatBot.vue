@@ -28,6 +28,55 @@ const wizardState = ref(null)
 const wizardProfile = ref({ sector: '', employees: 0, revenue: 0 })
 let wasmEngine = null
 
+const assessmentResult = ref(null)
+const checklistState = ref({})
+
+const checklistKey = computed(() => {
+  if (!wizardProfile.value.sector || !wizardProfile.value.employees) return null
+  return `nis2_checklist_${wizardProfile.value.sector}_${wizardProfile.value.employees}_${wizardProfile.value.revenue}`
+})
+
+// Watch checklistKey to load from localStorage
+import { watch } from 'vue'
+watch(checklistKey, (newKey) => {
+  if (newKey && typeof window !== 'undefined') {
+    const saved = localStorage.getItem(newKey)
+    if (saved) {
+      try {
+        checklistState.value = JSON.parse(saved)
+      } catch (e) {
+        checklistState.value = {}
+      }
+    } else {
+      checklistState.value = {}
+    }
+  } else {
+    checklistState.value = {}
+  }
+}, { immediate: true })
+
+// Save checklist state to localStorage
+function saveChecklist() {
+  const key = checklistKey.value
+  if (key && typeof window !== 'undefined') {
+    localStorage.setItem(key, JSON.stringify(checklistState.value))
+  }
+}
+
+function updateObligationStatus(obId, status) {
+  checklistState.value[obId] = status
+  saveChecklist()
+}
+
+const checklistProgress = computed(() => {
+  if (!assessmentResult.value || !assessmentResult.value.obligations) return { completed: 0, total: 0, pct: 0 }
+  const total = assessmentResult.value.obligations.length
+  if (total === 0) return { completed: 0, total: 0, pct: 0 }
+  const completed = assessmentResult.value.obligations.filter(ob => checklistState.value[ob.id] === 'Implemented').length
+  const pct = Math.round((completed / total) * 100)
+  return { completed, total, pct }
+})
+
 const lang = ref('en')
 onMounted(() => {
   const nav = navigator.language || navigator.userLanguage || 'en'
@@ -84,11 +133,12 @@ function exploreSuggestions(uiLang, limit = 4) {
   if (!unexplored.length) return []
   const candidates = []
   for (const cat of unexplored) {
-    const entries = dataset.value.filter(d => {
-      const dc = d.c.replace(/_impl$/, '')
-      return dc === cat && (uiLang === 'it' ? isItalian(d.q) : !isItalian(d.q))
-    })
-    if (entries.length) candidates.push(entries[0].q)
+    const entries = dataset.value.filter(d => d.c.replace(/_impl$/, '') === cat)
+    if (entries.length) {
+      const entry = entries[0]
+      const qText = uiLang === 'it' ? (entry.it?.q || entry.en?.q || '') : (entry.en?.q || entry.it?.q || '')
+      candidates.push(qText)
+    }
     if (candidates.length >= limit) break
   }
   return filterAsked(candidates)
@@ -103,30 +153,27 @@ function search(query) {
   
   const uiLang = lang.value
 
-  // --- LEGACY REAL-TIME TOOLING REMOVED ---
-  // The logic is now handled by the interactive WASM Wizard
+  // Map bilingual dataset to active language
+  const activeDataset = dataset.value.map(d => ({
+    q: d[uiLang]?.q || d.en?.q || '',
+    a: d[uiLang]?.a || d.en?.a || '',
+    c: d.c,
+    s: d.s,
+    d: d.d,
+    r: d.r,
+    id: d.id
+  }))
 
-  // Filter dataset by UI language first, fallback to full dataset
-  const langDataset = dataset.value.filter(d =>
-    uiLang === 'it' ? isItalian(d.q) : !isItalian(d.q)
-  )
-  let results = bm25Search(langDataset, query, 3)
-  let searchPool = langDataset
-
-  // Fallback: if no good results in lang-filtered set, try full dataset
-  if (!results.length || results[0].score <= 0.5) {
-    results = bm25Search(dataset.value, query, 3)
-    searchPool = dataset.value
-  }
+  let results = bm25Search(activeDataset, query, 3)
 
   const elapsed = performance.now() - t0
 
   if (results.length > 0 && results[0].score > 0.5) {
-    const entry = searchPool[results[0].idx]
+    const entry = activeDataset[results[0].idx]
     const cat = entry.c.replace(/_impl$/, '')
     visitedCategories.value = new Set([...visitedCategories.value, cat])
     stats.value.hits++
-    const rawFollowUps = findFollowUps(dataset.value, entry.c, uiLang)
+    const rawFollowUps = findFollowUps(activeDataset, entry.c, uiLang)
     let followUps = filterAsked(rawFollowUps)
     if (followUps.length < 2) {
       followUps = [...followUps, ...exploreSuggestions(uiLang, 4 - followUps.length)]
@@ -218,6 +265,11 @@ async function sendMessage(text) {
         try {
           const resStr = wasmEngine.evaluate_profile_json(payload)
           const res = JSON.parse(resStr)
+          assessmentResult.value = res
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('nis2_wizard_profile', JSON.stringify(wizardProfile.value))
+            localStorage.setItem('nis2_assessment_result', JSON.stringify(res))
+          }
           let ans = ""
           let severity = "info"
           
@@ -361,6 +413,22 @@ onMounted(async () => {
     await new Promise(r => setTimeout(r, 400))
     loadProgress.value = 100
     await new Promise(r => setTimeout(r, 300))
+    
+    // Restore profile and assessment result from localStorage
+    if (typeof window !== 'undefined') {
+      const savedProfile = localStorage.getItem('nis2_wizard_profile')
+      const savedResult = localStorage.getItem('nis2_assessment_result')
+      if (savedProfile) {
+        try {
+          wizardProfile.value = JSON.parse(savedProfile)
+        } catch (e) {}
+      }
+      if (savedResult) {
+        try {
+          assessmentResult.value = JSON.parse(savedResult)
+        } catch (e) {}
+      }
+    }
     ready.value = true
   } catch (e) { console.error('Dataset load failed:', e); ready.value = true }
 })
@@ -544,6 +612,36 @@ const citedArticles = computed(() => {
 
     <!-- Right sidebar: Command Dashboard -->
     <aside v-if="showRight && !focusMode" class="side side-r">
+      <!-- GRC Compliance Checklist -->
+      <div v-if="assessmentResult && assessmentResult.applicable" class="checklist-section">
+        <div class="side-label">{{ lang === 'it' ? 'Checklist Conformità GRC' : 'GRC Compliance Checklist' }}</div>
+        
+        <!-- Live progress indicator -->
+        <div class="checklist-progress">
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" :style="{ width: checklistProgress.pct + '%' }"></div>
+          </div>
+          <div class="progress-text">
+            {{ checklistProgress.completed }}/{{ checklistProgress.total }} {{ lang === 'it' ? 'completati' : 'completed' }} ({{ checklistProgress.pct }}%)
+          </div>
+        </div>
+
+        <!-- Obligations list -->
+        <div class="checklist-items">
+          <div v-for="ob in assessmentResult.obligations" :key="ob.id" class="checklist-item">
+            <div class="item-header">
+              <span class="item-ref">{{ ob.article_ref }}</span>
+              <select :value="checklistState[ob.id] || 'Pending'" @change="updateObligationStatus(ob.id, $event.target.value)" class="item-status-select">
+                <option value="Pending">{{ lang === 'it' ? 'Pendente' : 'Pending' }}</option>
+                <option value="In Progress">{{ lang === 'it' ? 'In Corso' : 'In Progress' }}</option>
+                <option value="Implemented">{{ lang === 'it' ? 'Implementato' : 'Implemented' }}</option>
+              </select>
+            </div>
+            <div class="item-desc" :title="ob.description">{{ ob.description }}</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Normativa identificata -->
       <div class="side-label">{{ lang === 'it' ? 'Norme Identificate' : 'Identified Legislation' }}</div>
       <div class="side-panel">
@@ -841,6 +939,94 @@ const citedArticles = computed(() => {
   }
 }
 @media(max-width:640px){.w-grid{grid-template-columns:1fr}.hd-sub{display:none}}
+
+.checklist-section {
+  margin-bottom: 20px;
+  background: var(--vp-c-bg-alt);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--vp-c-divider);
+}
+.checklist-progress {
+  margin-bottom: 12px;
+}
+.progress-bar-container {
+  width: 100%;
+  height: 6px;
+  background: var(--vp-c-divider);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--vp-c-brand-1);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+.progress-text {
+  font-size: 11px;
+  color: var(--vp-c-text-3);
+  text-align: right;
+  font-weight: 500;
+}
+.checklist-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.checklist-items::-webkit-scrollbar {
+  width: 4px;
+}
+.checklist-items::-webkit-scrollbar-thumb {
+  background: var(--vp-c-divider);
+  border-radius: 4px;
+}
+.checklist-item {
+  background: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 6px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.item-ref {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--vp-c-brand-1);
+}
+.item-status-select {
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  border: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg-alt);
+  color: var(--vp-c-text-1);
+  cursor: pointer;
+  outline: none;
+}
+.item-status-select:focus {
+  border-color: var(--vp-c-brand-1);
+}
+.item-desc {
+  font-size: 10.5px;
+  color: var(--vp-c-text-2);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* No separate light-mode overrides needed — all colors use
    VitePress CSS custom properties that auto-adapt to theme. */

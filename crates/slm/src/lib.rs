@@ -13,3 +13,4 @@ pub mod grammar;
 pub mod inference;
 pub mod prompt;
 pub mod report;
+pub mod report_typst;

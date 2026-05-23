@@ -39,6 +39,7 @@ impl EmbedModel {
 pub struct Embedder {
     model: Mutex<TextEmbedding>,
     dims: usize,
+    cache: Mutex<std::collections::HashMap<String, Vec<f32>>>,
 }
 
 impl Embedder {
@@ -50,6 +51,7 @@ impl Embedder {
         Ok(Self {
             model: Mutex::new(model),
             dims: variant.dimensions(),
+            cache: Mutex::new(std::collections::HashMap::new()),
         })
     }
 
@@ -60,12 +62,26 @@ impl Embedder {
 
     /// Embed a single text string.
     pub fn embed_one(&self, text: &str) -> Result<Vec<f32>> {
+        {
+            let cache = self.cache.lock().map_err(|e| anyhow::anyhow!("Cache lock poisoned: {e}"))?;
+            if let Some(emb) = cache.get(text) {
+                return Ok(emb.clone());
+            }
+        }
         let mut model = self.model.lock().map_err(|e| anyhow::anyhow!("Lock poisoned: {e}"))?;
         let results = model.embed(vec![text], None)?;
-        results
+        let emb = results
             .into_iter()
             .next()
-            .ok_or_else(|| anyhow::anyhow!("Embedding returned empty result"))
+            .ok_or_else(|| anyhow::anyhow!("Embedding returned empty result"))?;
+        {
+            let mut cache = self.cache.lock().map_err(|e| anyhow::anyhow!("Cache lock poisoned: {e}"))?;
+            if cache.len() >= 1000 {
+                cache.clear();
+            }
+            cache.insert(text.to_string(), emb.clone());
+        }
+        Ok(emb)
     }
 
     /// Embed a batch of text strings.

@@ -17,6 +17,7 @@ thiserror.workspace = true
 tracing.workspace = true
 schemars.workspace = true
 jsonschema.workspace = true
+utoipa = { version = "5", features = ["axum_extras"] }
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 extism = { workspace = true }
 

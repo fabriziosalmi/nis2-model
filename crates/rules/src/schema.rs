@@ -7,7 +7,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// Company profile — input to the compliance rule engine.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, utoipa::ToSchema)]
 pub struct CompanyProfile {
     /// Company name.
     pub name: String,
@@ -28,7 +28,7 @@ pub struct CompanyProfile {
 }
 
 /// Entity classification under NIS2.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, utoipa::ToSchema)]
 pub enum EntityCategory {
     /// Soggetto essenziale (Art. 3(1))
     Essential,
@@ -39,7 +39,7 @@ pub enum EntityCategory {
 }
 
 /// A single compliance obligation derived from Art. 21(2) NIS2.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, utoipa::ToSchema)]
 pub struct Obligation {
     /// Unique identifier for this obligation (e.g. "nis2_art21_2_a").
     pub id: String,
@@ -54,7 +54,7 @@ pub struct Obligation {
 }
 
 /// Status of a compliance obligation.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, utoipa::ToSchema)]
 pub enum ObligationStatus {
     /// Not yet evaluated.
     Pending,
@@ -67,7 +67,7 @@ pub enum ObligationStatus {
 }
 
 /// The complete output of the compliance rule engine.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, utoipa::ToSchema)]
 pub struct ComplianceStatus {
     /// Whether NIS2 applies to this entity at all.
     pub applicable: bool,
@@ -85,7 +85,7 @@ pub struct ComplianceStatus {
 }
 
 /// Art. 23 NIS2 — Incident reporting deadlines.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, utoipa::ToSchema)]
 pub struct IncidentReporting {
     /// Hours for initial early warning (Art. 23(4)(a)).
     pub early_warning_hours: u32,

@@ -24,6 +24,43 @@ async fn security_headers(
     response
 }
 
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
+
+#[derive(OpenApi)]
+#[openapi(
+    paths(
+        handlers::health,
+        handlers::evaluate,
+        handlers::applicability,
+        handlers::sanctions,
+        handlers::obligations,
+        handlers::report,
+        handlers::report_pdf,
+    ),
+    components(
+        schemas(
+            handlers::HealthResponse,
+            handlers::ApplicabilityRequest,
+            handlers::ApplicabilityResponse,
+            handlers::SanctionResponse,
+            handlers::ObligationItem,
+            handlers::ReportRequest,
+            handlers::ReportResponse,
+            nis2_rules::schema::CompanyProfile,
+            nis2_rules::schema::ComplianceStatus,
+            nis2_rules::schema::EntityCategory,
+            nis2_rules::schema::Obligation,
+            nis2_rules::schema::ObligationStatus,
+            nis2_rules::schema::IncidentReporting,
+        )
+    ),
+    tags(
+        (name = "Compliance API", description = "Endpoints for NIS2 compliance checking and report generation")
+    )
+)]
+struct ApiDoc;
+
 /// Build the complete API router.
 ///
 /// CORS policy: restricted by default (same-origin only).
@@ -36,7 +73,11 @@ pub fn build_router() -> Router {
         .route("/applicability", post(handlers::applicability))
         .route("/sanctions", post(handlers::sanctions))
         .route("/obligations", post(handlers::obligations))
-        .route("/report", post(handlers::report));
+        .route("/report", post(handlers::report))
+        .route("/report/pdf", post(handlers::report_pdf));
+
+    let swagger_ui = SwaggerUi::new("/swagger-ui")
+        .url("/api-docs/openapi.json", ApiDoc::openapi());
 
     // SECURITY: CORS restricted by default. Set CORS_ORIGIN env var for cross-origin access.
     let cors = match std::env::var("CORS_ORIGIN") {
@@ -44,13 +85,14 @@ pub fn build_router() -> Router {
             .allow_origin(origin.parse::<HeaderValue>().expect("Invalid CORS_ORIGIN value"))
             .allow_methods([Method::GET, Method::POST])
             .allow_headers([header::CONTENT_TYPE]),
-        Err(_) => CorsLayer::new()
-            .allow_methods([Method::GET, Method::POST])
-            .allow_headers([header::CONTENT_TYPE]),
+            Err(_) => CorsLayer::new()
+                .allow_methods([Method::GET, Method::POST])
+                .allow_headers([header::CONTENT_TYPE]),
     };
 
     Router::new()
         .nest(API_PREFIX, api_routes)
+        .merge(swagger_ui)
         .layer(middleware::from_fn(security_headers))
         .layer(TraceLayer::new_for_http())
         .layer(cors)

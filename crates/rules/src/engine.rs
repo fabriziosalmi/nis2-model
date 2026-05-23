@@ -62,7 +62,7 @@ pub fn evaluate(profile: &CompanyProfile) -> ComplianceStatus {
         (true, _, true) => (true, EntityCategory::Essential),
         (_, true, true) => (true, EntityCategory::Important),
         // Special cases: certain digital infrastructure is always in scope (Art. 2(2))
-        (true, _, false) if is_always_in_scope(&profile.sector) => {
+        (true, _, false) if is_always_in_scope(profile) => {
             (true, EntityCategory::Essential)
         }
         _ => (false, EntityCategory::OutOfScope),
@@ -131,11 +131,49 @@ fn build_obligations() -> Vec<Obligation> {
 }
 
 /// Certain entities are in scope regardless of size (Art. 2(2)).
-fn is_always_in_scope(sector: &str) -> bool {
-    matches!(
-        sector,
-        "digital_infrastructure" | "ict_service_management_b2b" | "public_administration"
-    )
+fn is_always_in_scope(profile: &CompanyProfile) -> bool {
+    match profile.sector.as_str() {
+        "ict_service_management_b2b" | "public_administration" => true,
+        "digital_infrastructure" => {
+            let is_special_service = |s: &str| {
+                let lower = s.to_lowercase();
+                lower.contains("dns")
+                    || lower.contains("tld")
+                    || lower.contains("trust")
+                    || lower.contains("telecom")
+                    || lower.contains("connettiv")
+                    || lower.contains("comunicaz")
+                    || lower.contains("communication")
+            };
+
+            if let Some(ref sub) = profile.sub_sector {
+                if is_special_service(sub) {
+                    return true;
+                }
+            }
+            if profile.services.iter().any(|s| is_special_service(s)) {
+                return true;
+            }
+
+            // Cloud, hosting, datacenters, CDNs are NOT always in scope
+            let has_other_services = if let Some(ref sub) = profile.sub_sector {
+                let lower = sub.to_lowercase();
+                lower.contains("cloud") || lower.contains("hosting") || lower.contains("datacent") || lower.contains("cdn")
+            } else {
+                profile.services.iter().any(|s| {
+                    let lower = s.to_lowercase();
+                    lower.contains("cloud") || lower.contains("hosting") || lower.contains("datacent") || lower.contains("cdn")
+                })
+            };
+
+            if has_other_services {
+                false
+            } else {
+                true
+            }
+        }
+        _ => false,
+    }
 }
 
 /// Calculate maximum sanction per Art. 34 NIS2.
@@ -198,6 +236,23 @@ mod tests {
     #[test]
     fn digital_infra_always_in_scope() {
         let result = evaluate(&test_profile("digital_infrastructure", 5, 0.5));
+        assert!(result.applicable);
+    }
+
+    #[test]
+    fn digital_infra_cloud_small_is_out_of_scope() {
+        let mut p = test_profile("digital_infrastructure", 5, 0.5);
+        p.services = vec!["Cloud Provider".to_string()];
+        let result = evaluate(&p);
+        assert!(!result.applicable);
+        assert_eq!(result.category, EntityCategory::OutOfScope);
+    }
+
+    #[test]
+    fn digital_infra_dns_small_is_essential() {
+        let mut p = test_profile("digital_infrastructure", 5, 0.5);
+        p.services = vec!["DNS Resolution".to_string()];
+        let result = evaluate(&p);
         assert!(result.applicable);
         assert_eq!(result.category, EntityCategory::Essential);
     }

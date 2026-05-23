@@ -42,7 +42,7 @@ fn get_uptime() -> u64 {
 }
 
 /// Health check response.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, utoipa::ToSchema)]
 pub struct HealthResponse {
     pub status: String,
     pub version: String,
@@ -51,6 +51,13 @@ pub struct HealthResponse {
 }
 
 /// GET /api/v1/health
+#[utoipa::path(
+    get,
+    path = "/api/v1/health",
+    responses(
+        (status = 200, description = "Health status of the API", body = HealthResponse)
+    )
+)]
 pub async fn health() -> Json<HealthResponse> {
     Json(HealthResponse {
         status: "ok".into(),
@@ -62,6 +69,14 @@ pub async fn health() -> Json<HealthResponse> {
 
 /// POST /api/v1/evaluate
 /// Full compliance evaluation -- returns ComplianceStatus JSON.
+#[utoipa::path(
+    post,
+    path = "/api/v1/evaluate",
+    request_body = CompanyProfile,
+    responses(
+        (status = 200, description = "Complete compliance status of the entity", body = ComplianceStatus)
+    )
+)]
 pub async fn evaluate(
     Json(profile): Json<CompanyProfile>,
 ) -> Json<ComplianceStatus> {
@@ -70,7 +85,7 @@ pub async fn evaluate(
 }
 
 /// Minimal applicability check input.
-#[derive(Deserialize)]
+#[derive(Deserialize, utoipa::ToSchema)]
 pub struct ApplicabilityRequest {
     pub sector: String,
     pub employees: u32,
@@ -78,7 +93,7 @@ pub struct ApplicabilityRequest {
 }
 
 /// Applicability response.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, utoipa::ToSchema)]
 pub struct ApplicabilityResponse {
     pub applicable: bool,
     pub category: String,
@@ -90,6 +105,14 @@ pub struct ApplicabilityResponse {
 }
 
 /// POST /api/v1/applicability
+#[utoipa::path(
+    post,
+    path = "/api/v1/applicability",
+    request_body = ApplicabilityRequest,
+    responses(
+        (status = 200, description = "Minimal applicability check result", body = ApplicabilityResponse)
+    )
+)]
 pub async fn applicability(
     Json(req): Json<ApplicabilityRequest>,
 ) -> Json<ApplicabilityResponse> {
@@ -117,7 +140,7 @@ pub async fn applicability(
 }
 
 /// Sanction response.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, utoipa::ToSchema)]
 pub struct SanctionResponse {
     pub category: String,
     pub max_sanction_eur: Option<f64>,
@@ -125,6 +148,14 @@ pub struct SanctionResponse {
 }
 
 /// POST /api/v1/sanctions
+#[utoipa::path(
+    post,
+    path = "/api/v1/sanctions",
+    request_body = ApplicabilityRequest,
+    responses(
+        (status = 200, description = "Maximum potential sanction details", body = SanctionResponse)
+    )
+)]
 pub async fn sanctions(
     Json(req): Json<ApplicabilityRequest>,
 ) -> Json<SanctionResponse> {
@@ -148,7 +179,7 @@ pub async fn sanctions(
 }
 
 /// Obligation summary item.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, utoipa::ToSchema)]
 pub struct ObligationItem {
     pub id: String,
     pub article_ref: String,
@@ -156,6 +187,14 @@ pub struct ObligationItem {
 }
 
 /// POST /api/v1/obligations
+#[utoipa::path(
+    post,
+    path = "/api/v1/obligations",
+    request_body = ApplicabilityRequest,
+    responses(
+        (status = 200, description = "List of applicable security obligations", body = [ObligationItem])
+    )
+)]
 pub async fn obligations(
     Json(req): Json<ApplicabilityRequest>,
 ) -> Json<Vec<ObligationItem>> {
@@ -180,7 +219,7 @@ pub async fn obligations(
 }
 
 /// Report request.
-#[derive(Deserialize)]
+#[derive(Deserialize, utoipa::ToSchema)]
 pub struct ReportRequest {
     pub name: String,
     pub sector: String,
@@ -200,13 +239,21 @@ fn default_member_states() -> Vec<String> {
 }
 
 /// Report response.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, utoipa::ToSchema)]
 pub struct ReportResponse {
     pub report: String,
     pub format: String,
 }
 
 /// POST /api/v1/report
+#[utoipa::path(
+    post,
+    path = "/api/v1/report",
+    request_body = ReportRequest,
+    responses(
+        (status = 200, description = "Markdown report text", body = ReportResponse)
+    )
+)]
 pub async fn report(
     Json(req): Json<ReportRequest>,
 ) -> Result<Json<ReportResponse>, (StatusCode, String)> {
@@ -231,6 +278,91 @@ pub async fn report(
         Err(e) => Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string())),
     }
 }
+
+/// POST /api/v1/report/pdf
+/// Generate a server-side Typst PDF report.
+#[utoipa::path(
+    post,
+    path = "/api/v1/report/pdf",
+    request_body = ReportRequest,
+    responses(
+        (status = 200, description = "PDF report download", body = Vec<u8>, content_type = "application/pdf")
+    )
+)]
+pub async fn report_pdf(
+    Json(req): Json<ReportRequest>,
+) -> Result<impl axum::response::IntoResponse, (StatusCode, String)> {
+    let profile = CompanyProfile {
+        name: req.name.clone(),
+        sector: req.sector,
+        sub_sector: req.sub_sector,
+        employees: req.employees,
+        annual_revenue_eur_m: req.annual_revenue_eur_m,
+        balance_sheet_eur_m: req.balance_sheet_eur_m,
+        services: req.services,
+        member_states: req.member_states,
+    };
+    let status = engine::evaluate(&profile);
+    let typst_markup = nis2_slm::report_typst::generate_typst_report(&req.name, &status);
+    
+    // Generate a unique filename using timestamp and thread ID
+    let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos();
+    let thread_id = std::thread::current().id();
+    let file_prefix = format!("report_{}_{:?}", now, thread_id);
+    let temp_dir = std::env::temp_dir();
+    let typst_path = temp_dir.join(format!("{}.typ", file_prefix));
+    let pdf_path = temp_dir.join(format!("{}.pdf", file_prefix));
+
+    // Write typst content to temp file
+    if let Err(e) = std::fs::write(&typst_path, typst_markup) {
+        return Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Failed to write typst file: {}", e)));
+    }
+
+    // Run typst compile
+    let output = std::process::Command::new("typst")
+        .arg("compile")
+        .arg(&typst_path)
+        .arg(&pdf_path)
+        .output();
+
+    // Clean up .typ file immediately
+    let _ = std::fs::remove_file(&typst_path);
+
+    match output {
+        Ok(out) if out.status.success() => {
+            // Read pdf bytes
+            match std::fs::read(&pdf_path) {
+                Ok(bytes) => {
+                    // Clean up pdf file
+                    let _ = std::fs::remove_file(&pdf_path);
+                    
+                    let filename = req.name.replace(' ', "_");
+                    let response = axum::response::Response::builder()
+                        .header(axum::http::header::CONTENT_TYPE, "application/pdf")
+                        .header(
+                            axum::http::header::CONTENT_DISPOSITION,
+                            format!("attachment; filename=\"nis2_report_{}.pdf\"", filename),
+                        )
+                        .body(axum::body::Body::from(bytes))
+                        .unwrap();
+                    Ok(response)
+                }
+                Err(e) => {
+                    let _ = std::fs::remove_file(&pdf_path);
+                    Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Failed to read generated PDF: {}", e)))
+                }
+            }
+        }
+        Ok(out) => {
+            let stderr = String::from_utf8_lossy(&out.stderr).to_string();
+            Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Typst compilation failed: {}", stderr)))
+        }
+        Err(e) => {
+            Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Failed to execute typst CLI: {}. Ensure typst is installed.", e)))
+        }
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -374,5 +506,40 @@ mod tests {
         let result: ReportResponse = serde_json::from_slice(&bytes).unwrap();
         assert!(result.report.contains("Ambito di applicazione"));
         assert!(result.report.contains("Art. 21(2)(a)"));
+    }
+
+    #[tokio::test]
+    async fn report_pdf_generation() {
+        let app = build_router();
+        let body = serde_json::json!({
+            "name": "Acme Energia S.p.A.",
+            "sector": "energy",
+            "employees": 250,
+            "annual_revenue_eur_m": 180.0,
+            "balance_sheet_eur_m": 150.0,
+            "services": ["electricity"],
+            "member_states": ["IT"]
+        });
+        let resp = app
+            .oneshot(
+                Request::post("/api/v1/report/pdf")
+                    .header("content-type", "application/json")
+                    .body(Body::from(serde_json::to_string(&body).unwrap()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        
+        let status = resp.status();
+        let headers = resp.headers().clone();
+        let bytes = axum::body::to_bytes(resp.into_body(), usize::MAX).await.unwrap();
+        let err_msg = String::from_utf8_lossy(&bytes).to_string();
+        
+        if status == 200 {
+            assert_eq!(headers.get("content-type").unwrap(), "application/pdf");
+            assert!(!bytes.is_empty());
+        } else {
+            panic!("PDF report generation failed: {}", err_msg);
+        }
     }
 }
