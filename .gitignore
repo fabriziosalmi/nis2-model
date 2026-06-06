@@ -36,3 +36,4 @@ desktop.ini
 docs/.vitepress/dist/
 docs/.vitepress/cache/
 node_modules/
+.DS_Store
