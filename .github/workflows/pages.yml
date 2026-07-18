@@ -35,6 +35,14 @@ jobs:
         if: hashFiles('Cargo.toml') != ''
         run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
 
+      - name: Install typst (required by PDF report tests)
+        if: hashFiles('Cargo.toml') != ''
+        run: |
+          TAG=$(curl -fsSL https://api.github.com/repos/typst/typst/releases/latest | grep -oP '"tag_name":\s*"\K[^"]+')
+          curl -fsSL "https://github.com/typst/typst/releases/download/${TAG}/typst-x86_64-unknown-linux-musl.tar.xz" | tar -xJ -C /tmp
+          sudo install /tmp/typst-x86_64-unknown-linux-musl/typst /usr/local/bin/typst
+          typst --version
+
       - name: Run Rust tests
         if: hashFiles('Cargo.toml') != ''
         run: cargo test --workspace
