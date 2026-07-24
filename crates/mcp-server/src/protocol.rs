@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 /// JSON-RPC 2.0 request envelope.
 #[derive(Debug, Deserialize)]
 pub struct JsonRpcRequest {
+    #[serde(rename = "jsonrpc", deserialize_with = "validate_jsonrpc_version")]
     pub jsonrpc: String,
     pub id: Option<serde_json::Value>,
     pub method: String,
@@ -141,3 +142,19 @@ impl ToolCallResult {
 /// Standard JSON-RPC error codes.
 pub const METHOD_NOT_FOUND: i32 = -32601;
 pub const INVALID_PARAMS: i32 = -32602;
+
+/// Validates that the `jsonrpc` field equals "2.0".
+fn validate_jsonrpc_version<'de, D>(deserializer: D) -> Result<String, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let s = String::deserialize(deserializer)?;
+    if s == "2.0" {
+        Ok(s)
+    } else {
+        Err(serde::de::Error::custom(format!(
+            "Invalid JSON-RPC version: expected '2.0', got '{}'",
+            s
+        )))
+    }
+}
