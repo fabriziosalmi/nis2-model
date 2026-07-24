@@ -81,13 +81,21 @@ pub fn build_router() -> Router {
 
     // SECURITY: CORS restricted by default. Set CORS_ORIGIN env var for cross-origin access.
     let cors = match std::env::var("CORS_ORIGIN") {
-        Ok(origin) => CorsLayer::new()
-            .allow_origin(origin.parse::<HeaderValue>().expect("Invalid CORS_ORIGIN value"))
-            .allow_methods([Method::GET, Method::POST])
-            .allow_headers([header::CONTENT_TYPE]),
-            Err(_) => CorsLayer::new()
+        Ok(origin) => match origin.parse::<HeaderValue>() {
+            Ok(value) => CorsLayer::new()
+                .allow_origin(value)
                 .allow_methods([Method::GET, Method::POST])
                 .allow_headers([header::CONTENT_TYPE]),
+            Err(e) => {
+                eprintln!("Warning: Invalid CORS_ORIGIN value '{origin}': {e}. Falling back to same-origin only.");
+                CorsLayer::new()
+                    .allow_methods([Method::GET, Method::POST])
+                    .allow_headers([header::CONTENT_TYPE])
+            }
+        },
+        Err(_) => CorsLayer::new()
+            .allow_methods([Method::GET, Method::POST])
+            .allow_headers([header::CONTENT_TYPE]),
     };
 
     Router::new()
