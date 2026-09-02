@@ -2,7 +2,11 @@
 #
 # Errors fail the build. This repository had none when the check went in, so
 # blocking costs nothing today and catches the first one that appears.
-# Warnings only report. Findings go to the Security tab either way.
+# Warnings only report.
+#
+# Findings reach the Security tab on a push and on a pull request from this
+# repository. A fork gets a read-only token whatever `permissions:` says, so its
+# findings stay in the job log; the build still fails on an error either way.
 name: slopless
 
 on:
