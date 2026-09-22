@@ -35,9 +35,9 @@ tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 
 # Embedding & Vector
 fastembed = "5"
-lancedb = "0.27"
-arrow-array = "57"
-arrow-schema = "57"
+lancedb = "0.29.0"
+arrow-array = "58"
+arrow-schema = "58"
 
 # Async utilities
 futures = "0.3"
