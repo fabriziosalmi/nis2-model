@@ -4,6 +4,9 @@ export default defineConfig({
   title: 'nis2-model',
   description: 'Interactive NIS2 compliance guidance engine — deterministic, zero-LLM, bilingual IT/EN',
   base: '/nis2-model/',
+  // The hostname carries the base path on purpose: VitePress joins it with each
+  // page's route, so without it every URL in the sitemap would point at a 404.
+  sitemap: { hostname: 'https://fabriziosalmi.github.io/nis2-model/' },
   lang: 'en-US',
   appearance: 'dark',
 
